@@ -15,6 +15,10 @@ public class MonsterItemManager {
 	
 	public static ItemStack spiderClass;
 	
+	// DRAGON / ADMIN ONLY
+	public static ItemStack dragonFireball;
+	public static ItemStack lightningStick;
+	
 	public static void init() {
 		createMonsterClassSelector();
 		createSuicidePill();
@@ -22,6 +26,9 @@ public class MonsterItemManager {
 		createZombieClass();
 		
 		createSpiderClass();
+		
+		createDragonFireball();
+		createLightningStick();
 	}
 	
 	private static void createMonsterClassSelector() {
@@ -75,5 +82,31 @@ public class MonsterItemManager {
 		item.setItemMeta(meta);
 		
 		spiderClass = item;
+	}
+	
+	private static void createDragonFireball() {
+		ItemStack item = new ItemStack(Material.FIRE_CHARGE);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName("§4Dragons Fireball§");
+		
+		List<String> lore = new ArrayList<>();
+		lore.add("§5Right clicking this will allow you to spit fireballs at dwarves.§");
+		meta.setLore(lore);
+		item.setItemMeta(meta);
+		
+		dragonFireball = item;
+	}
+	
+	private static void createLightningStick() {
+		ItemStack item = new ItemStack(Material.STICK);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName("§4Lightning Stick§");
+		
+		List<String> lore = new ArrayList<>();
+		lore.add("§5Right clicking this will summon lighting. You can scare the dwarves.§");
+		meta.setLore(lore);
+		item.setItemMeta(meta);
+		
+		lightningStick = item;
 	}
 }

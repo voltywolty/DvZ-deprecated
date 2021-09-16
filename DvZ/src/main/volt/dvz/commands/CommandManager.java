@@ -22,15 +22,18 @@ public class CommandManager implements CommandExecutor {
 	
 	// SUB COMMANDS
 	public String main = "dvz";
-	public String info = "info";
+	public String help = "help";
 	public String start = "start";
 	public String stop = "stop";
+	public String dragon = "dragon";
 			
 	public void setup() {
 		plugin.getCommand(main).setExecutor(this);
 		
 		this.commands.add(new StartCommand());
 		this.commands.add(new StopCommand());
+		this.commands.add(new DragonCommand());
+		this.commands.add(new HelpCommand());
 	}
 	
 	@Override

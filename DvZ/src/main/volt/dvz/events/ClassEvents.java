@@ -109,7 +109,7 @@ public class ClassEvents implements Listener {
 					player.getInventory().removeItem(ItemManager.dwarfBuilderClass);
 					
 					player.sendMessage(ChatColor.BLUE + "You have become a Builder Dwarf.");
-					player.setDisplayName(player.getName() + " §bthe Builder§");
+					player.setDisplayName(player.getName() + " §3the Builder§");
 				}
 			}
 		}
@@ -179,7 +179,7 @@ public class ClassEvents implements Listener {
 					player.getInventory().removeItem(ItemManager.dwarfBlacksmithClass);
 					
 					player.sendMessage(ChatColor.BLUE + "You have become a Blacksmith Dwarf.");
-					player.setDisplayName(player.getName() + " §bthe Blacksmith§");
+					player.setDisplayName(player.getName() + " §3the Blacksmith§");
 				}
 			}
 		}
@@ -250,7 +250,7 @@ public class ClassEvents implements Listener {
 					player.getInventory().removeItem(ItemManager.dwarfTailorClass);
 					
 					player.sendMessage(ChatColor.BLUE + "You have become a Tailor Dwarf.");
-					player.setDisplayName(player.getName() + " §bthe Tailor§");
+					player.setDisplayName(player.getName() + " §3the Tailor§");
 				}
 			}
 		}
@@ -329,7 +329,7 @@ public class ClassEvents implements Listener {
 					player.getInventory().removeItem(ItemManager.dwarfAlchemistClass);
 					
 					player.sendMessage(ChatColor.BLUE + "You have become a Alchemist Dwarf.");
-					player.setDisplayName(player.getName() + " §bthe Alchemist§");
+					player.setDisplayName(player.getName() + " §3the Alchemist§");
 				}
 			}
 		}
@@ -429,7 +429,7 @@ public class ClassEvents implements Listener {
 					player.getInventory().removeItem(ItemManager.dwarfBakerClass);
 					
 					player.sendMessage(ChatColor.BLUE + "You have become a Baker Dwarf.");
-					player.setDisplayName(player.getName() + " §bthe Baker§");
+					player.setDisplayName(player.getName() + " §3the Baker§");
 				}
 			}
 		}
