@@ -1,9 +1,9 @@
 What is DvZ?
 --------------------
 
-Dwarves vs. Zombies is a gamemode that was thought of by Rurikar22 aka Rob. Dwarves build a keep to protect their core. There are 5 dwarf classes: Alchemist, Baker, Blacksmith, Builder, and Tailor. Each class is useful for every single dwarf. The dwarfs have one full night to build a keep before a dragon comes in to cause some chaos. Once the dragon is destroyed, monsters spawn to attack the keep. Monsters win by either killing all of the dwarves, or if the dwarves have ran out of time.
+Dwarves vs. Zombies is a gamemode that was thought of by Rurikar22 aka Rob. Dwarves build a keep to protect their core. There are 5 dwarf classes: Alchemist, Baker, Blacksmith, Builder, and Tailor. Each class is useful for every single dwarf. The dwarfs have one full night to build a keep before a dragon comes in to cause some chaos. Once the dragon is destroyed, monsters spawn to attack the keep. Monsters appear by dwarves dying. Monsters win by either killing all of the dwarves, or if the dwarves have ran out of time.
 
-What does each class do?
+What does each dwarf class do?
 --------------------
 
 Here is what each class does.
