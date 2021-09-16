@@ -1,0 +1,17 @@
+BuilderBlocks:
+ - stone_bricks
+ - mossy_stone_bricks
+ - chiseled_stone_bricks
+ - cracked_stone_bricks
+
+BlacksmithTools:
+ - diamond_sword
+ - diamond_pickaxe
+ - diamond_axe
+ - diamond_shovel
+ 
+TailorArmors:
+ - diamond_helmet
+ - diamond_chestplate
+ - diamond_leggings
+ - diamond_boots

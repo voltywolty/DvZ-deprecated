@@ -1,0 +1,13 @@
+name: DvZ
+version: 1.0.0
+author: Volt
+main: main.volt.dvz.DvZ
+api-version: 1.14
+dependencies: LibsDisguises
+commands:
+   giveclassmagma:
+      description: Gives a magma cream that gives random classes to the player.
+      usage: /<command>
+   dvz:
+      description: All DvZ commands.
+      usage: /<command>
