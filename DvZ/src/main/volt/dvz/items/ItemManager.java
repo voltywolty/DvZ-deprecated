@@ -77,7 +77,7 @@ public class ItemManager {
 		meta.setDisplayName("§bBuilders Book");
 		
 		List<String> lore = new ArrayList<>();
-		lore.add("§7Right click this book to receive your blocks and glowstone.");
+		lore.add("§7Left click this book to receive your blocks and glowstone.");
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		
@@ -105,7 +105,7 @@ public class ItemManager {
 		meta.setDisplayName("§bBlacksmiths Book");
 		
 		List<String> lore = new ArrayList<>();
-		lore.add("§7Right click this book to receive some random tools and ores.");
+		lore.add("§7Left click this book to receive some random tools and ores.");
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		
@@ -132,7 +132,7 @@ public class ItemManager {
 		meta.setDisplayName("§bBakers Book");
 		
 		List<String> lore = new ArrayList<>();
-		lore.add("§7Right click this book to receive some random armor and gold.");
+		lore.add("§7Left click this book to receive some random armor and gold.");
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		
@@ -160,7 +160,7 @@ public class ItemManager {
 		meta.setDisplayName("§bAlchemists Book");
 		
 		List<String> lore = new ArrayList<>();
-		lore.add("§7Right click this book to receive some random potions, bones, and sand.");
+		lore.add("§7Left click this book to receive some random potions, bones, and sand.");
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		
@@ -188,7 +188,7 @@ public class ItemManager {
 		meta.setDisplayName("§bTailors Book");
 		
 		List<String> lore = new ArrayList<>();
-		lore.add("§7Right click this book to receive some gold and a random piece of armor.");
+		lore.add("§7Left click this book to receive some gold and a random piece of armor.");
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		

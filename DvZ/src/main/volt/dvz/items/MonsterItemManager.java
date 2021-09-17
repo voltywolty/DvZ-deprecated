@@ -15,6 +15,11 @@ public class MonsterItemManager {
 	
 	public static ItemStack spiderClass;
 	
+	public static ItemStack creeperClass;
+	public static ItemStack gunpowderItem;
+	
+	public static ItemStack skeletonClass;
+	
 	// DRAGON / ADMIN ONLY
 	public static ItemStack dragonFireball;
 	public static ItemStack lightningStick;
@@ -26,6 +31,11 @@ public class MonsterItemManager {
 		createZombieClass();
 		
 		createSpiderClass();
+		
+		createCreeperClass();
+		createGunpowder();
+		
+		createSkeletonClass();
 		
 		createDragonFireball();
 		createLightningStick();
@@ -48,7 +58,7 @@ public class MonsterItemManager {
 		ItemMeta meta = item.getItemMeta();
 		
 		List<String> lore = new ArrayList<>();
-		lore.add("§7Don't like your class? Right click to return to spawn.");
+		lore.add("§7Don't like your class? Left click to return to spawn.");
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 
@@ -69,6 +79,7 @@ public class MonsterItemManager {
 		zombieClass = item;
 	}
 	
+	
 	private static void createSpiderClass() {
 		ItemStack item = new ItemStack(Material.MUSIC_DISC_STRAD);
 		ItemMeta meta = item.getItemMeta();
@@ -84,13 +95,56 @@ public class MonsterItemManager {
 		spiderClass = item;
 	}
 	
+	// CREEPER CLASS
+	private static void createCreeperClass() {
+		ItemStack item = new ItemStack(Material.MUSIC_DISC_CHIRP, 1);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName("§bCreeper Class§");
+		
+		List<String> lore = new ArrayList<>();
+		lore.add("§7This disc gives you the creeper class.");
+		lore.add("§7You get gunpowder that when you Left click, it takes two seconds to blow up.");
+		meta.setLore(lore);
+		item.setItemMeta(meta);
+		
+		creeperClass = item;
+	}
+	
+	private static void createGunpowder() {
+		ItemStack item = new ItemStack(Material.GUNPOWDER, 1);
+		ItemMeta meta = item.getItemMeta();
+		
+		List<String> lore = new ArrayList<>();
+		lore.add("§7This gunpowder explodes the area around you.");
+		lore.add("§7It takes two seconds to blow up.");
+		meta.setLore(lore);
+		item.setItemMeta(meta);
+		
+		gunpowderItem = item;
+	}
+	
+	// SKELETON CLASS
+	private static void createSkeletonClass() {
+		ItemStack item = new ItemStack(Material.MUSIC_DISC_CAT, 1);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName("§bSkeleton Class§");
+		
+		List<String> lore = new ArrayList<>();
+		lore.add("§7This disc gives you the skeleton class.");
+		lore.add("§7You get a bow, some vines, and a stack of arrows.");
+		meta.setLore(lore);
+		item.setItemMeta(meta);
+		
+		skeletonClass = item;
+	}
+	
 	private static void createDragonFireball() {
 		ItemStack item = new ItemStack(Material.FIRE_CHARGE);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName("§4Dragons Fireball§");
 		
 		List<String> lore = new ArrayList<>();
-		lore.add("§5Right clicking this will allow you to spit fireballs at dwarves.§");
+		lore.add("§5Left clicking this will allow you to spit fireballs at dwarves.§");
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		
@@ -103,7 +157,7 @@ public class MonsterItemManager {
 		meta.setDisplayName("§4Lightning Stick§");
 		
 		List<String> lore = new ArrayList<>();
-		lore.add("§5Right clicking this will summon lighting. You can scare the dwarves.§");
+		lore.add("§5Left clicking this will summon lighting. You can scare the dwarves.§");
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		

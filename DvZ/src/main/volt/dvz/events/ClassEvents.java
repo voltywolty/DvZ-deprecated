@@ -43,7 +43,7 @@ public class ClassEvents implements Listener {
 	@EventHandler
 	public static void onClassGiverRightClick(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
-		if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.classSelector.getItemMeta())) {
 					
@@ -79,7 +79,7 @@ public class ClassEvents implements Listener {
 	// BUILDER CLASS
 	@EventHandler
 	public static void onBuilderClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBuilderClass.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -119,7 +119,7 @@ public class ClassEvents implements Listener {
 	
 	@EventHandler
 	public void onBuilderBookRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBuilderBook.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -150,7 +150,7 @@ public class ClassEvents implements Listener {
 	// BLACKSMITH CLASS
 	@EventHandler
 	public static void onBlacksmithClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBlacksmithClass.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -187,7 +187,7 @@ public class ClassEvents implements Listener {
 	
 	@EventHandler
 	public void onBlacksmithBookRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBlacksmithBook.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -222,7 +222,7 @@ public class ClassEvents implements Listener {
 	// TAILOR CLASS
 	@EventHandler
 	public static void onTailorClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfTailorClass.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -258,7 +258,7 @@ public class ClassEvents implements Listener {
 	
 	@EventHandler
 	public void onTailorBookRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfTailorBook.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -300,7 +300,7 @@ public class ClassEvents implements Listener {
 	//ALCHEMIST CLASS
 	@EventHandler
 	public static void onAlchemistClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfAlchemistClass.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -337,7 +337,7 @@ public class ClassEvents implements Listener {
 	
 	@EventHandler
 	public void onAlchemistBookRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfAlchemistBook.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -408,7 +408,7 @@ public class ClassEvents implements Listener {
 	//BAKER CLASS
 	@EventHandler
 	public static void onBakerClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBakerClass.getItemMeta())) {
 					Player player = event.getPlayer();
