@@ -20,7 +20,7 @@ public class ClassCommands implements CommandExecutor {
 		
 		Player player = (Player) sender;
 		
-		if (cmd.getName().equalsIgnoreCase("giveclassmagma") && player.isOp()) {
+		if (cmd.getName().equalsIgnoreCase("givedwarfclass") && player.isOp()) {
 			player.getInventory().addItem(ItemManager.classSelector);
 		}
 		else if (!player.isOp()) {

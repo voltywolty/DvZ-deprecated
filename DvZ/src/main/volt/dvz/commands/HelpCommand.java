@@ -13,6 +13,7 @@ public class HelpCommand extends SubCommand {
 		player.sendMessage(ChatColor.YELLOW + "List of commands for DvZ are:");
 		player.sendMessage(ChatColor.YELLOW + "start - Starts the DvZ game.");
 		player.sendMessage(ChatColor.YELLOW + "stop - Ends the DvZ game.");
+		player.sendMessage(ChatColor.YELLOW + "monster - Type either start or stop for the monsters to be able to spawn");
 		
 		if (player.isOp()) {
 			player.sendMessage(ChatColor.YELLOW + "dragon - Play as the dragon before the monsters spawn in. You want to start after the first day.");

@@ -2,7 +2,7 @@ package main.volt.dvz;
 
 import main.volt.dvz.commands.ClassCommands;
 import main.volt.dvz.commands.CommandManager;
-import main.volt.dvz.events.ClassEvents;
+import main.volt.dvz.events.DwarfEvents;
 import main.volt.dvz.events.MonsterEvents;
 import main.volt.dvz.events.PlayerEvents;
 import main.volt.dvz.items.ItemManager;
@@ -27,10 +27,10 @@ public class DvZ extends JavaPlugin {
 		
 		ItemManager.init();
 		MonsterItemManager.init();
-		getServer().getPluginManager().registerEvents(new ClassEvents(), this);
+		getServer().getPluginManager().registerEvents(new DwarfEvents(), this);
 		getServer().getPluginManager().registerEvents(new MonsterEvents(), this);
 		getServer().getPluginManager().registerEvents(new PlayerEvents(this), this);
-		getCommand("giveclassmagma").setExecutor(new ClassCommands());
+		getCommand("givedwarfclass").setExecutor(new ClassCommands());
 		getCommand("givemonsterclass").setExecutor(new ClassCommands());
 	}
 	

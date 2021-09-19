@@ -32,7 +32,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
 // FOR MONSTER CLASSES ONLY!
-
 public class MonsterEvents implements Listener {
 	// PLAINS WORLD
 	static World plainsWorld = Bukkit.getServer().getWorld("dwarf_plains");
@@ -50,6 +49,8 @@ public class MonsterEvents implements Listener {
 	private void onDeath(PlayerDeathEvent event) {
 		Player player = event.getEntity();
 		player.setDisplayName(player.getName());
+		
+		event.getDrops().clear();
 	}
 	
 	@EventHandler 
@@ -58,6 +59,10 @@ public class MonsterEvents implements Listener {
 		
 		if (StartCommand.gameStarted) {
 			player.getInventory().addItem(MonsterItemManager.monsterClassSelector);
+		}
+		
+		if (!StartCommand.gameStarted) {
+			DisguiseAPI.undisguiseToAll(player);
 		}
 	}
 	
@@ -228,8 +233,6 @@ public class MonsterEvents implements Listener {
 			if (attacker.getInventory().getItemInMainHand().getType() == Material.SPIDER_EYE) {
 				Random rand = new Random();
 				int randomEffectCounter = rand.nextInt(3);
-				
-				Bukkit.broadcastMessage("taking damage!");
 				
 				if (randomEffectCounter == 0) {
 					PotionEffect poisonEffect = new PotionEffect(PotionEffectType.POISON, 100, 1);
