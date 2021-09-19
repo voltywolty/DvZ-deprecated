@@ -1,5 +1,6 @@
 package main.volt.dvz.events;
 
+import main.volt.dvz.commands.StartCommand;
 import main.volt.dvz.items.MonsterItemManager;
 
 import me.libraryaddict.disguise.DisguiseAPI;
@@ -35,7 +36,7 @@ import org.bukkit.potion.PotionType;
 public class MonsterEvents implements Listener {
 	// PLAINS WORLD
 	static World plainsWorld = Bukkit.getServer().getWorld("dwarf_plains");
-	static Location plainsMonsterSpawn = new Location(plainsWorld, 1400, 73, 105); // MONSTER SPAWN
+	static Location plainsMonsterSpawn = new Location(plainsWorld, 1401, 73, 106); // MONSTER SPAWN
 	
 	// MOUNTAIN WORLD
 	static World mountainWorld = Bukkit.getServer().getWorld("dwarf_mountain");
@@ -54,12 +55,15 @@ public class MonsterEvents implements Listener {
 	@EventHandler 
 	private void onRespawn (PlayerRespawnEvent event) {
 		Player player = event.getPlayer();
-		player.getInventory().addItem(MonsterItemManager.monsterClassSelector);
+		
+		if (StartCommand.gameStarted) {
+			player.getInventory().addItem(MonsterItemManager.monsterClassSelector);
+		}
 	}
 	
 	@EventHandler
 	private void onMonsterClassSelectorRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(MonsterItemManager.monsterClassSelector.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -80,12 +84,12 @@ public class MonsterEvents implements Listener {
 					}
 					
 					player.getInventory().removeItem(MonsterItemManager.monsterClassSelector);
-					player.sendMessage(ChatColor.BLUE + "You have been given monsters classes. Right click a disc to become that monster.");
+					player.sendMessage(ChatColor.BLUE + "You have been given monsters classes. Left click a disc to become that monster.");
 					
 					player.setFallDistance(-1);
 					player.setCanPickupItems(false);
 					
-					player.setDisplayName(player.getName() + " §rthe Monster");
+					player.setDisplayName(player.getName() + " §rthe Monster§");
 				}
 			}
 		}
@@ -93,7 +97,7 @@ public class MonsterEvents implements Listener {
 	
 	@EventHandler
 	private void onSuicidePillRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(MonsterItemManager.suicidePill.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -105,14 +109,14 @@ public class MonsterEvents implements Listener {
 	
 	@EventHandler
 	private void onZombieClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(MonsterItemManager.zombieClass.getItemMeta())) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
 					
-					DisguiseAPI.disguiseToPlayers(player, new MobDisguise(DisguiseType.ZOMBIE, true), player);
+					DisguiseAPI.disguiseToAll(player, new MobDisguise(DisguiseType.ZOMBIE, true));
 					DisguiseAPI.setViewDisguiseToggled(player, false);
 					DisguiseAPI.setActionBarShown(player, false);
 					
@@ -122,7 +126,7 @@ public class MonsterEvents implements Listener {
 					harmingPotion.setItemMeta(harmingMeta);
 					
 					ItemStack zombieSword = new ItemStack(Material.IRON_SWORD, 1);
-					zombieSword.addEnchantment(Enchantment.DAMAGE_ALL, 2);
+					zombieSword.addEnchantment(Enchantment.DAMAGE_ALL, 1);
 					zombieSword.addEnchantment(Enchantment.DURABILITY, 2);
 					
 					// ZOMBIE STARTING GEAR
@@ -144,7 +148,15 @@ public class MonsterEvents implements Listener {
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
-					player.teleport(plainsMonsterSpawn);
+					if (player.getWorld() == plainsWorld) {
+						player.teleport(plainsMonsterSpawn);
+					}
+					else if (player.getWorld() == mountainWorld) {
+						player.teleport(mountainMonsterSpawn);
+					}
+					else if (player.getWorld() == desertWorld) {
+						player.teleport(desertMonsterSpawn);
+					}
 					// -------------------------------------------
 				}
 			}
@@ -154,14 +166,14 @@ public class MonsterEvents implements Listener {
 	// SPIDER CLASS
 	@EventHandler
 	private void onSpiderClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(MonsterItemManager.spiderClass.getItemMeta())) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
 					
-					DisguiseAPI.disguiseToPlayers(player, new MobDisguise(DisguiseType.SPIDER, true), player);
+					DisguiseAPI.disguiseToAll(player, new MobDisguise(DisguiseType.CAVE_SPIDER, true));
 					DisguiseAPI.setViewDisguiseToggled(player, false);
 					DisguiseAPI.setActionBarShown(player, false);
 					
@@ -181,8 +193,8 @@ public class MonsterEvents implements Listener {
 					player.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS));
 					player.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS));
 					
-					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 1470, 1));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 1470, 4));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 29400, 1));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 29400, 4));
 					
 					player.getInventory().remove(MonsterItemManager.spiderClass);
 					
@@ -192,7 +204,15 @@ public class MonsterEvents implements Listener {
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
-					player.teleport(plainsMonsterSpawn);
+					if (player.getWorld() == plainsWorld) {
+						player.teleport(plainsMonsterSpawn);
+					}
+					else if (player.getWorld() == mountainWorld) {
+						player.teleport(mountainMonsterSpawn);
+					}
+					else if (player.getWorld() == desertWorld) {
+						player.teleport(desertMonsterSpawn);
+					}
 					// -------------------------------------------
 				}
 			}
@@ -209,16 +229,18 @@ public class MonsterEvents implements Listener {
 				Random rand = new Random();
 				int randomEffectCounter = rand.nextInt(3);
 				
+				Bukkit.broadcastMessage("taking damage!");
+				
 				if (randomEffectCounter == 0) {
-					PotionEffect poisonEffect = new PotionEffect(PotionEffectType.POISON, 5, 1);
+					PotionEffect poisonEffect = new PotionEffect(PotionEffectType.POISON, 100, 1);
 					poisonEffect.apply(damaged);
 				}
 				else if (randomEffectCounter == 1) {
-					PotionEffect blindnessEffect = new PotionEffect(PotionEffectType.BLINDNESS, 5, 5);
+					PotionEffect blindnessEffect = new PotionEffect(PotionEffectType.BLINDNESS, 100, 5);
 					blindnessEffect.apply(damaged);
 				}
 				else if (randomEffectCounter == 2) {
-					PotionEffect confusionEffect = new PotionEffect(PotionEffectType.CONFUSION, 5, 1);
+					PotionEffect confusionEffect = new PotionEffect(PotionEffectType.CONFUSION, 100, 1);
 					confusionEffect.apply(damaged);
 				}
 			}
@@ -228,14 +250,14 @@ public class MonsterEvents implements Listener {
 	// CREEPER CLASS
 	@EventHandler
 	private void onCreeperClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(MonsterItemManager.creeperClass.getItemMeta())) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
 					
-					DisguiseAPI.disguiseToPlayers(player, new MobDisguise(DisguiseType.CREEPER, true), player);
+					DisguiseAPI.disguiseToAll(player, new MobDisguise(DisguiseType.CREEPER, true));
 					DisguiseAPI.setViewDisguiseToggled(player, false);
 					DisguiseAPI.setActionBarShown(player, false);
 					
@@ -257,7 +279,15 @@ public class MonsterEvents implements Listener {
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
-					player.teleport(plainsMonsterSpawn);
+					if (player.getWorld() == plainsWorld) {
+						player.teleport(plainsMonsterSpawn);
+					}
+					else if (player.getWorld() == mountainWorld) {
+						player.teleport(mountainMonsterSpawn);
+					}
+					else if (player.getWorld() == desertWorld) {
+						player.teleport(desertMonsterSpawn);
+					}
 					// -------------------------------------------
 				}
 			}
@@ -266,13 +296,13 @@ public class MonsterEvents implements Listener {
 	
 	@EventHandler
 	private void onGunpowderRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(MonsterItemManager.gunpowderItem.getItemMeta())) {
 					Player player = event.getPlayer();
 					World world = player.getWorld();
 					Location loc = event.getPlayer().getLocation();
-					world.createExplosion(loc, 3F, false);
+					world.createExplosion(loc, 4F, false);
 				}
 			}
 		}
@@ -281,14 +311,14 @@ public class MonsterEvents implements Listener {
 	// SKELETON CLASS
 	@EventHandler
 	private void onSkeletonClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(MonsterItemManager.skeletonClass.getItemMeta())) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
 					
-					DisguiseAPI.disguiseToPlayers(player, new MobDisguise(DisguiseType.SKELETON, true), player);
+					DisguiseAPI.disguiseToAll(player, new MobDisguise(DisguiseType.SKELETON, true));
 					DisguiseAPI.setViewDisguiseToggled(player, false);
 					DisguiseAPI.setActionBarShown(player, false);
 					
@@ -317,7 +347,15 @@ public class MonsterEvents implements Listener {
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
-					player.teleport(plainsMonsterSpawn);
+					if (player.getWorld() == plainsWorld) {
+						player.teleport(plainsMonsterSpawn);
+					}
+					else if (player.getWorld() == mountainWorld) {
+						player.teleport(mountainMonsterSpawn);
+					}
+					else if (player.getWorld() == desertWorld) {
+						player.teleport(desertMonsterSpawn);
+					}
 					// -------------------------------------------
 				}
 			}
@@ -327,7 +365,7 @@ public class MonsterEvents implements Listener {
 	// DRAGON ONLY
 	@EventHandler
 	private void onDragonFireballRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(MonsterItemManager.dragonFireball.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -339,7 +377,7 @@ public class MonsterEvents implements Listener {
 	
 	@EventHandler
 	private void onLightningStickRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(MonsterItemManager.lightningStick.getItemMeta())) {
 					Player player = event.getPlayer();

@@ -27,10 +27,11 @@ public class DvZ extends JavaPlugin {
 		
 		ItemManager.init();
 		MonsterItemManager.init();
-		getServer().getPluginManager().registerEvents(new ClassEvents(), Instance);
-		getServer().getPluginManager().registerEvents(new MonsterEvents(), Instance);
-		getServer().getPluginManager().registerEvents(new PlayerEvents(this), Instance);
+		getServer().getPluginManager().registerEvents(new ClassEvents(), this);
+		getServer().getPluginManager().registerEvents(new MonsterEvents(), this);
+		getServer().getPluginManager().registerEvents(new PlayerEvents(this), this);
 		getCommand("giveclassmagma").setExecutor(new ClassCommands());
+		getCommand("givemonsterclass").setExecutor(new ClassCommands());
 	}
 	
 	private void loadConfig() {

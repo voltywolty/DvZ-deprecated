@@ -132,7 +132,7 @@ public class ItemManager {
 		meta.setDisplayName("§bBakers Book");
 		
 		List<String> lore = new ArrayList<>();
-		lore.add("§7Left click this book to receive some random armor and gold.");
+		lore.add("§7Left click this book to receive some food, coal, and clay.");
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		

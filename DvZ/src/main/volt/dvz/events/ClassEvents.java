@@ -43,12 +43,12 @@ public class ClassEvents implements Listener {
 	@EventHandler
 	public static void onClassGiverRightClick(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.classSelector.getItemMeta())) {
 					
 					Random rand = new Random();
-					int classChance = rand.nextInt(6);
+					int classChance = rand.nextInt(8);
 					
 					player.getInventory().addItem(ItemManager.dwarfBuilderClass); // This is guaranteed no matter what
 					
@@ -66,7 +66,7 @@ public class ClassEvents implements Listener {
 					}
 					
 					player.getInventory().removeItem(ItemManager.classSelector);
-					player.sendMessage(ChatColor.BLUE + "You have been given classes. Right click a disc to become that class.");
+					player.sendMessage(ChatColor.BLUE + "You have been given classes. Left click a disc to become that class.");
 					
 					player.setFallDistance(3);
 					player.setCanPickupItems(true);
@@ -79,7 +79,7 @@ public class ClassEvents implements Listener {
 	// BUILDER CLASS
 	@EventHandler
 	public static void onBuilderClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBuilderClass.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -104,7 +104,15 @@ public class ClassEvents implements Listener {
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
-					player.teleport(plainsSpawn);
+					if (player.getWorld() == plainsWorld) {
+						player.teleport(plainsSpawn);
+					}
+					else if (player.getWorld() == mountainWorld) {
+						player.teleport(mountainSpawn);
+					}
+					else if (player.getWorld() == desertWorld) {
+						player.teleport(desertSpawn);
+					}
 					// -------------------------------------------
 					player.getInventory().removeItem(ItemManager.dwarfBuilderClass);
 					
@@ -119,7 +127,7 @@ public class ClassEvents implements Listener {
 	
 	@EventHandler
 	public void onBuilderBookRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBuilderBook.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -150,7 +158,7 @@ public class ClassEvents implements Listener {
 	// BLACKSMITH CLASS
 	@EventHandler
 	public static void onBlacksmithClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBlacksmithClass.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -174,7 +182,15 @@ public class ClassEvents implements Listener {
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
-					player.teleport(plainsSpawn);
+					if (player.getWorld() == plainsWorld) {
+						player.teleport(plainsSpawn);
+					}
+					else if (player.getWorld() == mountainWorld) {
+						player.teleport(mountainSpawn);
+					}
+					else if (player.getWorld() == desertWorld) {
+						player.teleport(desertSpawn);
+					}
 					// -------------------------------------------
 					player.getInventory().removeItem(ItemManager.dwarfBlacksmithClass);
 					
@@ -187,7 +203,7 @@ public class ClassEvents implements Listener {
 	
 	@EventHandler
 	public void onBlacksmithBookRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBlacksmithBook.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -202,11 +218,10 @@ public class ClassEvents implements Listener {
 						
 						ItemStack newItem = new ItemStack(Material.getMaterial(items.toUpperCase()));
 						
-						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.COAL, 25));
-						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.DIRT, 11));
+						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.COAL, 18));
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.ARROW, 20));
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.BOW, 1));
-						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.REDSTONE_BLOCK, 8));
+						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.REDSTONE, 12));
 						player.getWorld().dropItem(player.getEyeLocation(), newItem);
 						
 						player.getInventory().removeItem(new ItemStack(Material.CLOCK, 3));
@@ -222,7 +237,7 @@ public class ClassEvents implements Listener {
 	// TAILOR CLASS
 	@EventHandler
 	public static void onTailorClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfTailorClass.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -245,7 +260,15 @@ public class ClassEvents implements Listener {
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
-					player.teleport(plainsSpawn);
+					if (player.getWorld() == plainsWorld) {
+						player.teleport(plainsSpawn);
+					}
+					else if (player.getWorld() == mountainWorld) {
+						player.teleport(mountainSpawn);
+					}
+					else if (player.getWorld() == desertWorld) {
+						player.teleport(desertSpawn);
+					}
 					// -------------------------------------------
 					player.getInventory().removeItem(ItemManager.dwarfTailorClass);
 					
@@ -258,7 +281,7 @@ public class ClassEvents implements Listener {
 	
 	@EventHandler
 	public void onTailorBookRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfTailorBook.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -273,7 +296,7 @@ public class ClassEvents implements Listener {
 						}
 					}
 					
-					bookCooldown.put(player.getName(), System.currentTimeMillis() + (15 * 1000));
+					bookCooldown.put(player.getName(), System.currentTimeMillis() + (10 * 1000));
 					
 					ItemStack dyeCheck = new ItemStack(Material.ORANGE_DYE);
 
@@ -300,7 +323,7 @@ public class ClassEvents implements Listener {
 	//ALCHEMIST CLASS
 	@EventHandler
 	public static void onAlchemistClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfAlchemistClass.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -313,6 +336,7 @@ public class ClassEvents implements Listener {
 					player.getInventory().addItem(new ItemStack(Material.CAULDRON, 2));
 					player.getInventory().addItem(new ItemStack(Material.CHEST, 2));
 					player.getInventory().addItem(new ItemStack(Material.REDSTONE, 5));
+					player.getInventory().addItem(new ItemStack(Material.BLAZE_POWDER, 16));
 					player.getInventory().addItem(new ItemStack(Material.OAK_SIGN, 3));
 					player.getInventory().addItem(new ItemStack(Material.LAPIS_BLOCK, 64));
 					player.getInventory().addItem(new ItemStack(Material.GLASS, 64));
@@ -324,7 +348,15 @@ public class ClassEvents implements Listener {
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
-					player.teleport(plainsSpawn);
+					if (player.getWorld() == plainsWorld) {
+						player.teleport(plainsSpawn);
+					}
+					else if (player.getWorld() == mountainWorld) {
+						player.teleport(mountainSpawn);
+					}
+					else if (player.getWorld() == desertWorld) {
+						player.teleport(desertSpawn);
+					}
 					// -------------------------------------------
 					player.getInventory().removeItem(ItemManager.dwarfAlchemistClass);
 					
@@ -337,7 +369,7 @@ public class ClassEvents implements Listener {
 	
 	@EventHandler
 	public void onAlchemistBookRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfAlchemistBook.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -361,7 +393,7 @@ public class ClassEvents implements Listener {
 
 					if (player.getInventory().containsAtLeast(potionCheck, 4)) {		
 						Random rand = new Random();
-						int chance = rand.nextInt(2);
+						int chance = rand.nextInt(3);
 						
 						ItemStack healthPotion = new ItemStack(Material.POTION, 3);
 						PotionMeta healthMeta = (PotionMeta)healthPotion.getItemMeta();
@@ -380,7 +412,7 @@ public class ClassEvents implements Listener {
 						
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.BONE, 3));
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.MILK_BUCKET, 1));
-						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.SAND, 9));
+						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.SAND, 3));
 						
 						if (chance == 0) {
 							player.getWorld().dropItem(player.getEyeLocation(), healthPotion);
@@ -408,7 +440,7 @@ public class ClassEvents implements Listener {
 	//BAKER CLASS
 	@EventHandler
 	public static void onBakerClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBakerClass.getItemMeta())) {
 					Player player = event.getPlayer();
@@ -417,6 +449,14 @@ public class ClassEvents implements Listener {
 					
 					// BAKER STARTER ITEMS
 					player.getInventory().addItem(ItemManager.dwarfBakerBook);
+					player.getInventory().addItem(new ItemStack(Material.IRON_PICKAXE));
+					player.getInventory().addItem(new ItemStack(Material.FURNACE, 2));
+					player.getInventory().addItem(new ItemStack(Material.CHEST, 2));
+					player.getInventory().addItem(new ItemStack(Material.CLAY, 10));
+					player.getInventory().addItem(new ItemStack(Material.OAK_SIGN, 3));
+					player.getInventory().addItem(new ItemStack(Material.BRICKS, 64));
+					player.getInventory().addItem(new ItemStack(Material.CAKE, 10));
+					player.getInventory().addItem(new ItemStack(Material.COAL, 25));
 					
 					plainsSpawn.setWorld(plainsWorld);
 					mountainSpawn.setWorld(mountainWorld);
@@ -424,12 +464,62 @@ public class ClassEvents implements Listener {
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
-					player.teleport(plainsSpawn);
+					if (player.getWorld() == plainsWorld) {
+						player.teleport(plainsSpawn);
+					}
+					else if (player.getWorld() == mountainWorld) {
+						player.teleport(mountainSpawn);
+					}
+					else if (player.getWorld() == desertWorld) {
+						player.teleport(desertSpawn);
+					}
 					// -------------------------------------------
 					player.getInventory().removeItem(ItemManager.dwarfBakerClass);
 					
 					player.sendMessage(ChatColor.BLUE + "You have become a Baker Dwarf.");
 					player.setDisplayName(player.getName() + " §3the Baker§");
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onBakerBookRightClick(PlayerInteractEvent event) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+			if (event.getItem() != null) {
+				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBakerBook.getItemMeta())) {
+					Player player = event.getPlayer();
+					
+					player.updateInventory();
+					
+					ItemStack brickCheck = new ItemStack(Material.BRICK);
+					
+					Random randCookieCount = new Random();
+					int low = 10;
+					int high = 22;
+					int cookieResult = randCookieCount.nextInt(high - low) + low;
+					
+					Random randCount = new Random();
+					int num = randCount.nextInt(5);
+					
+					Random randCakeCount = new Random();
+					int cakeLow = 2;
+					int cakeHigh = 8;
+					int cakeResult = randCakeCount.nextInt(cakeHigh - cakeLow) + cakeLow;
+
+					if (player.getInventory().containsAtLeast(brickCheck, 15)) {
+						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.CLAY, 5));
+						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.COOKIE, cookieResult));
+						
+						if (num == 3) {
+							player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.CAKE, cakeResult));
+						}
+						
+						player.getInventory().removeItem(new ItemStack(Material.BRICK, 15));
+					}
+					else if (!player.getInventory().containsAtLeast(brickCheck, 15)) {
+						player.sendMessage(ChatColor.BLUE + "You do not have 15 bricks in your inventory! Smelt clay to get bricks.");
+					}
 				}
 			}
 		}

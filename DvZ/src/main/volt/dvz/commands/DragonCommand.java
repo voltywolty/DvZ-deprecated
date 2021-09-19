@@ -15,7 +15,7 @@ public class DragonCommand extends SubCommand {
 	
 	@Override
 	public void onCommand(Player player, String[] args) {
-		DisguiseAPI.disguiseToPlayers(player, new MobDisguise(DisguiseType.ENDER_DRAGON, true), player);
+		DisguiseAPI.disguiseToAll(player, new MobDisguise(DisguiseType.ENDER_DRAGON, true));
 		DisguiseAPI.setViewDisguiseToggled(player, false);
 		DisguiseAPI.setActionBarShown(player, false);
 		

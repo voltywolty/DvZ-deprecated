@@ -1,6 +1,8 @@
 package main.volt.dvz.events;
 
 import main.volt.dvz.DvZ;
+import main.volt.dvz.commands.StartCommand;
+import main.volt.dvz.items.MonsterItemManager;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -25,6 +27,10 @@ public class PlayerEvents implements Listener {
 		
 		if (!hasJoined) {
 			player.sendMessage(ChatColor.LIGHT_PURPLE + "Welcome " + player.getName() + " to the official DvZ server!");
+		}
+		
+		if (StartCommand.gameStarted) {
+			player.getInventory().addItem(MonsterItemManager.monsterClassSelector);
 		}
 	}
 }

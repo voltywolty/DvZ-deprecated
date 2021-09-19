@@ -11,3 +11,6 @@ commands:
    dvz:
       description: All DvZ commands.
       usage: /<command>
+   givemonsterclass:
+      description: Gives a gold nugget that gives you a random monster class.
+      usage: /<command>

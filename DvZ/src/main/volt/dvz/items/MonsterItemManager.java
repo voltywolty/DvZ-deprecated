@@ -103,7 +103,7 @@ public class MonsterItemManager {
 		
 		List<String> lore = new ArrayList<>();
 		lore.add("§7This disc gives you the creeper class.");
-		lore.add("§7You get gunpowder that when you Left click, it takes two seconds to blow up.");
+		lore.add("§7You get gunpowder that when you left click, it takes two seconds to blow up.");
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		

@@ -1,6 +1,7 @@
 package main.volt.dvz.commands;
 
 import main.volt.dvz.items.ItemManager;
+import main.volt.dvz.items.MonsterItemManager;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -21,6 +22,13 @@ public class ClassCommands implements CommandExecutor {
 		
 		if (cmd.getName().equalsIgnoreCase("giveclassmagma") && player.isOp()) {
 			player.getInventory().addItem(ItemManager.classSelector);
+		}
+		else if (!player.isOp()) {
+			player.sendMessage(ChatColor.RED + "You do not have permission to use that command.");
+		}
+		
+		if (cmd.getName().equalsIgnoreCase("givemonsterclass") && player.isOp()) {
+			player.getInventory().addItem(MonsterItemManager.monsterClassSelector);
 		}
 		else if (!player.isOp()) {
 			player.sendMessage(ChatColor.RED + "You do not have permission to use that command.");
