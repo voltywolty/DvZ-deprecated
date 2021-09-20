@@ -20,6 +20,10 @@ public class MonsterItemManager {
 	
 	public static ItemStack skeletonClass;
 	
+	public static ItemStack wolfClass;
+	
+	public static ItemStack chickenNuggetClass;
+	
 	// DRAGON / ADMIN ONLY
 	public static ItemStack dragonFireball;
 	public static ItemStack lightningStick;
@@ -36,6 +40,10 @@ public class MonsterItemManager {
 		createGunpowder();
 		
 		createSkeletonClass();
+		
+		createWolfClass();
+		
+		createChickenNuggetClass();
 		
 		createDragonFireball();
 		createLightningStick();
@@ -136,6 +144,35 @@ public class MonsterItemManager {
 		item.setItemMeta(meta);
 		
 		skeletonClass = item;
+	}
+	
+	// WOLF CLASS
+	private static void createWolfClass() {
+		ItemStack item = new ItemStack(Material.MUSIC_DISC_WARD, 1);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName("§bWolf Class§");
+		
+		List<String> lore = new ArrayList<>();
+		lore.add("§7This disc gives you the wolf class.");
+		lore.add("§7You get two swords, wolf eggs, and 64 bones.");
+		meta.setLore(lore);
+		item.setItemMeta(meta);
+		
+		wolfClass = item;
+	}
+	
+	// CHICKEN NUGGET CLASS
+	private static void createChickenNuggetClass() {
+		ItemStack item = new ItemStack(Material.MUSIC_DISC_MELLOHI, 1);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName("§bChicken Nugget Class§");
+		
+		List<String> lore = new ArrayList<>();
+		lore.add("§7This disc gives you the chicken nugget class.");
+		meta.setLore(lore);
+		item.setItemMeta(meta);
+		
+		chickenNuggetClass = item;
 	}
 	
 	private static void createDragonFireball() {

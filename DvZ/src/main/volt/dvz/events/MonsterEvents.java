@@ -35,7 +35,7 @@ import org.bukkit.potion.PotionType;
 public class MonsterEvents implements Listener {
 	// PLAINS WORLD
 	static World plainsWorld = Bukkit.getServer().getWorld("dwarf_plains");
-	static Location plainsMonsterSpawn = new Location(plainsWorld, 1401, 73, 106); // MONSTER SPAWN
+	static Location plainsMonsterSpawn = new Location(plainsWorld, -376, 87, -227); // MONSTER SPAWN
 	
 	// MOUNTAIN WORLD
 	static World mountainWorld = Bukkit.getServer().getWorld("dwarf_mountain");
@@ -44,6 +44,10 @@ public class MonsterEvents implements Listener {
 	// DESERT WORLD
 	static World desertWorld = Bukkit.getServer().getWorld("dwarf_desert");
 	static Location desertMonsterSpawn = new Location(desertWorld, 244, 63, 241); // MONSTER SPAWN
+	
+	// RUINS WORLD
+	static World ruinsWorld = Bukkit.getServer().getWorld("dwarf_ruins");
+	static Location ruinsMonsterSpawn = new Location(ruinsWorld, -378, 86, 177); // MONSTER SPAWN
 	
 	@EventHandler
 	private void onDeath(PlayerDeathEvent event) {
@@ -74,12 +78,18 @@ public class MonsterEvents implements Listener {
 					Player player = event.getPlayer();
 					
 					Random rand = new Random();
-					int monsterChance = rand.nextInt(5);
+					int monsterChance = rand.nextInt(10);
+					
+					int classChance = rand.nextInt(4);
 					
 					player.getInventory().addItem(MonsterItemManager.zombieClass); // Guaranteed no matter what
 					
 					if (monsterChance == 2) {
 						player.getInventory().addItem(MonsterItemManager.spiderClass);
+						
+						if (classChance == 2) {
+							player.getInventory().addItem(MonsterItemManager.creeperClass);
+						}
 					}
 					else if (monsterChance == 3) {
 						player.getInventory().addItem(MonsterItemManager.creeperClass);
@@ -87,11 +97,12 @@ public class MonsterEvents implements Listener {
 					else if (monsterChance == 4) {
 						player.getInventory().addItem(MonsterItemManager.skeletonClass);
 					}
+					else if (monsterChance == 5) {
+						player.getInventory().addItem(MonsterItemManager.wolfClass);
+					}
 					
 					player.getInventory().removeItem(MonsterItemManager.monsterClassSelector);
 					player.sendMessage(ChatColor.BLUE + "You have been given monsters classes. Left click a disc to become that monster.");
-					
-					player.setFallDistance(-1);
 					player.setCanPickupItems(false);
 					
 					player.setDisplayName(player.getName() + " §rthe Monster§");
@@ -162,6 +173,9 @@ public class MonsterEvents implements Listener {
 					else if (player.getWorld() == desertWorld) {
 						player.teleport(desertMonsterSpawn);
 					}
+					else if (player.getWorld() == ruinsWorld) {
+						player.teleport(ruinsMonsterSpawn);
+					}
 					// -------------------------------------------
 				}
 			}
@@ -217,6 +231,9 @@ public class MonsterEvents implements Listener {
 					}
 					else if (player.getWorld() == desertWorld) {
 						player.teleport(desertMonsterSpawn);
+					}
+					else if (player.getWorld() == ruinsWorld) {
+						player.teleport(ruinsMonsterSpawn);
 					}
 					// -------------------------------------------
 				}
@@ -291,6 +308,9 @@ public class MonsterEvents implements Listener {
 					else if (player.getWorld() == desertWorld) {
 						player.teleport(desertMonsterSpawn);
 					}
+					else if (player.getWorld() == ruinsWorld) {
+						player.teleport(ruinsMonsterSpawn);
+					}
 					// -------------------------------------------
 				}
 			}
@@ -331,7 +351,7 @@ public class MonsterEvents implements Listener {
 					skeletonBow.addEnchantment(Enchantment.ARROW_DAMAGE, 2);
 					
 					// SKELETON STARTING GEAR
-					player.getInventory().setItemInMainHand(skeletonBow);
+					player.getInventory().addItem(skeletonBow);
 					player.getInventory().addItem(new ItemStack(Material.ARROW, 64));
 					player.getInventory().addItem(new ItemStack(Material.VINE, 24));
 					player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
@@ -358,6 +378,70 @@ public class MonsterEvents implements Listener {
 					}
 					else if (player.getWorld() == desertWorld) {
 						player.teleport(desertMonsterSpawn);
+					}
+					else if (player.getWorld() == ruinsWorld) {
+						player.teleport(ruinsMonsterSpawn);
+					}
+					// -------------------------------------------
+				}
+			}
+		}
+	}
+	
+	// WOLF CLASS
+	@EventHandler
+	private void onWolfClassRightClick(PlayerInteractEvent event) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+			if (event.getItem() != null) {
+				if (event.getItem().getItemMeta().equals(MonsterItemManager.wolfClass.getItemMeta())) {
+					Player player = event.getPlayer();
+					
+					player.getInventory().clear();
+					
+					DisguiseAPI.disguiseToAll(player, new MobDisguise(DisguiseType.WOLF, true));
+					DisguiseAPI.setViewDisguiseToggled(player, false);
+					DisguiseAPI.setActionBarShown(player, false);
+					
+					ItemStack ironSword = new ItemStack(Material.IRON_SWORD, 1);
+					ironSword.addEnchantment(Enchantment.DAMAGE_ALL, 4);
+					
+					ItemStack goldSword = new ItemStack(Material.GOLDEN_SWORD);
+					goldSword.addEnchantment(Enchantment.FIRE_ASPECT, 2);
+					goldSword.addEnchantment(Enchantment.KNOCKBACK, 2);
+					
+					// WOLF STARTING GEAR
+					player.getInventory().addItem(ironSword);
+					player.getInventory().addItem(goldSword);
+					player.getInventory().addItem(new ItemStack(Material.ARROW, 64));
+					player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
+					player.getInventory().addItem(new ItemStack(Material.WOLF_SPAWN_EGG, 5));
+					player.getInventory().addItem(new ItemStack(Material.BONE, 64));
+					player.getInventory().addItem(MonsterItemManager.suicidePill);
+					
+					player.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET));
+					player.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE));
+					player.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS));
+					player.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS));
+					
+					player.getInventory().remove(MonsterItemManager.skeletonClass);
+					
+					plainsMonsterSpawn.setWorld(plainsWorld);
+					mountainMonsterSpawn.setWorld(mountainWorld);
+					desertMonsterSpawn.setWorld(desertWorld);
+					
+					// -------------------------------------------
+					// CHANGE DEPENDING ON THE MAP
+					if (player.getWorld() == plainsWorld) {
+						player.teleport(plainsMonsterSpawn);
+					}
+					else if (player.getWorld() == mountainWorld) {
+						player.teleport(mountainMonsterSpawn);
+					}
+					else if (player.getWorld() == desertWorld) {
+						player.teleport(desertMonsterSpawn);
+					}
+					else if (player.getWorld() == ruinsWorld) {
+						player.teleport(ruinsMonsterSpawn);
 					}
 					// -------------------------------------------
 				}

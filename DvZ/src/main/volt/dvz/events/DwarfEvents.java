@@ -28,7 +28,7 @@ public class DwarfEvents implements Listener {
 	
 	// PLAINS WORLD
 	static World plainsWorld = Bukkit.getServer().getWorld("dwarf_plains");
-	static Location plainsSpawn = new Location(plainsWorld, 1487, 72, -148); // DWARF SPAWN
+	static Location plainsSpawn = new Location(plainsWorld, -699, 77, -223); // DWARF SPAWN
 	
 	// MOUNTAIN WORLD
 	static World mountainWorld = Bukkit.getServer().getWorld("dwarf_mountain");
@@ -37,6 +37,10 @@ public class DwarfEvents implements Listener {
 	// DESERT WORLD
 	static World desertWorld = Bukkit.getServer().getWorld("dwarf_desert");
 	static Location desertSpawn = new Location(desertWorld, 91, 69, 449); // DWARF SPAWN
+	
+	// RUINS WORLD
+	static World ruinsWorld = Bukkit.getServer().getWorld("dwarf_ruins");
+	static Location ruinsSpawn = new Location(ruinsWorld, -253, 77, 149); // DWARF SPAWN
 	
 	// THIS IS FOR THE CLASS GIVER (MAGMA CREAM)
 	@EventHandler
@@ -48,11 +52,16 @@ public class DwarfEvents implements Listener {
 					
 					Random rand = new Random();
 					int classChance = rand.nextInt(8);
+					int classChance2 = rand.nextInt(4);
 					
 					player.getInventory().addItem(ItemManager.dwarfBuilderClass); // This is guaranteed no matter what
 					
 					if (classChance == 2) {
 						player.getInventory().addItem(ItemManager.dwarfBlacksmithClass);
+						
+						if (classChance2 == 3) {
+							player.getInventory().addItem(ItemManager.dwarfTailorClass);
+						}
 					}
 					else if (classChance == 3) {
 						player.getInventory().addItem(ItemManager.dwarfTailorClass);
@@ -112,6 +121,9 @@ public class DwarfEvents implements Listener {
 					else if (player.getWorld() == desertWorld) {
 						player.teleport(desertSpawn);
 					}
+					else if (player.getWorld() == ruinsWorld) {
+						player.teleport(ruinsSpawn);
+					}
 					// -------------------------------------------
 					player.getInventory().removeItem(ItemManager.dwarfBuilderClass);
 					
@@ -131,6 +143,9 @@ public class DwarfEvents implements Listener {
 				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBuilderBook.getItemMeta())) {
 					Player player = event.getPlayer();
 					
+					Random rand = new Random();
+					int chance = rand.nextInt(5);
+					
 					if (bookCooldown.containsKey(player.getName())) {
 						if (bookCooldown.get(player.getName()) > System.currentTimeMillis()) {
 							long secondsLeft = (bookCooldown.get(player.getName()) - System.currentTimeMillis()) / 1000;
@@ -148,6 +163,15 @@ public class DwarfEvents implements Listener {
 					ItemStack newItem = new ItemStack(Material.getMaterial(items.toUpperCase()), 64);
 					
 					player.getWorld().dropItem(player.getEyeLocation(), newItem);
+					
+					if (chance == 3) {
+						player.getWorld().dropItem(player.getEyeLocation(), newItem);
+					}
+					else if (chance == 4) {
+						player.getWorld().dropItem(player.getEyeLocation(), newItem);
+						player.getWorld().dropItem(player.getEyeLocation(), newItem);
+					}
+					
 					player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.GLOWSTONE_DUST, 3));
 				}
 			}
@@ -190,6 +214,9 @@ public class DwarfEvents implements Listener {
 					else if (player.getWorld() == desertWorld) {
 						player.teleport(desertSpawn);
 					}
+					else if (player.getWorld() == ruinsWorld) {
+						player.teleport(ruinsSpawn);
+					}
 					// -------------------------------------------
 					player.getInventory().removeItem(ItemManager.dwarfBlacksmithClass);
 					
@@ -217,10 +244,9 @@ public class DwarfEvents implements Listener {
 						
 						ItemStack newItem = new ItemStack(Material.getMaterial(items.toUpperCase()));
 						
-						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.COAL, 18));
+						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.COAL, 8));
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.ARROW, 20));
-						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.BOW, 1));
-						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.REDSTONE, 12));
+						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.REDSTONE, 8));
 						player.getWorld().dropItem(player.getEyeLocation(), newItem);
 						
 						player.getInventory().removeItem(new ItemStack(Material.CLOCK, 3));
@@ -267,6 +293,9 @@ public class DwarfEvents implements Listener {
 					}
 					else if (player.getWorld() == desertWorld) {
 						player.teleport(desertSpawn);
+					}
+					else if (player.getWorld() == ruinsWorld) {
+						player.teleport(ruinsSpawn);
 					}
 					// -------------------------------------------
 					player.getInventory().removeItem(ItemManager.dwarfTailorClass);
@@ -356,6 +385,9 @@ public class DwarfEvents implements Listener {
 					else if (player.getWorld() == desertWorld) {
 						player.teleport(desertSpawn);
 					}
+					else if (player.getWorld() == ruinsWorld) {
+						player.teleport(ruinsSpawn);
+					}
 					// -------------------------------------------
 					player.getInventory().removeItem(ItemManager.dwarfAlchemistClass);
 					
@@ -412,6 +444,7 @@ public class DwarfEvents implements Listener {
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.BONE, 3));
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.MILK_BUCKET, 1));
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.SAND, 3));
+						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.LAPIS_LAZULI, 4));
 						
 						if (chance == 0) {
 							player.getWorld().dropItem(player.getEyeLocation(), healthPotion);
@@ -471,6 +504,9 @@ public class DwarfEvents implements Listener {
 					}
 					else if (player.getWorld() == desertWorld) {
 						player.teleport(desertSpawn);
+					}
+					else if (player.getWorld() == ruinsWorld) {
+						player.teleport(ruinsSpawn);
 					}
 					// -------------------------------------------
 					player.getInventory().removeItem(ItemManager.dwarfBakerClass);
