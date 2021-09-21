@@ -2,7 +2,7 @@ package main.volt.dvz.events;
 
 import main.volt.dvz.DvZ;
 import main.volt.dvz.items.ItemManager;
-import me.libraryaddict.disguise.DisguiseAPI;
+//import net.milkbowl.vault.permission.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +36,7 @@ public class DwarfEvents implements Listener {
 	
 	// DESERT WORLD
 	static World desertWorld = Bukkit.getServer().getWorld("dwarf_desert");
-	static Location desertSpawn = new Location(desertWorld, 91, 69, 449); // DWARF SPAWN
+	static Location desertSpawn = new Location(desertWorld, -38, 70, 240); // DWARF SPAWN
 	
 	// RUINS WORLD
 	static World ruinsWorld = Bukkit.getServer().getWorld("dwarf_ruins");
@@ -78,7 +78,6 @@ public class DwarfEvents implements Listener {
 					
 					player.setFallDistance(3);
 					player.setCanPickupItems(true);
-					DisguiseAPI.undisguiseToAll(player);
 				}
 			}
 		}
@@ -128,7 +127,7 @@ public class DwarfEvents implements Listener {
 					player.getInventory().removeItem(ItemManager.dwarfBuilderClass);
 					
 					player.sendMessage(ChatColor.BLUE + "You have become a Builder Dwarf.");
-					player.setDisplayName(player.getName() + " §3the Builder§");
+					player.setDisplayName(player.getName() + ChatColor.DARK_AQUA + " the Builder" + ChatColor.WHITE);
 				}
 			}
 		}
@@ -221,7 +220,7 @@ public class DwarfEvents implements Listener {
 					player.getInventory().removeItem(ItemManager.dwarfBlacksmithClass);
 					
 					player.sendMessage(ChatColor.BLUE + "You have become a Blacksmith Dwarf.");
-					player.setDisplayName(player.getName() + " §3the Blacksmith§");
+					player.setDisplayName(player.getName() + ChatColor.DARK_AQUA + " the Blacksmith" + ChatColor.WHITE);
 				}
 			}
 		}
@@ -236,6 +235,9 @@ public class DwarfEvents implements Listener {
 					
 					player.updateInventory();
 					
+					Random rand = new Random();
+					int randomTool = rand.nextInt(7);
+					
 					ItemStack clockCheck = new ItemStack(Material.CLOCK);
 					if (player.getInventory().containsAtLeast(clockCheck, 3)) {
 						List <String> toolItems = DvZ.getInstance().getConfig().getStringList("BlacksmithTools");
@@ -248,6 +250,16 @@ public class DwarfEvents implements Listener {
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.ARROW, 20));
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.REDSTONE, 8));
 						player.getWorld().dropItem(player.getEyeLocation(), newItem);
+						
+						if (randomTool == 2) {
+							player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.DIAMOND_SHOVEL, 1));
+						}
+						else if (randomTool == 4) {
+							player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.DIAMOND_PICKAXE, 1));
+						}
+						else if (randomTool == 6) {
+							player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.DIAMOND_AXE, 1));
+						}
 						
 						player.getInventory().removeItem(new ItemStack(Material.CLOCK, 3));
 					}
@@ -301,7 +313,7 @@ public class DwarfEvents implements Listener {
 					player.getInventory().removeItem(ItemManager.dwarfTailorClass);
 					
 					player.sendMessage(ChatColor.BLUE + "You have become a Tailor Dwarf.");
-					player.setDisplayName(player.getName() + " §3the Tailor§");
+					player.setDisplayName(player.getName() + ChatColor.DARK_AQUA + " the Tailor" + ChatColor.WHITE);
 				}
 			}
 		}
@@ -392,7 +404,7 @@ public class DwarfEvents implements Listener {
 					player.getInventory().removeItem(ItemManager.dwarfAlchemistClass);
 					
 					player.sendMessage(ChatColor.BLUE + "You have become a Alchemist Dwarf.");
-					player.setDisplayName(player.getName() + " §3the Alchemist§");
+					player.setDisplayName(player.getName() + ChatColor.DARK_AQUA + " the Alchemist" + ChatColor.WHITE);
 				}
 			}
 		}
@@ -488,7 +500,7 @@ public class DwarfEvents implements Listener {
 					player.getInventory().addItem(new ItemStack(Material.OAK_SIGN, 3));
 					player.getInventory().addItem(new ItemStack(Material.BRICKS, 64));
 					player.getInventory().addItem(new ItemStack(Material.CAKE, 10));
-					player.getInventory().addItem(new ItemStack(Material.COAL, 25));
+					player.getInventory().addItem(new ItemStack(Material.COAL, 32));
 					
 					plainsSpawn.setWorld(plainsWorld);
 					mountainSpawn.setWorld(mountainWorld);
@@ -512,7 +524,7 @@ public class DwarfEvents implements Listener {
 					player.getInventory().removeItem(ItemManager.dwarfBakerClass);
 					
 					player.sendMessage(ChatColor.BLUE + "You have become a Baker Dwarf.");
-					player.setDisplayName(player.getName() + " §3the Baker§");
+					player.setDisplayName(player.getName() + ChatColor.DARK_AQUA + " the Baker" + ChatColor.WHITE);
 				}
 			}
 		}
@@ -530,16 +542,16 @@ public class DwarfEvents implements Listener {
 					ItemStack brickCheck = new ItemStack(Material.BRICK);
 					
 					Random randCookieCount = new Random();
-					int low = 10;
-					int high = 22;
+					int low = 8;
+					int high = 16;
 					int cookieResult = randCookieCount.nextInt(high - low) + low;
 					
 					Random randCount = new Random();
 					int num = randCount.nextInt(5);
 					
 					Random randCakeCount = new Random();
-					int cakeLow = 2;
-					int cakeHigh = 8;
+					int cakeLow = 1;
+					int cakeHigh = 6;
 					int cakeResult = randCakeCount.nextInt(cakeHigh - cakeLow) + cakeLow;
 
 					if (player.getInventory().containsAtLeast(brickCheck, 15)) {
@@ -550,10 +562,10 @@ public class DwarfEvents implements Listener {
 							player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.CAKE, cakeResult));
 						}
 						
-						player.getInventory().removeItem(new ItemStack(Material.BRICK, 15));
+						player.getInventory().removeItem(new ItemStack(Material.BRICK, 10));
 					}
-					else if (!player.getInventory().containsAtLeast(brickCheck, 15)) {
-						player.sendMessage(ChatColor.BLUE + "You do not have 15 bricks in your inventory! Smelt clay to get bricks.");
+					else if (!player.getInventory().containsAtLeast(brickCheck, 10)) {
+						player.sendMessage(ChatColor.BLUE + "You do not have 10 bricks in your inventory! Smelt clay to get bricks.");
 					}
 				}
 			}

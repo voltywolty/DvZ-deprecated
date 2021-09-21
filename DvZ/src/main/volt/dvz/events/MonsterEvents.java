@@ -6,6 +6,7 @@ import main.volt.dvz.items.MonsterItemManager;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
+//import net.milkbowl.vault.permission.Permission;
 
 import java.util.Random;
 
@@ -43,7 +44,7 @@ public class MonsterEvents implements Listener {
 	
 	// DESERT WORLD
 	static World desertWorld = Bukkit.getServer().getWorld("dwarf_desert");
-	static Location desertMonsterSpawn = new Location(desertWorld, 244, 63, 241); // MONSTER SPAWN
+	static Location desertMonsterSpawn = new Location(desertWorld, -228, 63, 165); // MONSTER SPAWN
 	
 	// RUINS WORLD
 	static World ruinsWorld = Bukkit.getServer().getWorld("dwarf_ruins");
@@ -60,6 +61,8 @@ public class MonsterEvents implements Listener {
 	@EventHandler 
 	private void onRespawn (PlayerRespawnEvent event) {
 		Player player = event.getPlayer();
+		
+		DisguiseAPI.undisguiseToAll(player);
 		
 		if (StartCommand.gameStarted) {
 			player.getInventory().addItem(MonsterItemManager.monsterClassSelector);
@@ -105,7 +108,7 @@ public class MonsterEvents implements Listener {
 					player.sendMessage(ChatColor.BLUE + "You have been given monsters classes. Left click a disc to become that monster.");
 					player.setCanPickupItems(false);
 					
-					player.setDisplayName(player.getName() + " §rthe Monster§");
+					player.setDisplayName(player.getName() + ChatColor.DARK_RED + " the Monster" + ChatColor.WHITE);
 				}
 			}
 		}
@@ -146,7 +149,7 @@ public class MonsterEvents implements Listener {
 					zombieSword.addEnchantment(Enchantment.DURABILITY, 2);
 					
 					// ZOMBIE STARTING GEAR
-					player.getInventory().setItemInMainHand(zombieSword);
+					player.getInventory().addItem(zombieSword);
 					player.getInventory().addItem(harmingPotion);
 					player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
 					player.getInventory().addItem(MonsterItemManager.suicidePill);
@@ -348,7 +351,7 @@ public class MonsterEvents implements Listener {
 					ItemStack skeletonBow = new ItemStack(Material.BOW, 1);
 					skeletonBow.addEnchantment(Enchantment.ARROW_INFINITE, 1);
 					skeletonBow.addEnchantment(Enchantment.DURABILITY, 2);
-					skeletonBow.addEnchantment(Enchantment.ARROW_DAMAGE, 2);
+					skeletonBow.addEnchantment(Enchantment.ARROW_DAMAGE, 1);
 					
 					// SKELETON STARTING GEAR
 					player.getInventory().addItem(skeletonBow);
@@ -412,7 +415,6 @@ public class MonsterEvents implements Listener {
 					// WOLF STARTING GEAR
 					player.getInventory().addItem(ironSword);
 					player.getInventory().addItem(goldSword);
-					player.getInventory().addItem(new ItemStack(Material.ARROW, 64));
 					player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
 					player.getInventory().addItem(new ItemStack(Material.WOLF_SPAWN_EGG, 5));
 					player.getInventory().addItem(new ItemStack(Material.BONE, 64));

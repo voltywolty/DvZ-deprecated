@@ -6,9 +6,6 @@ BuilderBlocks:
 
 BlacksmithTools:
  - diamond_sword
- - diamond_pickaxe
- - diamond_axe
- - diamond_shovel
  - bow
  - shield
  
