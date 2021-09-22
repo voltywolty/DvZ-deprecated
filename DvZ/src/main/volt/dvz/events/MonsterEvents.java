@@ -15,6 +15,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
@@ -36,7 +38,7 @@ import org.bukkit.potion.PotionType;
 public class MonsterEvents implements Listener {
 	// PLAINS WORLD
 	static World plainsWorld = Bukkit.getServer().getWorld("dwarf_plains");
-	static Location plainsMonsterSpawn = new Location(plainsWorld, -376, 87, -227); // MONSTER SPAWN
+	static Location plainsMonsterSpawn = new Location(plainsWorld, -378, 87, -227); // MONSTER SPAWN
 	
 	// MOUNTAIN WORLD
 	static World mountainWorld = Bukkit.getServer().getWorld("dwarf_mountain");
@@ -81,8 +83,7 @@ public class MonsterEvents implements Listener {
 					Player player = event.getPlayer();
 					
 					Random rand = new Random();
-					int monsterChance = rand.nextInt(10);
-					
+					int monsterChance = rand.nextInt(14);
 					int classChance = rand.nextInt(4);
 					
 					player.getInventory().addItem(MonsterItemManager.zombieClass); // Guaranteed no matter what
@@ -100,7 +101,10 @@ public class MonsterEvents implements Listener {
 					else if (monsterChance == 4) {
 						player.getInventory().addItem(MonsterItemManager.skeletonClass);
 					}
-					else if (monsterChance == 5) {
+					else if (monsterChance == 6) {
+						player.getInventory().addItem(MonsterItemManager.broodmotherClass);
+					}
+					else if (monsterChance == 7) {
 						player.getInventory().addItem(MonsterItemManager.wolfClass);
 					}
 					
@@ -164,6 +168,7 @@ public class MonsterEvents implements Listener {
 					plainsMonsterSpawn.setWorld(plainsWorld);
 					mountainMonsterSpawn.setWorld(mountainWorld);
 					desertMonsterSpawn.setWorld(desertWorld);
+					ruinsMonsterSpawn.setWorld(ruinsWorld);
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
@@ -223,6 +228,7 @@ public class MonsterEvents implements Listener {
 					plainsMonsterSpawn.setWorld(plainsWorld);
 					mountainMonsterSpawn.setWorld(mountainWorld);
 					desertMonsterSpawn.setWorld(desertWorld);
+					ruinsMonsterSpawn.setWorld(ruinsWorld);
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
@@ -299,6 +305,7 @@ public class MonsterEvents implements Listener {
 					plainsMonsterSpawn.setWorld(plainsWorld);
 					mountainMonsterSpawn.setWorld(mountainWorld);
 					desertMonsterSpawn.setWorld(desertWorld);
+					ruinsMonsterSpawn.setWorld(ruinsWorld);
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
@@ -370,6 +377,7 @@ public class MonsterEvents implements Listener {
 					plainsMonsterSpawn.setWorld(plainsWorld);
 					mountainMonsterSpawn.setWorld(mountainWorld);
 					desertMonsterSpawn.setWorld(desertWorld);
+					ruinsMonsterSpawn.setWorld(ruinsWorld);
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
@@ -430,6 +438,7 @@ public class MonsterEvents implements Listener {
 					plainsMonsterSpawn.setWorld(plainsWorld);
 					mountainMonsterSpawn.setWorld(mountainWorld);
 					desertMonsterSpawn.setWorld(desertWorld);
+					ruinsMonsterSpawn.setWorld(ruinsWorld);
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
@@ -446,6 +455,119 @@ public class MonsterEvents implements Listener {
 						player.teleport(ruinsMonsterSpawn);
 					}
 					// -------------------------------------------
+				}
+			}
+		}
+	}
+	
+	// BROODMOTHER CLASS
+	@EventHandler
+	private void onBroodmotherClassRightClick(PlayerInteractEvent event) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+			if (event.getItem() != null) {
+				if (event.getItem().getItemMeta().equals(MonsterItemManager.broodmotherClass.getItemMeta())) {
+					Player player = event.getPlayer();
+					
+					player.getInventory().clear();
+					
+					DisguiseAPI.disguiseToAll(player, new MobDisguise(DisguiseType.SILVERFISH, true));
+					DisguiseAPI.setViewDisguiseToggled(player, false);
+					DisguiseAPI.setActionBarShown(player, false);
+					
+					// BROODMOTHER STARTING GEAR
+					player.getInventory().addItem(new ItemStack(Material.COOKED_COD, 1));
+					player.getInventory().addItem(new ItemStack(Material.COD, 1));
+					player.getInventory().addItem(new ItemStack(Material.IRON_SHOVEL, 1));
+					player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
+					player.getInventory().addItem(new ItemStack(Material.SILVERFISH_SPAWN_EGG, 5));
+					player.getInventory().addItem(MonsterItemManager.suicidePill);
+					
+					player.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
+					player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
+					player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
+					player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+					
+					player.getInventory().remove(MonsterItemManager.broodmotherClass);
+					
+					plainsMonsterSpawn.setWorld(plainsWorld);
+					mountainMonsterSpawn.setWorld(mountainWorld);
+					desertMonsterSpawn.setWorld(desertWorld);
+					ruinsMonsterSpawn.setWorld(ruinsWorld);
+					
+					// -------------------------------------------
+					// CHANGE DEPENDING ON THE MAP
+					if (player.getWorld() == plainsWorld) {
+						player.teleport(plainsMonsterSpawn);
+					}
+					else if (player.getWorld() == mountainWorld) {
+						player.teleport(mountainMonsterSpawn);
+					}
+					else if (player.getWorld() == desertWorld) {
+						player.teleport(desertMonsterSpawn);
+					}
+					else if (player.getWorld() == ruinsWorld) {
+						player.teleport(ruinsMonsterSpawn);
+					}
+					// -------------------------------------------
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	private void onCookedCodUse(PlayerInteractEvent event) {
+		Block blockToBreak = event.getClickedBlock();
+		Player player = event.getPlayer();
+		
+		if (player.getInventory().getItemInMainHand().getType() == Material.COOKED_COD) {
+			if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
+					if (blockToBreak.getType().equals(Material.INFESTED_STONE)) {
+						blockToBreak.breakNaturally();
+						blockToBreak.getRelative(BlockFace.NORTH).breakNaturally();
+						blockToBreak.getRelative(BlockFace.NORTH).getRelative(BlockFace.EAST).breakNaturally();
+						blockToBreak.getRelative(BlockFace.NORTH).getRelative(BlockFace.WEST).breakNaturally();
+						blockToBreak.getRelative(BlockFace.SOUTH).breakNaturally();
+						blockToBreak.getRelative(BlockFace.SOUTH).getRelative(BlockFace.EAST).breakNaturally();
+						blockToBreak.getRelative(BlockFace.SOUTH).getRelative(BlockFace.WEST).breakNaturally();
+						blockToBreak.getRelative(BlockFace.EAST).breakNaturally();
+						blockToBreak.getRelative(BlockFace.WEST).breakNaturally();
+					} 
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	private void onCodUse(PlayerInteractEvent event) {
+		Player player = event.getPlayer();
+		Block stoneBlocks = event.getClickedBlock();
+		
+		int totalUses = 8;
+		boolean canUse = true;
+		
+		if (player.getInventory().getItemInMainHand().getType() == Material.COD) {
+			if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
+					if (stoneBlocks.getType().equals(Material.STONE_BRICKS) || stoneBlocks.getType().equals(Material.MOSSY_STONE_BRICKS) || stoneBlocks.getType().equals(Material.CRACKED_STONE_BRICKS) || stoneBlocks.getType().equals(Material.CHISELED_STONE_BRICKS)) {
+						totalUses--;
+						
+						if (totalUses <= 0) {
+							player.sendMessage(ChatColor.RED + "You can no longer use this ability.");
+							canUse = false;
+						}
+						else if (canUse) {
+							stoneBlocks.setType(Material.INFESTED_STONE);
+							stoneBlocks.getRelative(BlockFace.NORTH).setType(Material.INFESTED_STONE);
+							stoneBlocks.getRelative(BlockFace.NORTH).getRelative(BlockFace.EAST).setType(Material.INFESTED_STONE);
+							stoneBlocks.getRelative(BlockFace.NORTH).getRelative(BlockFace.WEST).setType(Material.INFESTED_STONE);
+							stoneBlocks.getRelative(BlockFace.SOUTH).setType(Material.INFESTED_STONE);
+							stoneBlocks.getRelative(BlockFace.SOUTH).getRelative(BlockFace.EAST).setType(Material.INFESTED_STONE);
+							stoneBlocks.getRelative(BlockFace.SOUTH).getRelative(BlockFace.WEST).setType(Material.INFESTED_STONE);
+							stoneBlocks.getRelative(BlockFace.EAST).setType(Material.INFESTED_STONE);
+							stoneBlocks.getRelative(BlockFace.WEST).setType(Material.INFESTED_STONE);
+						}
+					}
 				}
 			}
 		}

@@ -44,7 +44,7 @@ public class DwarfEvents implements Listener {
 	
 	// THIS IS FOR THE CLASS GIVER (MAGMA CREAM)
 	@EventHandler
-	public static void onClassGiverRightClick(PlayerInteractEvent event) {
+	public void onClassGiverRightClick(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (event.getItem() != null) {
@@ -108,6 +108,7 @@ public class DwarfEvents implements Listener {
 					plainsSpawn.setWorld(plainsWorld);
 					mountainSpawn.setWorld(mountainWorld);
 					desertSpawn.setWorld(desertWorld);
+					ruinsSpawn.setWorld(ruinsWorld);
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
@@ -201,6 +202,7 @@ public class DwarfEvents implements Listener {
 					plainsSpawn.setWorld(plainsWorld);
 					mountainSpawn.setWorld(mountainWorld);
 					desertSpawn.setWorld(desertWorld);
+					ruinsSpawn.setWorld(ruinsWorld);
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
@@ -294,6 +296,7 @@ public class DwarfEvents implements Listener {
 					plainsSpawn.setWorld(plainsWorld);
 					mountainSpawn.setWorld(mountainWorld);
 					desertSpawn.setWorld(desertWorld);
+					ruinsSpawn.setWorld(ruinsWorld);
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
@@ -385,6 +388,7 @@ public class DwarfEvents implements Listener {
 					plainsSpawn.setWorld(plainsWorld);
 					mountainSpawn.setWorld(mountainWorld);
 					desertSpawn.setWorld(desertWorld);
+					ruinsSpawn.setWorld(ruinsWorld);
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
@@ -505,6 +509,7 @@ public class DwarfEvents implements Listener {
 					plainsSpawn.setWorld(plainsWorld);
 					mountainSpawn.setWorld(mountainWorld);
 					desertSpawn.setWorld(desertWorld);
+					ruinsSpawn.setWorld(ruinsWorld);
 					
 					// -------------------------------------------
 					// CHANGE DEPENDING ON THE MAP
@@ -554,7 +559,7 @@ public class DwarfEvents implements Listener {
 					int cakeHigh = 6;
 					int cakeResult = randCakeCount.nextInt(cakeHigh - cakeLow) + cakeLow;
 
-					if (player.getInventory().containsAtLeast(brickCheck, 15)) {
+					if (player.getInventory().containsAtLeast(brickCheck, 10)) {
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.CLAY, 5));
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.COOKIE, cookieResult));
 						

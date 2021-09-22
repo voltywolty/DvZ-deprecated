@@ -22,7 +22,9 @@ public class MonsterItemManager {
 	
 	public static ItemStack wolfClass;
 	
-	public static ItemStack chickenNuggetClass;
+	public static ItemStack broodmotherClass;
+	
+	public static ItemStack chickenNuggetClass; // WIP
 	
 	// DRAGON / ADMIN ONLY
 	public static ItemStack dragonFireball;
@@ -42,6 +44,8 @@ public class MonsterItemManager {
 		createSkeletonClass();
 		
 		createWolfClass();
+		
+		createBroodmotherClass();
 		
 		createChickenNuggetClass();
 		
@@ -159,6 +163,21 @@ public class MonsterItemManager {
 		item.setItemMeta(meta);
 		
 		wolfClass = item;
+	}
+	
+	// BROODMOTHER CLASS
+	private static void createBroodmotherClass() {
+		ItemStack item = new ItemStack(Material.MUSIC_DISC_MALL, 1);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName("§bBroodmother Class§");
+		
+		List<String> lore = new ArrayList<>();
+		lore.add("§7This disc gives you the broodmother class.");
+		lore.add("§7Lay your eggs and cause the dwarf wall to fall!");
+		meta.setLore(lore);
+		item.setItemMeta(meta);
+		
+		broodmotherClass = item;
 	}
 	
 	// CHICKEN NUGGET CLASS

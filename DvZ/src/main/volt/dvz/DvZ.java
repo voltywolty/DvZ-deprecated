@@ -27,6 +27,7 @@ public class DvZ extends JavaPlugin {
 		
 		ItemManager.init();
 		MonsterItemManager.init();
+		
 		getServer().getPluginManager().registerEvents(new DwarfEvents(), this);
 		getServer().getPluginManager().registerEvents(new MonsterEvents(), this);
 		getServer().getPluginManager().registerEvents(new PlayerEvents(this), this);
