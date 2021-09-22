@@ -18,6 +18,8 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Egg;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,6 +27,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -52,6 +55,9 @@ public class MonsterEvents implements Listener {
 	static World ruinsWorld = Bukkit.getServer().getWorld("dwarf_ruins");
 	static Location ruinsMonsterSpawn = new Location(ruinsWorld, -378, 86, 177); // MONSTER SPAWN
 	
+	int totalUses = 8;
+	boolean canUse = true;
+	
 	@EventHandler
 	private void onDeath(PlayerDeathEvent event) {
 		Player player = event.getEntity();
@@ -66,8 +72,15 @@ public class MonsterEvents implements Listener {
 		
 		DisguiseAPI.undisguiseToAll(player);
 		
-		if (StartCommand.gameStarted) {
+		totalUses = 8;
+		canUse = true;
+		
+		if (StartCommand.gameStarted || !DwarfEvents.isDragonWarrior) {
 			player.getInventory().addItem(MonsterItemManager.monsterClassSelector);
+		}
+		
+		if (DwarfEvents.isDragonWarrior) {
+			player.sendMessage(ChatColor.RED + "Your heart is too pure to become a monster.");
 		}
 		
 		if (!StartCommand.gameStarted) {
@@ -83,7 +96,7 @@ public class MonsterEvents implements Listener {
 					Player player = event.getPlayer();
 					
 					Random rand = new Random();
-					int monsterChance = rand.nextInt(14);
+					int monsterChance = rand.nextInt(12);
 					int classChance = rand.nextInt(4);
 					
 					player.getInventory().addItem(MonsterItemManager.zombieClass); // Guaranteed no matter what
@@ -97,15 +110,30 @@ public class MonsterEvents implements Listener {
 					}
 					else if (monsterChance == 3) {
 						player.getInventory().addItem(MonsterItemManager.creeperClass);
+						
+						if (classChance == 3) {
+							player.getInventory().addItem(MonsterItemManager.wolfClass);
+						}
 					}
 					else if (monsterChance == 4) {
 						player.getInventory().addItem(MonsterItemManager.skeletonClass);
 					}
 					else if (monsterChance == 6) {
 						player.getInventory().addItem(MonsterItemManager.broodmotherClass);
+						
+						if (classChance == 0) {
+							player.getInventory().addItem(MonsterItemManager.creeperClass);
+						}
 					}
 					else if (monsterChance == 7) {
 						player.getInventory().addItem(MonsterItemManager.wolfClass);
+						
+						if (classChance == 1) {
+							player.getInventory().addItem(MonsterItemManager.chickenNuggetClass);
+						}
+					}
+					else if (monsterChance == 11) {
+						player.getInventory().addItem(MonsterItemManager.chickenNuggetClass);
 					}
 					
 					player.getInventory().removeItem(MonsterItemManager.monsterClassSelector);
@@ -335,7 +363,7 @@ public class MonsterEvents implements Listener {
 					Player player = event.getPlayer();
 					World world = player.getWorld();
 					Location loc = event.getPlayer().getLocation();
-					world.createExplosion(loc, 4F, false);
+					world.createExplosion(loc, 6F, false);
 				}
 			}
 		}
@@ -543,9 +571,6 @@ public class MonsterEvents implements Listener {
 		Player player = event.getPlayer();
 		Block stoneBlocks = event.getClickedBlock();
 		
-		int totalUses = 8;
-		boolean canUse = true;
-		
 		if (player.getInventory().getItemInMainHand().getType() == Material.COD) {
 			if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
 				if (event.getItem() != null) {
@@ -573,7 +598,73 @@ public class MonsterEvents implements Listener {
 		}
 	}
 	
-	// DRAGON ONLY
+	// CHICKEN NUGGET CLASS
+	@EventHandler
+	private void onChickenNuggetClassRightClick(PlayerInteractEvent event) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+			if (event.getItem() != null) {
+				if (event.getItem().getItemMeta().equals(MonsterItemManager.chickenNuggetClass.getItemMeta())) {
+					Player player = event.getPlayer();
+					
+					player.getInventory().clear();
+					
+					DisguiseAPI.disguiseToAll(player, new MobDisguise(DisguiseType.CHICKEN, true));
+					DisguiseAPI.setViewDisguiseToggled(player, false);
+					DisguiseAPI.setActionBarShown(player, false);
+					
+					// CHICKEN NUGGET STARTING GEAR
+					player.getInventory().addItem(new ItemStack(Material.EGG, 10));
+					player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
+					player.getInventory().addItem(MonsterItemManager.suicidePill);
+					
+					player.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
+					player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
+					player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
+					player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+					
+					player.getInventory().remove(MonsterItemManager.chickenNuggetClass);
+					
+					plainsMonsterSpawn.setWorld(plainsWorld);
+					mountainMonsterSpawn.setWorld(mountainWorld);
+					desertMonsterSpawn.setWorld(desertWorld);
+					ruinsMonsterSpawn.setWorld(ruinsWorld);
+					
+					// -------------------------------------------
+					// CHANGE DEPENDING ON THE MAP
+					if (player.getWorld() == plainsWorld) {
+						player.teleport(plainsMonsterSpawn);
+					}
+					else if (player.getWorld() == mountainWorld) {
+						player.teleport(mountainMonsterSpawn);
+					}
+					else if (player.getWorld() == desertWorld) {
+						player.teleport(desertMonsterSpawn);
+					}
+					else if (player.getWorld() == ruinsWorld) {
+						player.teleport(ruinsMonsterSpawn);
+					}
+					// -------------------------------------------
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	private void onEggHit(ProjectileHitEvent event) {
+		if (event.getEntity() instanceof Egg && event.getEntity().getShooter() instanceof Player) {
+			Entity egg = event.getEntity();
+			
+			Location location = egg.getLocation();
+			World world = event.getEntity().getWorld();
+			world.createExplosion(location, 3F);
+		}
+	}
+	
+	// --------------------------------
+	// DRAGONS
+	// --------------------------------
+	
+	// VLAURUNGA
 	@EventHandler
 	private void onDragonFireballRightClick(PlayerInteractEvent event) {
 		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
@@ -586,6 +677,7 @@ public class MonsterEvents implements Listener {
 		}
 	}
 	
+	// AVIRELLA
 	@EventHandler
 	private void onLightningStickRightClick(PlayerInteractEvent event) {
 		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {

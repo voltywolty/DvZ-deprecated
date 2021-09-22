@@ -10,7 +10,7 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 
-public class DragonCommand extends SubCommand {
+public class AvirellaDragonCommand extends SubCommand {
 	private DvZ plugin = DvZ.getInstance();
 	
 	@Override
@@ -19,16 +19,17 @@ public class DragonCommand extends SubCommand {
 		DisguiseAPI.setViewDisguiseToggled(player, false);
 		DisguiseAPI.setActionBarShown(player, false);
 		
-		player.setDisplayName(ChatColor.RED + "Vlaurunga" + ChatColor.DARK_PURPLE + " the Mighty Dragon" + ChatColor.WHITE);
+		player.setDisplayName(ChatColor.BLUE + "Avirella" + ChatColor.DARK_PURPLE + " the Swift Dragon" + ChatColor.WHITE);
 		player.setGameMode(GameMode.CREATIVE);
+		player.setFlySpeed(5);
 		
-		player.getInventory().addItem(MonsterItemManager.dragonFireball);
 		player.getInventory().addItem(MonsterItemManager.lightningStick);
+		// Need to add the stick that sends dwarves in the air!
 	}
 
 	@Override
 	public String name() {
-		return plugin.commandManager.dragon;
+		return plugin.commandManager.avirella;
 	}
 
 	@Override
@@ -40,5 +41,4 @@ public class DragonCommand extends SubCommand {
 	public String[] aliases() {
 		return new String[0];
 	}
-
 }

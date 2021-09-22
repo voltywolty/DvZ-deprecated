@@ -33,6 +33,7 @@ public class DvZ extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(new PlayerEvents(this), this);
 		getCommand("givedwarfclass").setExecutor(new ClassCommands());
 		getCommand("givemonsterclass").setExecutor(new ClassCommands());
+		getCommand("givedragonwarrior").setExecutor(new ClassCommands());
 	}
 	
 	private void loadConfig() {

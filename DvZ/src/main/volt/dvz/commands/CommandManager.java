@@ -25,14 +25,16 @@ public class CommandManager implements CommandExecutor {
 	public String help = "help";
 	public String start = "start";
 	public String stop = "stop";
-	public String dragon = "dragon";
+	public String vlaurunga = "vlaurunga";
+	public String avirella = "avirella";
 			
 	public void setup() {
 		plugin.getCommand(main).setExecutor(this);
 		
 		this.commands.add(new StartCommand());
 		this.commands.add(new StopCommand());
-		this.commands.add(new DragonCommand());
+		this.commands.add(new VlaurungaDragonCommand());
+		this.commands.add(new AvirellaDragonCommand());
 		this.commands.add(new HelpCommand());
 	}
 	

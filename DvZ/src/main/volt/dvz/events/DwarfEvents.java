@@ -2,7 +2,6 @@ package main.volt.dvz.events;
 
 import main.volt.dvz.DvZ;
 import main.volt.dvz.items.ItemManager;
-//import net.milkbowl.vault.permission.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -13,14 +12,19 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
 // THIS CLASS IS FOR DWARVES ONLY! MONSTERS ARE TO BE HANDLED WITH IN MonsterEvents
@@ -41,6 +45,8 @@ public class DwarfEvents implements Listener {
 	// RUINS WORLD
 	static World ruinsWorld = Bukkit.getServer().getWorld("dwarf_ruins");
 	static Location ruinsSpawn = new Location(ruinsWorld, -253, 77, 149); // DWARF SPAWN
+	
+	public static boolean isDragonWarrior = false;
 	
 	// THIS IS FOR THE CLASS GIVER (MAGMA CREAM)
 	@EventHandler
@@ -485,6 +491,104 @@ public class DwarfEvents implements Listener {
 		}
 	}
 	
+	HashMap<String, Long> potionCooldown = new HashMap<String, Long>();
+	
+	@EventHandler
+	public void onPotionUse(PlayerInteractEvent event) {
+		Player player = event.getPlayer();
+		
+		ItemStack healthPotion = new ItemStack(Material.SPLASH_POTION);
+		PotionMeta healthMeta = (PotionMeta)healthPotion.getItemMeta();
+		healthMeta.setBasePotionData(new PotionData(PotionType.INSTANT_HEAL, false, false));
+		healthPotion.setItemMeta(healthMeta);
+		
+		ItemStack speedPotion = new ItemStack(Material.SPLASH_POTION);
+		PotionMeta speedMeta = (PotionMeta)speedPotion.getItemMeta();
+		speedMeta.setBasePotionData(new PotionData(PotionType.SPEED, false, false));
+		speedPotion.setItemMeta(speedMeta);
+		
+		ItemStack strengthPotion = new ItemStack(Material.SPLASH_POTION);
+		PotionMeta strengthMeta = (PotionMeta)strengthPotion.getItemMeta();
+		strengthMeta.setBasePotionData(new PotionData(PotionType.STRENGTH, false, false));
+		strengthPotion.setItemMeta(strengthMeta);
+		
+		if (event.getItem().getItemMeta().equals(healthPotion.getItemMeta())) {
+			if (potionCooldown.containsKey(player.getName())) {
+				if (potionCooldown.get(player.getName()) > System.currentTimeMillis()) {
+					long secondsLeft = (potionCooldown.get(player.getName()) - System.currentTimeMillis()) / 1000;
+					player.sendMessage(ChatColor.BLUE + "Spell is on cooldown for " + secondsLeft + " seconds.");
+					return;
+				}
+			}
+			
+			potionCooldown.put(player.getName(), System.currentTimeMillis() + (5 * 1000));
+			
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
+					ItemStack healingPotion = new ItemStack(Material.SPLASH_POTION);
+					PotionMeta healingMeta = (PotionMeta) healingPotion.getItemMeta();
+					healingMeta.addCustomEffect(new PotionEffect(PotionEffectType.HEAL, 3600, 0), true);
+					healingPotion.setItemMeta(healingMeta);
+					
+					ThrownPotion thrownHealingPotion = player.launchProjectile(ThrownPotion.class);
+					thrownHealingPotion.setItem(healingPotion);
+					
+					player.addPotionEffect(new PotionEffect(PotionEffectType.HEAL, 3600, 0));
+				}
+			}
+		}
+		else if (event.getItem().getItemMeta().equals(speedPotion.getItemMeta())) {
+			if (potionCooldown.containsKey(player.getName())) {
+				if (potionCooldown.get(player.getName()) > System.currentTimeMillis()) {
+					long secondsLeft = (potionCooldown.get(player.getName()) - System.currentTimeMillis()) / 1000;
+					player.sendMessage(ChatColor.BLUE + "Spell is on cooldown for " + secondsLeft + " seconds.");
+					return;
+				}
+			}
+			
+			potionCooldown.put(player.getName(), System.currentTimeMillis() + (5 * 1000));
+			
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
+					ItemStack speedingPotion = new ItemStack(Material.SPLASH_POTION);
+					PotionMeta speedingMeta = (PotionMeta) speedingPotion.getItemMeta();
+					speedingMeta.addCustomEffect(new PotionEffect(PotionEffectType.SPEED, 3600, 0), true);
+					speedingPotion.setItemMeta(speedingMeta);
+					
+					ThrownPotion thrownHealingPotion = player.launchProjectile(ThrownPotion.class);
+					thrownHealingPotion.setItem(speedingPotion);
+					
+					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 3600, 0));
+				}
+			}
+		}
+		else if (event.getItem().getItemMeta().equals(strengthPotion.getItemMeta())) {
+			if (potionCooldown.containsKey(player.getName())) {
+				if (potionCooldown.get(player.getName()) > System.currentTimeMillis()) {
+					long secondsLeft = (potionCooldown.get(player.getName()) - System.currentTimeMillis()) / 1000;
+					player.sendMessage(ChatColor.BLUE + "Spell is on cooldown for " + secondsLeft + " seconds.");
+					return;
+				}
+			}
+			
+			potionCooldown.put(player.getName(), System.currentTimeMillis() + (5 * 1000));
+			
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
+					ItemStack strengthingPotion = new ItemStack(Material.SPLASH_POTION);
+					PotionMeta strengthingMeta = (PotionMeta) strengthingPotion.getItemMeta();
+					strengthingMeta.addCustomEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 3600, 0), true);
+					strengthingPotion.setItemMeta(strengthingMeta);
+					
+					ThrownPotion thrownHealingPotion = player.launchProjectile(ThrownPotion.class);
+					thrownHealingPotion.setItem(strengthingPotion);
+					
+					player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 3600, 0));
+				}
+			}
+		}
+	}
+	
 	//BAKER CLASS
 	@EventHandler
 	public static void onBakerClassRightClick(PlayerInteractEvent event) {
@@ -572,6 +676,56 @@ public class DwarfEvents implements Listener {
 					else if (!player.getInventory().containsAtLeast(brickCheck, 10)) {
 						player.sendMessage(ChatColor.BLUE + "You do not have 10 bricks in your inventory! Smelt clay to get bricks.");
 					}
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onDragonWarriorGiven(PlayerInteractEvent event) {
+		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+			if (event.getItem() != null) {
+				if (event.getItem().getItemMeta().equals(ItemManager.dragonWarriorClass.getItemMeta())) {
+					Player player = event.getPlayer();
+					
+					player.getInventory().clear();
+					
+					isDragonWarrior = true;
+					
+					ItemStack sword = new ItemStack(Material.DIAMOND_SWORD, 1);
+					sword.addEnchantment(Enchantment.DAMAGE_ALL, 3);
+					ItemStack bow = new ItemStack(Material.BOW, 1);
+					bow.addEnchantment(Enchantment.ARROW_DAMAGE, 2);
+					ItemStack stick = new ItemStack(Material.STICK, 1);
+					ItemMeta stickMeta = stick.getItemMeta();
+					stickMeta.setDisplayName(ChatColor.RED + "Fus Ro Dah Staff");
+					stick.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
+					
+					ItemStack helmet = new ItemStack(Material.IRON_HELMET, 1);
+					helmet.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 3);
+					ItemStack chestplate = new ItemStack(Material.IRON_CHESTPLATE, 1);
+					chestplate.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 3);
+					ItemStack leggings = new ItemStack(Material.IRON_LEGGINGS, 1);
+					leggings.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 3);
+					ItemStack boots = new ItemStack(Material.IRON_BOOTS, 1);
+					boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 3);
+					
+					// DRAGON WARRIOR ITEMS
+					player.getInventory().addItem(ItemManager.dwarfBuilderBook);
+					player.getInventory().addItem(sword);
+					player.getInventory().addItem(bow);
+					player.getInventory().addItem(stick);
+					player.getInventory().addItem(new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 16));
+					
+					player.getInventory().setHelmet(helmet);
+					player.getInventory().setChestplate(chestplate);
+					player.getInventory().setLeggings(leggings);
+					player.getInventory().setBoots(boots);
+					
+					player.getInventory().removeItem(ItemManager.dragonWarriorClass);
+					
+					player.sendMessage(ChatColor.GOLD + "You have become a the Dragon Warrior.");
+					player.setDisplayName(player.getName() + ChatColor.GOLD + " the Dragon Warrior" + ChatColor.WHITE);
 				}
 			}
 		}

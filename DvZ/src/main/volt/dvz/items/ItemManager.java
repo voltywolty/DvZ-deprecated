@@ -25,6 +25,8 @@ public class ItemManager {
 	public static ItemStack dwarfTailorClass;
 	public static ItemStack dwarfTailorBook;
 	
+	public static ItemStack dragonWarriorClass;
+	
 	public static void init() {
 		createClassSelector();
 		
@@ -42,6 +44,8 @@ public class ItemManager {
 		
 		createDwarfTailorClass();
 		createDwarfTailorBook();
+		
+		createDragonWarriorClass();
 	}
 	
 	private static void createClassSelector() {
@@ -193,5 +197,18 @@ public class ItemManager {
 		item.setItemMeta(meta);
 		
 		dwarfTailorBook = item;
+	}
+	
+	private static void createDragonWarriorClass() {
+		ItemStack item = new ItemStack(Material.MUSIC_DISC_PIGSTEP, 1);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName("§4Dragon Warrior Class");
+		
+		List<String> lore = new ArrayList<>();
+		lore.add("§7This class is granted to those who have slayed the dragon!");
+		meta.setLore(lore);
+		item.setItemMeta(meta);
+		
+		dragonWarriorClass = item;
 	}
 }

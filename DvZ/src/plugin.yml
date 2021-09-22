@@ -14,3 +14,6 @@ commands:
    givemonsterclass:
       description: Gives a gold nugget that gives you a random monster class.
       usage: /<command>
+   givedragonwarrior:
+      description: Gives the dragon warrior disc.
+      usage: /<command>

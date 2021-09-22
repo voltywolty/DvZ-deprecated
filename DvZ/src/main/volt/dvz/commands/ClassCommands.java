@@ -34,6 +34,13 @@ public class ClassCommands implements CommandExecutor {
 			player.sendMessage(ChatColor.RED + "You do not have permission to use that command.");
 		}
 		
+		if (cmd.getName().equalsIgnoreCase("givedragonwarrior") && player.isOp()) {
+			player.getInventory().addItem(ItemManager.dragonWarriorClass);
+		}
+		else if (!player.isOp()) {
+			player.sendMessage(ChatColor.RED + "You do not have permission to use that command.");
+		}
+		
 		return true;
 	}
 	
