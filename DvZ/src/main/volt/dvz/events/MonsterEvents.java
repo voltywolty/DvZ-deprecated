@@ -6,7 +6,6 @@ import main.volt.dvz.items.MonsterItemManager;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
-//import net.milkbowl.vault.permission.Permission;
 
 import java.util.Random;
 
@@ -21,11 +20,13 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -58,12 +59,16 @@ public class MonsterEvents implements Listener {
 	int totalUses = 8;
 	boolean canUse = true;
 	
+	boolean isMonster = false;
+	
 	@EventHandler
 	private void onDeath(PlayerDeathEvent event) {
 		Player player = event.getEntity();
 		player.setDisplayName(player.getName());
 		
-		event.getDrops().clear();
+		if (isMonster) {
+			event.getDrops().clear();
+		}
 	}
 	
 	@EventHandler 
@@ -74,8 +79,9 @@ public class MonsterEvents implements Listener {
 		
 		totalUses = 8;
 		canUse = true;
+		isMonster = false;
 		
-		if (StartCommand.gameStarted || !DwarfEvents.isDragonWarrior) {
+		if (StartCommand.gameStarted) {
 			player.getInventory().addItem(MonsterItemManager.monsterClassSelector);
 		}
 		
@@ -87,6 +93,18 @@ public class MonsterEvents implements Listener {
 			DisguiseAPI.undisguiseToAll(player);
 		}
 	}
+	
+	@EventHandler
+    public void onEntityTarget(EntityTargetEvent event) {
+		if (isMonster) {
+			if (event.getTarget() instanceof Player) {
+	            if (event.getEntity() instanceof Monster) {
+	                event.setCancelled(true);
+	                return;
+	            }
+	        }
+		}
+    }
 	
 	@EventHandler
 	private void onMonsterClassSelectorRightClick(PlayerInteractEvent event) {
@@ -137,10 +155,11 @@ public class MonsterEvents implements Listener {
 					}
 					
 					player.getInventory().removeItem(MonsterItemManager.monsterClassSelector);
-					player.sendMessage(ChatColor.BLUE + "You have been given monsters classes. Left click a disc to become that monster.");
+					player.sendMessage(ChatColor.DARK_AQUA + "You have been given monsters classes. Left click a disc to become that monster.");
 					player.setCanPickupItems(false);
 					
 					player.setDisplayName(player.getName() + ChatColor.DARK_RED + " the Monster" + ChatColor.WHITE);
+					isMonster = true;
 				}
 			}
 		}
@@ -656,7 +675,7 @@ public class MonsterEvents implements Listener {
 			
 			Location location = egg.getLocation();
 			World world = event.getEntity().getWorld();
-			world.createExplosion(location, 3F);
+			world.createExplosion(location, 2F);
 		}
 	}
 	

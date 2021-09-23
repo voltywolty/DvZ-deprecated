@@ -16,7 +16,8 @@ public class HelpCommand extends SubCommand {
 		player.sendMessage(ChatColor.YELLOW + "monster - Type either start or stop for the monsters to be able to spawn");
 		
 		if (player.isOp()) {
-			player.sendMessage(ChatColor.YELLOW + "dragon - Play as the dragon before the monsters spawn in. You want to start after the first day.");
+			player.sendMessage(ChatColor.YELLOW + "avirella - Play as the fast dragon before the monsters spawn in. You want to start after the second night.");
+			player.sendMessage(ChatColor.YELLOW + "vlaurunga - Play as the normal dragon before the monsters spawn in. You want to start after the second night.");
 		}
 	}
 

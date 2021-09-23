@@ -80,7 +80,7 @@ public class DwarfEvents implements Listener {
 					}
 					
 					player.getInventory().removeItem(ItemManager.classSelector);
-					player.sendMessage(ChatColor.BLUE + "You have been given classes. Left click a disc to become that class.");
+					player.sendMessage(ChatColor.DARK_AQUA + "You have been given classes. Left click a disc to become that class.");
 					
 					player.setFallDistance(3);
 					player.setCanPickupItems(true);
@@ -133,7 +133,7 @@ public class DwarfEvents implements Listener {
 					// -------------------------------------------
 					player.getInventory().removeItem(ItemManager.dwarfBuilderClass);
 					
-					player.sendMessage(ChatColor.BLUE + "You have become a Builder Dwarf.");
+					player.sendMessage(ChatColor.DARK_AQUA + "You have become a Builder Dwarf.");
 					player.setDisplayName(player.getName() + ChatColor.DARK_AQUA + " the Builder" + ChatColor.WHITE);
 				}
 			}
@@ -155,7 +155,7 @@ public class DwarfEvents implements Listener {
 					if (bookCooldown.containsKey(player.getName())) {
 						if (bookCooldown.get(player.getName()) > System.currentTimeMillis()) {
 							long secondsLeft = (bookCooldown.get(player.getName()) - System.currentTimeMillis()) / 1000;
-							player.sendMessage(ChatColor.BLUE + "Spell is on cooldown for " + secondsLeft + " seconds.");
+							player.sendMessage(ChatColor.DARK_AQUA + "Spell is on cooldown for " + secondsLeft + " seconds.");
 							return;
 						}
 					}
@@ -197,7 +197,7 @@ public class DwarfEvents implements Listener {
 					// BLACKSMITH STARTER ITEMS
 					player.getInventory().addItem(ItemManager.dwarfBlacksmithBook);
 					player.getInventory().addItem(new ItemStack(Material.IRON_PICKAXE));
-					player.getInventory().addItem(new ItemStack(Material.REDSTONE, 8));
+					player.getInventory().addItem(new ItemStack(Material.REDSTONE_ORE, 8));
 					player.getInventory().addItem(new ItemStack(Material.GOLD_ORE, 24));
 					player.getInventory().addItem(new ItemStack(Material.FURNACE, 4));
 					player.getInventory().addItem(new ItemStack(Material.COAL, 10));
@@ -227,7 +227,7 @@ public class DwarfEvents implements Listener {
 					// -------------------------------------------
 					player.getInventory().removeItem(ItemManager.dwarfBlacksmithClass);
 					
-					player.sendMessage(ChatColor.BLUE + "You have become a Blacksmith Dwarf.");
+					player.sendMessage(ChatColor.DARK_AQUA + "You have become a Blacksmith Dwarf.");
 					player.setDisplayName(player.getName() + ChatColor.DARK_AQUA + " the Blacksmith" + ChatColor.WHITE);
 				}
 			}
@@ -272,7 +272,7 @@ public class DwarfEvents implements Listener {
 						player.getInventory().removeItem(new ItemStack(Material.CLOCK, 3));
 					}
 					else if (!player.getInventory().containsAtLeast(clockCheck, 3)) {
-						player.sendMessage(ChatColor.BLUE + "You do not have three clocks in your inventory! Smelt gold and redstone and craft them into clocks.");
+						player.sendMessage(ChatColor.DARK_AQUA + "You do not have three clocks in your inventory! Smelt gold and redstone and craft them into clocks.");
 					}
 				}
 			}
@@ -321,7 +321,7 @@ public class DwarfEvents implements Listener {
 					// -------------------------------------------
 					player.getInventory().removeItem(ItemManager.dwarfTailorClass);
 					
-					player.sendMessage(ChatColor.BLUE + "You have become a Tailor Dwarf.");
+					player.sendMessage(ChatColor.DARK_AQUA + "You have become a Tailor Dwarf.");
 					player.setDisplayName(player.getName() + ChatColor.DARK_AQUA + " the Tailor" + ChatColor.WHITE);
 				}
 			}
@@ -340,7 +340,7 @@ public class DwarfEvents implements Listener {
 					if (bookCooldown.containsKey(player.getName())) {
 						if (bookCooldown.get(player.getName()) > System.currentTimeMillis()) {
 							long secondsLeft = (bookCooldown.get(player.getName()) - System.currentTimeMillis()) / 1000;
-							player.sendMessage(ChatColor.BLUE + "Spell is on cooldown for " + secondsLeft + " seconds.");
+							player.sendMessage(ChatColor.DARK_AQUA + "Spell is on cooldown for " + secondsLeft + " seconds.");
 							return;
 						}
 					}
@@ -362,7 +362,7 @@ public class DwarfEvents implements Listener {
 						player.getInventory().removeItem(new ItemStack(Material.ORANGE_DYE, 10));
 					}
 					else if (!player.getInventory().containsAtLeast(dyeCheck, 10)) {
-						player.sendMessage(ChatColor.BLUE + "You do not have 10 orange dye in your inventory! Use bonemeal and craft orange dye.");
+						player.sendMessage(ChatColor.DARK_AQUA + "You do not have 10 orange dye in your inventory! Use bonemeal and craft orange dye.");
 					}
 				}
 			}
@@ -413,7 +413,7 @@ public class DwarfEvents implements Listener {
 					// -------------------------------------------
 					player.getInventory().removeItem(ItemManager.dwarfAlchemistClass);
 					
-					player.sendMessage(ChatColor.BLUE + "You have become a Alchemist Dwarf.");
+					player.sendMessage(ChatColor.DARK_AQUA + "You have become a Alchemist Dwarf.");
 					player.setDisplayName(player.getName() + ChatColor.DARK_AQUA + " the Alchemist" + ChatColor.WHITE);
 				}
 			}
@@ -432,7 +432,7 @@ public class DwarfEvents implements Listener {
 					if (bookCooldown.containsKey(player.getName())) {
 						if (bookCooldown.get(player.getName()) > System.currentTimeMillis()) {
 							long secondsLeft = (bookCooldown.get(player.getName()) - System.currentTimeMillis()) / 1000;
-							player.sendMessage(ChatColor.BLUE + "Spell is on cooldown for " + secondsLeft + " seconds.");
+							player.sendMessage(ChatColor.DARK_AQUA + "Spell is on cooldown for " + secondsLeft + " seconds.");
 							return;
 						}
 					}
@@ -484,7 +484,7 @@ public class DwarfEvents implements Listener {
 						player.getInventory().removeItem(potionCheck);
 					}
 					else if (!player.getInventory().containsAtLeast(potionCheck, 4)) {
-						player.sendMessage(ChatColor.BLUE + "You do not have 4 mundane potions in your inventory! Fill your brew your bottles of water to get mundane potions.");
+						player.sendMessage(ChatColor.DARK_AQUA + "You do not have 4 mundane potions in your inventory! Fill your brew your bottles of water to get mundane potions.");
 					}
 				}
 			}
@@ -516,7 +516,7 @@ public class DwarfEvents implements Listener {
 			if (potionCooldown.containsKey(player.getName())) {
 				if (potionCooldown.get(player.getName()) > System.currentTimeMillis()) {
 					long secondsLeft = (potionCooldown.get(player.getName()) - System.currentTimeMillis()) / 1000;
-					player.sendMessage(ChatColor.BLUE + "Spell is on cooldown for " + secondsLeft + " seconds.");
+					player.sendMessage(ChatColor.DARK_AQUA + "Spell is on cooldown for " + secondsLeft + " seconds.");
 					return;
 				}
 			}
@@ -541,7 +541,7 @@ public class DwarfEvents implements Listener {
 			if (potionCooldown.containsKey(player.getName())) {
 				if (potionCooldown.get(player.getName()) > System.currentTimeMillis()) {
 					long secondsLeft = (potionCooldown.get(player.getName()) - System.currentTimeMillis()) / 1000;
-					player.sendMessage(ChatColor.BLUE + "Spell is on cooldown for " + secondsLeft + " seconds.");
+					player.sendMessage(ChatColor.DARK_AQUA + "Spell is on cooldown for " + secondsLeft + " seconds.");
 					return;
 				}
 			}
@@ -566,7 +566,7 @@ public class DwarfEvents implements Listener {
 			if (potionCooldown.containsKey(player.getName())) {
 				if (potionCooldown.get(player.getName()) > System.currentTimeMillis()) {
 					long secondsLeft = (potionCooldown.get(player.getName()) - System.currentTimeMillis()) / 1000;
-					player.sendMessage(ChatColor.BLUE + "Spell is on cooldown for " + secondsLeft + " seconds.");
+					player.sendMessage(ChatColor.DARK_AQUA + "Spell is on cooldown for " + secondsLeft + " seconds.");
 					return;
 				}
 			}
@@ -632,7 +632,7 @@ public class DwarfEvents implements Listener {
 					// -------------------------------------------
 					player.getInventory().removeItem(ItemManager.dwarfBakerClass);
 					
-					player.sendMessage(ChatColor.BLUE + "You have become a Baker Dwarf.");
+					player.sendMessage(ChatColor.DARK_AQUA + "You have become a Baker Dwarf.");
 					player.setDisplayName(player.getName() + ChatColor.DARK_AQUA + " the Baker" + ChatColor.WHITE);
 				}
 			}
@@ -674,7 +674,7 @@ public class DwarfEvents implements Listener {
 						player.getInventory().removeItem(new ItemStack(Material.BRICK, 10));
 					}
 					else if (!player.getInventory().containsAtLeast(brickCheck, 10)) {
-						player.sendMessage(ChatColor.BLUE + "You do not have 10 bricks in your inventory! Smelt clay to get bricks.");
+						player.sendMessage(ChatColor.DARK_AQUA + "You do not have 10 bricks in your inventory! Smelt clay to get bricks.");
 					}
 				}
 			}
