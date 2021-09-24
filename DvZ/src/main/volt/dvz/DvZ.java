@@ -7,19 +7,24 @@ import main.volt.dvz.events.MonsterEvents;
 import main.volt.dvz.events.PlayerEvents;
 import main.volt.dvz.items.ItemManager;
 import main.volt.dvz.items.MonsterItemManager;
+import main.volt.dvz.utility.ConfigManager;
 
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class DvZ extends JavaPlugin {
 	private static DvZ Instance;
+	
 	public CommandManager commandManager;
+	public ConfigManager configManager;
 	
 	@Override
 	public void onEnable() {
 		setInstance(this);
 		
+		loadConfigManager();
 		loadConfig();
+		
 		getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "[DvZ]: Plugin is enabled!");
 		
 		commandManager = new CommandManager();
@@ -34,6 +39,11 @@ public class DvZ extends JavaPlugin {
 		getCommand("givedwarfclass").setExecutor(new ClassCommands());
 		getCommand("givemonsterclass").setExecutor(new ClassCommands());
 		getCommand("givedragonwarrior").setExecutor(new ClassCommands());
+	}
+	
+	private void loadConfigManager() {
+		configManager = new ConfigManager();
+		configManager.setup();
 	}
 	
 	private void loadConfig() {

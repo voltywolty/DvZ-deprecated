@@ -36,7 +36,7 @@ public class DwarfEvents implements Listener {
 	
 	// MOUNTAIN WORLD
 	static World mountainWorld = Bukkit.getServer().getWorld("dwarf_mountain");
-	static Location mountainSpawn = new Location(mountainWorld, -152, 116, 498);
+	static Location mountainSpawn = new Location(mountainWorld, -152, 116, 498); // DWARF SPAWN
 	
 	// DESERT WORLD
 	static World desertWorld = Bukkit.getServer().getWorld("dwarf_desert");
@@ -162,7 +162,7 @@ public class DwarfEvents implements Listener {
 					
 					bookCooldown.put(player.getName(), System.currentTimeMillis() + (30 * 1000));
 					
-					List <String> buildItems = DvZ.getInstance().getConfig().getStringList("BuilderBlocks");
+					List <String> buildItems = DvZ.getInstance().configManager.builderConfig.getStringList("BuilderBlocks");
 					int index = new Random().nextInt(buildItems.size());
 					String items = buildItems.get(index);
 					
@@ -248,7 +248,7 @@ public class DwarfEvents implements Listener {
 					
 					ItemStack clockCheck = new ItemStack(Material.CLOCK);
 					if (player.getInventory().containsAtLeast(clockCheck, 3)) {
-						List <String> toolItems = DvZ.getInstance().getConfig().getStringList("BlacksmithTools");
+						List <String> toolItems = DvZ.getInstance().configManager.blacksmithConfig.getStringList("BlacksmithTools");
 						int index = new Random().nextInt(toolItems.size());
 						String items = toolItems.get(index);
 						
@@ -256,7 +256,7 @@ public class DwarfEvents implements Listener {
 						
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.COAL, 8));
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.ARROW, 20));
-						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.REDSTONE, 8));
+						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.REDSTONE_ORE, 3));
 						player.getWorld().dropItem(player.getEyeLocation(), newItem);
 						
 						if (randomTool == 2) {
@@ -350,7 +350,7 @@ public class DwarfEvents implements Listener {
 					ItemStack dyeCheck = new ItemStack(Material.ORANGE_DYE);
 
 					if (player.getInventory().containsAtLeast(dyeCheck, 10)) {
-						List <String> armorItems = DvZ.getInstance().getConfig().getStringList("TailorArmors");
+						List <String> armorItems = DvZ.getInstance().configManager.tailorConfig.getStringList("TailorArmors");
 						int index = new Random().nextInt(armorItems.size());
 						String items = armorItems.get(index);
 						
@@ -369,7 +369,7 @@ public class DwarfEvents implements Listener {
 		}
 	}
 	
-	//ALCHEMIST CLASS
+	// ALCHEMIST CLASS
 	@EventHandler
 	public static void onAlchemistClassRightClick(PlayerInteractEvent event) {
 		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
@@ -499,7 +499,7 @@ public class DwarfEvents implements Listener {
 		
 		ItemStack healthPotion = new ItemStack(Material.SPLASH_POTION);
 		PotionMeta healthMeta = (PotionMeta)healthPotion.getItemMeta();
-		healthMeta.setBasePotionData(new PotionData(PotionType.INSTANT_HEAL, false, false));
+		healthMeta.setBasePotionData(new PotionData(PotionType.REGEN, false, false));
 		healthPotion.setItemMeta(healthMeta);
 		
 		ItemStack speedPotion = new ItemStack(Material.SPLASH_POTION);
@@ -511,6 +511,11 @@ public class DwarfEvents implements Listener {
 		PotionMeta strengthMeta = (PotionMeta)strengthPotion.getItemMeta();
 		strengthMeta.setBasePotionData(new PotionData(PotionType.STRENGTH, false, false));
 		strengthPotion.setItemMeta(strengthMeta);
+		
+		ItemStack firePotion = new ItemStack(Material.SPLASH_POTION);
+		PotionMeta fireMeta = (PotionMeta)firePotion.getItemMeta();
+		fireMeta.setBasePotionData(new PotionData(PotionType.FIRE_RESISTANCE, false, false));
+		firePotion.setItemMeta(fireMeta);
 		
 		if (event.getItem().getItemMeta().equals(healthPotion.getItemMeta())) {
 			if (potionCooldown.containsKey(player.getName())) {
@@ -527,13 +532,13 @@ public class DwarfEvents implements Listener {
 				if (event.getItem() != null) {
 					ItemStack healingPotion = new ItemStack(Material.SPLASH_POTION);
 					PotionMeta healingMeta = (PotionMeta) healingPotion.getItemMeta();
-					healingMeta.addCustomEffect(new PotionEffect(PotionEffectType.HEAL, 3600, 0), true);
+					healingMeta.addCustomEffect(new PotionEffect(PotionEffectType.REGENERATION, 3600, 0), true);
 					healingPotion.setItemMeta(healingMeta);
 					
 					ThrownPotion thrownHealingPotion = player.launchProjectile(ThrownPotion.class);
 					thrownHealingPotion.setItem(healingPotion);
 					
-					player.addPotionEffect(new PotionEffect(PotionEffectType.HEAL, 3600, 0));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 3600, 0));
 				}
 			}
 		}
@@ -555,8 +560,8 @@ public class DwarfEvents implements Listener {
 					speedingMeta.addCustomEffect(new PotionEffect(PotionEffectType.SPEED, 3600, 0), true);
 					speedingPotion.setItemMeta(speedingMeta);
 					
-					ThrownPotion thrownHealingPotion = player.launchProjectile(ThrownPotion.class);
-					thrownHealingPotion.setItem(speedingPotion);
+					ThrownPotion thrownSpeedingPotion = player.launchProjectile(ThrownPotion.class);
+					thrownSpeedingPotion.setItem(speedingPotion);
 					
 					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 3600, 0));
 				}
@@ -580,10 +585,35 @@ public class DwarfEvents implements Listener {
 					strengthingMeta.addCustomEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 3600, 0), true);
 					strengthingPotion.setItemMeta(strengthingMeta);
 					
-					ThrownPotion thrownHealingPotion = player.launchProjectile(ThrownPotion.class);
-					thrownHealingPotion.setItem(strengthingPotion);
+					ThrownPotion thrownStrengthPotion = player.launchProjectile(ThrownPotion.class);
+					thrownStrengthPotion.setItem(strengthingPotion);
 					
 					player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 3600, 0));
+				}
+			}
+		}
+		else if (event.getItem().getItemMeta().equals(firePotion.getItemMeta())) {
+			if (potionCooldown.containsKey(player.getName())) {
+				if (potionCooldown.get(player.getName()) > System.currentTimeMillis()) {
+					long secondsLeft = (potionCooldown.get(player.getName()) - System.currentTimeMillis()) / 1000;
+					player.sendMessage(ChatColor.DARK_AQUA + "Spell is on cooldown for " + secondsLeft + " seconds.");
+					return;
+				}
+			}
+			
+			potionCooldown.put(player.getName(), System.currentTimeMillis() + (5 * 1000));
+			
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
+					ItemStack firingPotion = new ItemStack(Material.SPLASH_POTION);
+					PotionMeta firingMeta = (PotionMeta) firingPotion.getItemMeta();
+					firingMeta.addCustomEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 3600, 0), true);
+					firingPotion.setItemMeta(firingMeta);
+					
+					ThrownPotion thrownFirePotion = player.launchProjectile(ThrownPotion.class);
+					thrownFirePotion.setItem(firingPotion);
+					
+					player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 3600, 0));
 				}
 			}
 		}
@@ -683,9 +713,9 @@ public class DwarfEvents implements Listener {
 	
 	@EventHandler
 	public void onDragonWarriorGiven(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(ItemManager.dragonWarriorClass.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(ItemManager.dragonWarriorClass.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
@@ -694,28 +724,71 @@ public class DwarfEvents implements Listener {
 					
 					ItemStack sword = new ItemStack(Material.DIAMOND_SWORD, 1);
 					sword.addEnchantment(Enchantment.DAMAGE_ALL, 3);
+					sword.addEnchantment(Enchantment.KNOCKBACK, 2);
+					
 					ItemStack bow = new ItemStack(Material.BOW, 1);
 					bow.addEnchantment(Enchantment.ARROW_DAMAGE, 2);
+					bow.addEnchantment(Enchantment.ARROW_KNOCKBACK, 2);
+					
 					ItemStack stick = new ItemStack(Material.STICK, 1);
 					ItemMeta stickMeta = stick.getItemMeta();
-					stickMeta.setDisplayName(ChatColor.RED + "Fus Ro Dah Staff");
 					stick.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
+					stickMeta.setDisplayName("§4Fus Roh Dah Staff");
 					
-					ItemStack helmet = new ItemStack(Material.IRON_HELMET, 1);
-					helmet.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 3);
-					ItemStack chestplate = new ItemStack(Material.IRON_CHESTPLATE, 1);
-					chestplate.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 3);
-					ItemStack leggings = new ItemStack(Material.IRON_LEGGINGS, 1);
-					leggings.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 3);
-					ItemStack boots = new ItemStack(Material.IRON_BOOTS, 1);
-					boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 3);
+					ItemStack helmet = new ItemStack(Material.GOLDEN_HELMET, 1);
+					helmet.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
+					helmet.addEnchantment(Enchantment.PROTECTION_FIRE, 4);
+					helmet.addEnchantment(Enchantment.PROTECTION_PROJECTILE, 4);
+					helmet.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 4);
+					
+					ItemStack chestplate = new ItemStack(Material.GOLDEN_CHESTPLATE, 1);
+					chestplate.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
+					chestplate.addEnchantment(Enchantment.PROTECTION_FIRE, 4);
+					chestplate.addEnchantment(Enchantment.PROTECTION_PROJECTILE, 4);
+					chestplate.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 4);
+					
+					ItemStack leggings = new ItemStack(Material.GOLDEN_LEGGINGS, 1);
+					leggings.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
+					leggings.addEnchantment(Enchantment.PROTECTION_FIRE, 4);
+					leggings.addEnchantment(Enchantment.PROTECTION_PROJECTILE, 4);
+					leggings.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 4);
+					
+					ItemStack boots = new ItemStack(Material.GOLDEN_BOOTS, 1);
+					boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
+					boots.addEnchantment(Enchantment.PROTECTION_FIRE, 4);
+					boots.addEnchantment(Enchantment.PROTECTION_PROJECTILE, 4);
+					boots.addEnchantment(Enchantment.PROTECTION_FALL, 4);
+					boots.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 4);
+					
+					ItemStack healingPotion = new ItemStack(Material.POTION, 1);
+					PotionMeta healingMeta = (PotionMeta)healingPotion.getItemMeta();
+					healingMeta.setBasePotionData(new PotionData(PotionType.REGEN, false, false));
+					healingPotion.setItemMeta(healingMeta);
+					
+					ItemStack speedPotion = new ItemStack(Material.POTION, 1);
+					PotionMeta speedMeta = (PotionMeta)speedPotion.getItemMeta();
+					speedMeta.setBasePotionData(new PotionData(PotionType.SPEED, false, false));
+					speedPotion.setItemMeta(speedMeta);
+					
+					ItemStack strengthPotion = new ItemStack(Material.POTION, 1);
+					PotionMeta strengthMeta = (PotionMeta)strengthPotion.getItemMeta();
+					strengthMeta.setBasePotionData(new PotionData(PotionType.STRENGTH, false, false));
+					strengthPotion.setItemMeta(strengthMeta);
+					
+					ItemStack firePotion = new ItemStack(Material.POTION, 1);
+					PotionMeta fireMeta = (PotionMeta)firePotion.getItemMeta();
+					fireMeta.setBasePotionData(new PotionData(PotionType.FIRE_RESISTANCE, false, false));
+					firePotion.setItemMeta(fireMeta);
 					
 					// DRAGON WARRIOR ITEMS
-					player.getInventory().addItem(ItemManager.dwarfBuilderBook);
+					player.getInventory().addItem(stick);
 					player.getInventory().addItem(sword);
 					player.getInventory().addItem(bow);
-					player.getInventory().addItem(stick);
-					player.getInventory().addItem(new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 16));
+					player.getInventory().addItem(new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 24));
+					player.getInventory().addItem(healingPotion);
+					player.getInventory().addItem(speedPotion);
+					player.getInventory().addItem(strengthPotion);
+					player.getInventory().addItem(firePotion);
 					
 					player.getInventory().setHelmet(helmet);
 					player.getInventory().setChestplate(chestplate);
@@ -723,6 +796,9 @@ public class DwarfEvents implements Listener {
 					player.getInventory().setBoots(boots);
 					
 					player.getInventory().removeItem(ItemManager.dragonWarriorClass);
+					
+					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 3600, 0));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 2400, 0));
 					
 					player.sendMessage(ChatColor.GOLD + "You have become a the Dragon Warrior.");
 					player.setDisplayName(player.getName() + ChatColor.GOLD + " the Dragon Warrior" + ChatColor.WHITE);
