@@ -1,9 +1,9 @@
 name: DvZ
-version: 1.1.1
+version: 1.1.2
 author: Volt
 main: main.volt.dvz.DvZ
 api-version: 1.14
-dependencies: [LibDisguises, Vault]
+dependencies: [LibDisguises]
 commands:
    givedwarfclass:
       description: Gives a magma cream that gives random classes to the player.

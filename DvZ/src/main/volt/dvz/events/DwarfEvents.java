@@ -4,8 +4,12 @@ import main.volt.dvz.DvZ;
 import main.volt.dvz.items.ItemManager;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -46,18 +50,17 @@ public class DwarfEvents implements Listener {
 	static World ruinsWorld = Bukkit.getServer().getWorld("dwarf_ruins");
 	static Location ruinsSpawn = new Location(ruinsWorld, -253, 77, 149); // DWARF SPAWN
 	
-	public static boolean isDragonWarrior = false;
+	public final Set<UUID> isDragonWarrior = new HashSet<UUID>();
 	
 	// THIS IS FOR THE CLASS GIVER (MAGMA CREAM)
 	@EventHandler
 	public void onClassGiverRightClick(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(ItemManager.classSelector.getItemMeta())) {
-					
-					Random rand = new Random();
-					int classChance = rand.nextInt(8);
+		if (event.getItem().getItemMeta().equals(ItemManager.classSelector.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
+					ThreadLocalRandom rand = ThreadLocalRandom.current();
+					int classChance = rand.nextInt(9);
 					int classChance2 = rand.nextInt(4);
 					
 					player.getInventory().addItem(ItemManager.dwarfBuilderClass); // This is guaranteed no matter what
@@ -65,15 +68,27 @@ public class DwarfEvents implements Listener {
 					if (classChance == 2) {
 						player.getInventory().addItem(ItemManager.dwarfBlacksmithClass);
 						
+						if (classChance2 == 2) {
+							player.getInventory().addItem(ItemManager.dwarfAlchemistClass);
+						}
+						
 						if (classChance2 == 3) {
 							player.getInventory().addItem(ItemManager.dwarfTailorClass);
 						}
 					}
 					else if (classChance == 3) {
 						player.getInventory().addItem(ItemManager.dwarfTailorClass);
+						
+						if (classChance2 == 1) {
+							player.getInventory().addItem(ItemManager.dwarfBakerClass);
+						}
 					}
 					else if (classChance == 4) {
 						player.getInventory().addItem(ItemManager.dwarfBakerClass);
+						
+						if (classChance2 == 2) {
+							player.getInventory().addItem(ItemManager.dwarfTailorClass);
+						}
 					}
 					else if (classChance == 5) {
 						player.getInventory().addItem(ItemManager.dwarfAlchemistClass);
@@ -92,9 +107,9 @@ public class DwarfEvents implements Listener {
 	// BUILDER CLASS
 	@EventHandler
 	public static void onBuilderClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBuilderClass.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(ItemManager.dwarfBuilderClass.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
@@ -144,9 +159,9 @@ public class DwarfEvents implements Listener {
 	
 	@EventHandler
 	public void onBuilderBookRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBuilderBook.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(ItemManager.dwarfBuilderBook.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					Random rand = new Random();
@@ -163,7 +178,7 @@ public class DwarfEvents implements Listener {
 					bookCooldown.put(player.getName(), System.currentTimeMillis() + (30 * 1000));
 					
 					List <String> buildItems = DvZ.getInstance().configManager.builderConfig.getStringList("BuilderBlocks");
-					int index = new Random().nextInt(buildItems.size());
+					int index = ThreadLocalRandom.current().nextInt(buildItems.size());
 					String items = buildItems.get(index);
 					
 					ItemStack newItem = new ItemStack(Material.getMaterial(items.toUpperCase()), 64);
@@ -187,9 +202,9 @@ public class DwarfEvents implements Listener {
 	// BLACKSMITH CLASS
 	@EventHandler
 	public static void onBlacksmithClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBlacksmithClass.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(ItemManager.dwarfBlacksmithClass.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
@@ -236,9 +251,9 @@ public class DwarfEvents implements Listener {
 	
 	@EventHandler
 	public void onBlacksmithBookRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBlacksmithBook.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(ItemManager.dwarfBlacksmithBook.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.updateInventory();
@@ -249,7 +264,7 @@ public class DwarfEvents implements Listener {
 					ItemStack clockCheck = new ItemStack(Material.CLOCK);
 					if (player.getInventory().containsAtLeast(clockCheck, 3)) {
 						List <String> toolItems = DvZ.getInstance().configManager.blacksmithConfig.getStringList("BlacksmithTools");
-						int index = new Random().nextInt(toolItems.size());
+						int index = ThreadLocalRandom.current().nextInt(toolItems.size());
 						String items = toolItems.get(index);
 						
 						ItemStack newItem = new ItemStack(Material.getMaterial(items.toUpperCase()));
@@ -282,9 +297,9 @@ public class DwarfEvents implements Listener {
 	// TAILOR CLASS
 	@EventHandler
 	public static void onTailorClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(ItemManager.dwarfTailorClass.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(ItemManager.dwarfTailorClass.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
@@ -330,9 +345,9 @@ public class DwarfEvents implements Listener {
 	
 	@EventHandler
 	public void onTailorBookRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(ItemManager.dwarfTailorBook.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(ItemManager.dwarfTailorBook.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.updateInventory();
@@ -351,7 +366,7 @@ public class DwarfEvents implements Listener {
 
 					if (player.getInventory().containsAtLeast(dyeCheck, 10)) {
 						List <String> armorItems = DvZ.getInstance().configManager.tailorConfig.getStringList("TailorArmors");
-						int index = new Random().nextInt(armorItems.size());
+						int index = ThreadLocalRandom.current().nextInt(armorItems.size());
 						String items = armorItems.get(index);
 						
 						ItemStack newItem = new ItemStack(Material.getMaterial(items.toUpperCase()));
@@ -372,9 +387,9 @@ public class DwarfEvents implements Listener {
 	// ALCHEMIST CLASS
 	@EventHandler
 	public static void onAlchemistClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(ItemManager.dwarfAlchemistClass.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(ItemManager.dwarfAlchemistClass.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
@@ -422,9 +437,9 @@ public class DwarfEvents implements Listener {
 	
 	@EventHandler
 	public void onAlchemistBookRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(ItemManager.dwarfAlchemistBook.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(ItemManager.dwarfAlchemistBook.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.updateInventory();
@@ -450,7 +465,7 @@ public class DwarfEvents implements Listener {
 						
 						ItemStack healthPotion = new ItemStack(Material.POTION, 3);
 						PotionMeta healthMeta = (PotionMeta)healthPotion.getItemMeta();
-						healthMeta.setBasePotionData(new PotionData(PotionType.INSTANT_HEAL, false, false));
+						healthMeta.setBasePotionData(new PotionData(PotionType.REGEN, false, false));
 						healthPotion.setItemMeta(healthMeta);
 						
 						ItemStack speedPotion = new ItemStack(Material.POTION, 3);
@@ -622,9 +637,9 @@ public class DwarfEvents implements Listener {
 	//BAKER CLASS
 	@EventHandler
 	public static void onBakerClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBakerClass.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(ItemManager.dwarfBakerClass.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
@@ -671,9 +686,9 @@ public class DwarfEvents implements Listener {
 	
 	@EventHandler
 	public void onBakerBookRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(ItemManager.dwarfBakerBook.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(ItemManager.dwarfBakerBook.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.updateInventory();
@@ -720,7 +735,7 @@ public class DwarfEvents implements Listener {
 					
 					player.getInventory().clear();
 					
-					isDragonWarrior = true;
+					isDragonWarrior.add(player.getUniqueId());
 					
 					ItemStack sword = new ItemStack(Material.DIAMOND_SWORD, 1);
 					sword.addEnchantment(Enchantment.DAMAGE_ALL, 3);

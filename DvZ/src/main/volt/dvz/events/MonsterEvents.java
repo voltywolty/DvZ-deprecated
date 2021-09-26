@@ -7,7 +7,10 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -38,6 +41,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
+import io.netty.util.internal.ThreadLocalRandom;
+
 // FOR MONSTER CLASSES ONLY!
 public class MonsterEvents implements Listener {
 	// PLAINS WORLD
@@ -59,14 +64,16 @@ public class MonsterEvents implements Listener {
 	int totalUses = 8;
 	boolean canUse = true;
 	
-	boolean isMonster = false;
+	private final Set<UUID> isMonster = new HashSet<UUID>();
+	
+	//boolean isMonster = false;
 	
 	@EventHandler
 	private void onDeath(PlayerDeathEvent event) {
 		Player player = event.getEntity();
 		player.setDisplayName(player.getName());
 		
-		if (isMonster) {
+		if (isMonster.contains(player.getUniqueId()) && StartCommand.gameStarted) {
 			event.getDrops().clear();
 		}
 	}
@@ -79,15 +86,15 @@ public class MonsterEvents implements Listener {
 		
 		totalUses = 8;
 		canUse = true;
-		isMonster = false;
+		isMonster.remove(player.getUniqueId());
 		
 		if (StartCommand.gameStarted) {
 			player.getInventory().addItem(MonsterItemManager.monsterClassSelector);
 		}
 		
-		if (DwarfEvents.isDragonWarrior) {
-			player.sendMessage(ChatColor.RED + "Your heart is too pure to become a monster.");
-		}
+//		if (DwarfEvents.isDragonWarrior.contains(player.getUniqueId())) {
+//			player.sendMessage(ChatColor.RED + "Your heart is too pure to become a monster.");
+//		}
 		
 		if (!StartCommand.gameStarted) {
 			DisguiseAPI.undisguiseToAll(player);
@@ -96,7 +103,9 @@ public class MonsterEvents implements Listener {
 	
 	@EventHandler
     public void onEntityTarget(EntityTargetEvent event) {
-		if (isMonster) {
+		Player player = (Player) event.getEntity();
+		
+		if (isMonster.contains(player.getUniqueId())) {
 			if (event.getTarget() instanceof Player) {
 	            if (event.getEntity() instanceof Monster) {
 	                event.setCancelled(true);
@@ -108,12 +117,12 @@ public class MonsterEvents implements Listener {
 	
 	@EventHandler
 	private void onMonsterClassSelectorRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(MonsterItemManager.monsterClassSelector.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(MonsterItemManager.monsterClassSelector.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
-					Random rand = new Random();
+					ThreadLocalRandom rand = ThreadLocalRandom.current();
 					int monsterChance = rand.nextInt(12);
 					int classChance = rand.nextInt(4);
 					
@@ -150,7 +159,7 @@ public class MonsterEvents implements Listener {
 							player.getInventory().addItem(MonsterItemManager.chickenNuggetClass);
 						}
 					}
-					else if (monsterChance == 11) {
+					else if (monsterChance == 12) {
 						player.getInventory().addItem(MonsterItemManager.chickenNuggetClass);
 					}
 					
@@ -159,7 +168,7 @@ public class MonsterEvents implements Listener {
 					player.setCanPickupItems(false);
 					
 					player.setDisplayName(player.getName() + ChatColor.DARK_RED + " the Monster" + ChatColor.WHITE);
-					isMonster = true;
+					isMonster.add(player.getUniqueId());
 				}
 			}
 		}
@@ -167,9 +176,9 @@ public class MonsterEvents implements Listener {
 	
 	@EventHandler
 	private void onSuicidePillRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(MonsterItemManager.suicidePill.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(MonsterItemManager.suicidePill.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					player.setHealth(0);
 				}
@@ -179,9 +188,9 @@ public class MonsterEvents implements Listener {
 	
 	@EventHandler
 	private void onZombieClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(MonsterItemManager.zombieClass.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(MonsterItemManager.zombieClass.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
@@ -240,9 +249,9 @@ public class MonsterEvents implements Listener {
 	// SPIDER CLASS
 	@EventHandler
 	private void onSpiderClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(MonsterItemManager.spiderClass.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(MonsterItemManager.spiderClass.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
@@ -326,9 +335,9 @@ public class MonsterEvents implements Listener {
 	// CREEPER CLASS
 	@EventHandler
 	private void onCreeperClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(MonsterItemManager.creeperClass.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(MonsterItemManager.creeperClass.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
@@ -376,9 +385,9 @@ public class MonsterEvents implements Listener {
 	
 	@EventHandler
 	private void onGunpowderRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(MonsterItemManager.gunpowderItem.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(MonsterItemManager.gunpowderItem.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					World world = player.getWorld();
 					Location loc = event.getPlayer().getLocation();
@@ -391,9 +400,9 @@ public class MonsterEvents implements Listener {
 	// SKELETON CLASS
 	@EventHandler
 	private void onSkeletonClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(MonsterItemManager.skeletonClass.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(MonsterItemManager.skeletonClass.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
@@ -449,9 +458,9 @@ public class MonsterEvents implements Listener {
 	// WOLF CLASS
 	@EventHandler
 	private void onWolfClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(MonsterItemManager.wolfClass.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(MonsterItemManager.wolfClass.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
@@ -510,9 +519,9 @@ public class MonsterEvents implements Listener {
 	// BROODMOTHER CLASS
 	@EventHandler
 	private void onBroodmotherClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(MonsterItemManager.broodmotherClass.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(MonsterItemManager.broodmotherClass.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
@@ -620,9 +629,9 @@ public class MonsterEvents implements Listener {
 	// CHICKEN NUGGET CLASS
 	@EventHandler
 	private void onChickenNuggetClassRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(MonsterItemManager.chickenNuggetClass.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(MonsterItemManager.chickenNuggetClass.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
 					player.getInventory().clear();
@@ -686,9 +695,9 @@ public class MonsterEvents implements Listener {
 	// VLAURUNGA
 	@EventHandler
 	private void onDragonFireballRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(MonsterItemManager.dragonFireball.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(MonsterItemManager.dragonFireball.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					player.launchProjectile(Fireball.class).setVelocity(player.getLocation().getDirection().multiply(0.7));
 				}
@@ -699,9 +708,9 @@ public class MonsterEvents implements Listener {
 	// AVIRELLA
 	@EventHandler
 	private void onLightningStickRightClick(PlayerInteractEvent event) {
-		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getItem() != null) {
-				if (event.getItem().getItemMeta().equals(MonsterItemManager.lightningStick.getItemMeta())) {
+		if (event.getItem().getItemMeta().equals(MonsterItemManager.lightningStick.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					player.getWorld().strikeLightning(player.getTargetBlock(null, 50).getLocation());
 				}

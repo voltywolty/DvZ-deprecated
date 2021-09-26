@@ -24,7 +24,7 @@ public class MonsterItemManager {
 	
 	public static ItemStack broodmotherClass;
 	
-	public static ItemStack chickenNuggetClass; // WIP
+	public static ItemStack chickenNuggetClass;
 	
 	// DRAGON / ADMIN ONLY
 	public static ItemStack dragonFireball;
