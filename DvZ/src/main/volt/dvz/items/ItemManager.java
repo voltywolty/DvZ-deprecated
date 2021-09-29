@@ -178,8 +178,10 @@ public class ItemManager {
 		meta.setDisplayName("§bTailor Class");
 		
 		List<String> lore = new ArrayList<>();
-		lore.add("§7Becoming a tailor allows you to craft armor for the other dwarves. You are very vital to every dwarf.");
-		lore.add("§7It's a good idea to settle near an alchemist so they can supply you with bonemeal.");
+		lore.add("§7Becoming a tailor allows you to craft armor for the other dwarves.");
+		lore.add("§7You are very vital to every dwarf.");
+		lore.add("§7It's a good idea to settle near an alchemist");
+		lore.add("§7 so they can supply you with bonemeal.");
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		

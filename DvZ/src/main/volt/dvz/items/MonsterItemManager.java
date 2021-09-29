@@ -26,6 +26,10 @@ public class MonsterItemManager {
 	
 	public static ItemStack chickenNuggetClass;
 	
+	public static ItemStack hungryPigClass;
+	
+	public static ItemStack cougarClass;
+	
 	// DRAGON / ADMIN ONLY
 	public static ItemStack dragonFireball;
 	public static ItemStack lightningStick;
@@ -48,6 +52,10 @@ public class MonsterItemManager {
 		createBroodmotherClass();
 		
 		createChickenNuggetClass();
+		
+		createHungryPigClass();
+		
+		createCougarClass();
 		
 		createDragonFireball();
 		createLightningStick();
@@ -78,7 +86,7 @@ public class MonsterItemManager {
 	}
 	
 	private static void createZombieClass() {
-		ItemStack item = new ItemStack(Material.MUSIC_DISC_STAL);
+		ItemStack item = new ItemStack(Material.MUSIC_DISC_11);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName("§bZombie Class§");
 		
@@ -93,7 +101,7 @@ public class MonsterItemManager {
 	
 	
 	private static void createSpiderClass() {
-		ItemStack item = new ItemStack(Material.MUSIC_DISC_STRAD);
+		ItemStack item = new ItemStack(Material.MUSIC_DISC_CHIRP);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName("§bSpider Class§");
 		
@@ -109,7 +117,7 @@ public class MonsterItemManager {
 	
 	// CREEPER CLASS
 	private static void createCreeperClass() {
-		ItemStack item = new ItemStack(Material.MUSIC_DISC_CHIRP, 1);
+		ItemStack item = new ItemStack(Material.MUSIC_DISC_BLOCKS, 1);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName("§bCreeper Class§");
 		
@@ -152,7 +160,7 @@ public class MonsterItemManager {
 	
 	// WOLF CLASS
 	private static void createWolfClass() {
-		ItemStack item = new ItemStack(Material.MUSIC_DISC_WARD, 1);
+		ItemStack item = new ItemStack(Material.MUSIC_DISC_FAR, 1);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName("§bWolf Class§");
 		
@@ -192,6 +200,34 @@ public class MonsterItemManager {
 		item.setItemMeta(meta);
 		
 		chickenNuggetClass = item;
+	}
+	
+	// HUNGRY PIG CLASS
+	private static void createHungryPigClass() {
+		ItemStack item = new ItemStack(Material.MUSIC_DISC_WARD, 1);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName("§bHungry Pig Class§");
+		
+		List<String> lore = new ArrayList<>();
+		lore.add("§7This disc gives you the hungry pig class.");
+		meta.setLore(lore);
+		item.setItemMeta(meta);
+		
+		hungryPigClass = item;
+	}
+	
+	// COUGAR CLASS
+	private static void createCougarClass() {
+		ItemStack item = new ItemStack(Material.MUSIC_DISC_STAL, 1);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName("§bCougar Class§");
+		
+		List<String> lore = new ArrayList<>();
+		lore.add("§7This disc gives you the cougar class.");
+		meta.setLore(lore);
+		item.setItemMeta(meta);
+		
+		cougarClass = item;
 	}
 	
 	private static void createDragonFireball() {

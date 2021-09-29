@@ -6,7 +6,6 @@ import main.volt.dvz.items.ItemManager;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -50,7 +49,7 @@ public class DwarfEvents implements Listener {
 	static World ruinsWorld = Bukkit.getServer().getWorld("dwarf_ruins");
 	static Location ruinsSpawn = new Location(ruinsWorld, -253, 77, 149); // DWARF SPAWN
 	
-	public final Set<UUID> isDragonWarrior = new HashSet<UUID>();
+	public Set<UUID> isDragonWarrior = new HashSet<UUID>();
 	
 	// THIS IS FOR THE CLASS GIVER (MAGMA CREAM)
 	@EventHandler
@@ -164,7 +163,7 @@ public class DwarfEvents implements Listener {
 				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					
-					Random rand = new Random();
+					ThreadLocalRandom rand = ThreadLocalRandom.current();
 					int chance = rand.nextInt(5);
 					
 					if (bookCooldown.containsKey(player.getName())) {
@@ -194,6 +193,7 @@ public class DwarfEvents implements Listener {
 					}
 					
 					player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.GLOWSTONE_DUST, 3));
+					player.giveExp(1);
 				}
 			}
 		}
@@ -258,7 +258,7 @@ public class DwarfEvents implements Listener {
 					
 					player.updateInventory();
 					
-					Random rand = new Random();
+					ThreadLocalRandom rand = ThreadLocalRandom.current();
 					int randomTool = rand.nextInt(7);
 					
 					ItemStack clockCheck = new ItemStack(Material.CLOCK);
@@ -285,6 +285,7 @@ public class DwarfEvents implements Listener {
 						}
 						
 						player.getInventory().removeItem(new ItemStack(Material.CLOCK, 3));
+						player.giveExp(1);
 					}
 					else if (!player.getInventory().containsAtLeast(clockCheck, 3)) {
 						player.sendMessage(ChatColor.DARK_AQUA + "You do not have three clocks in your inventory! Smelt gold and redstone and craft them into clocks.");
@@ -375,6 +376,7 @@ public class DwarfEvents implements Listener {
 						player.getWorld().dropItem(player.getEyeLocation(), newItem);
 						
 						player.getInventory().removeItem(new ItemStack(Material.ORANGE_DYE, 10));
+						player.giveExp(1);
 					}
 					else if (!player.getInventory().containsAtLeast(dyeCheck, 10)) {
 						player.sendMessage(ChatColor.DARK_AQUA + "You do not have 10 orange dye in your inventory! Use bonemeal and craft orange dye.");
@@ -460,8 +462,9 @@ public class DwarfEvents implements Listener {
 					potionCheck.setItemMeta(potionMeta);
 
 					if (player.getInventory().containsAtLeast(potionCheck, 4)) {		
-						Random rand = new Random();
+						ThreadLocalRandom rand = ThreadLocalRandom.current();
 						int chance = rand.nextInt(3);
+						int firePotChance = rand.nextInt(20);
 						
 						ItemStack healthPotion = new ItemStack(Material.POTION, 3);
 						PotionMeta healthMeta = (PotionMeta)healthPotion.getItemMeta();
@@ -478,6 +481,11 @@ public class DwarfEvents implements Listener {
 						strengthMeta.setBasePotionData(new PotionData(PotionType.STRENGTH, false, false));
 						strengthPotion.setItemMeta(strengthMeta);
 						
+						ItemStack firePotion = new ItemStack(Material.POTION, 3);
+						PotionMeta fireMeta = (PotionMeta)firePotion.getItemMeta();
+						fireMeta.setBasePotionData(new PotionData(PotionType.FIRE_RESISTANCE, false, false));
+						firePotion.setItemMeta(fireMeta);
+						
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.BONE, 3));
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.MILK_BUCKET, 1));
 						player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.SAND, 3));
@@ -493,10 +501,15 @@ public class DwarfEvents implements Listener {
 							player.getWorld().dropItem(player.getEyeLocation(), strengthPotion);
 						}
 						
+						if (firePotChance == 4) {
+							player.getWorld().dropItem(player.getEyeLocation(), firePotion );
+						}
+						
 						player.getInventory().removeItem(potionCheck);
 						player.getInventory().removeItem(potionCheck);
 						player.getInventory().removeItem(potionCheck);
 						player.getInventory().removeItem(potionCheck);
+						player.giveExp(1);
 					}
 					else if (!player.getInventory().containsAtLeast(potionCheck, 4)) {
 						player.sendMessage(ChatColor.DARK_AQUA + "You do not have 4 mundane potions in your inventory! Fill your brew your bottles of water to get mundane potions.");
@@ -695,15 +708,15 @@ public class DwarfEvents implements Listener {
 					
 					ItemStack brickCheck = new ItemStack(Material.BRICK);
 					
-					Random randCookieCount = new Random();
+					ThreadLocalRandom randCookieCount = ThreadLocalRandom.current();
 					int low = 8;
 					int high = 16;
 					int cookieResult = randCookieCount.nextInt(high - low) + low;
 					
-					Random randCount = new Random();
+					ThreadLocalRandom randCount = ThreadLocalRandom.current();
 					int num = randCount.nextInt(5);
 					
-					Random randCakeCount = new Random();
+					ThreadLocalRandom randCakeCount = ThreadLocalRandom.current();
 					int cakeLow = 1;
 					int cakeHigh = 6;
 					int cakeResult = randCakeCount.nextInt(cakeHigh - cakeLow) + cakeLow;
@@ -717,6 +730,7 @@ public class DwarfEvents implements Listener {
 						}
 						
 						player.getInventory().removeItem(new ItemStack(Material.BRICK, 10));
+						player.giveExp(1);
 					}
 					else if (!player.getInventory().containsAtLeast(brickCheck, 10)) {
 						player.sendMessage(ChatColor.DARK_AQUA + "You do not have 10 bricks in your inventory! Smelt clay to get bricks.");
@@ -804,11 +818,14 @@ public class DwarfEvents implements Listener {
 					player.getInventory().addItem(speedPotion);
 					player.getInventory().addItem(strengthPotion);
 					player.getInventory().addItem(firePotion);
+					player.getInventory().addItem(new ItemStack(Material.ARROW, 128));
 					
 					player.getInventory().setHelmet(helmet);
 					player.getInventory().setChestplate(chestplate);
 					player.getInventory().setLeggings(leggings);
 					player.getInventory().setBoots(boots);
+					
+					player.giveExp(315);
 					
 					player.getInventory().removeItem(ItemManager.dragonWarriorClass);
 					

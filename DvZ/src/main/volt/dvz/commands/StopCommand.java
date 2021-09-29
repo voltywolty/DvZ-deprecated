@@ -14,6 +14,8 @@ public class StopCommand extends SubCommand {
 	public void onCommand(Player player, String[] args) {
 		if (StartCommand.gameStarted) {
 			for (Player players : Bukkit.getOnlinePlayers()) {
+				StartCommand.gameStarted = false;
+				
 				players.getInventory().clear();
 				players.sendMessage(ChatColor.BLUE + "The game has ended! Please wait for the next round.");
 				players.setDisplayName(players.getName());
@@ -23,8 +25,6 @@ public class StopCommand extends SubCommand {
 				DisguiseAPI.undisguiseToAll(player);
 				
 				players.teleport(players.getWorld().getSpawnLocation());
-				
-				StartCommand.gameStarted = false;
 			}
 		}
 		else {

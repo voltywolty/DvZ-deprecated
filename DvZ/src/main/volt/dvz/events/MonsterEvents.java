@@ -8,7 +8,6 @@ import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,6 +15,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -23,6 +23,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -64,9 +65,8 @@ public class MonsterEvents implements Listener {
 	int totalUses = 8;
 	boolean canUse = true;
 	
-	private final Set<UUID> isMonster = new HashSet<UUID>();
-	
-	//boolean isMonster = false;
+	public Set<UUID> isMonster = new HashSet<UUID>();
+	public static boolean canSpawn = false;
 	
 	@EventHandler
 	private void onDeath(PlayerDeathEvent event) {
@@ -88,16 +88,13 @@ public class MonsterEvents implements Listener {
 		canUse = true;
 		isMonster.remove(player.getUniqueId());
 		
-		if (StartCommand.gameStarted) {
+		if (StartCommand.gameStarted && canSpawn) {
 			player.getInventory().addItem(MonsterItemManager.monsterClassSelector);
 		}
 		
-//		if (DwarfEvents.isDragonWarrior.contains(player.getUniqueId())) {
-//			player.sendMessage(ChatColor.RED + "Your heart is too pure to become a monster.");
-//		}
-		
 		if (!StartCommand.gameStarted) {
 			DisguiseAPI.undisguiseToAll(player);
+			isMonster.remove(player.getUniqueId());
 		}
 	}
 	
@@ -123,7 +120,7 @@ public class MonsterEvents implements Listener {
 					Player player = event.getPlayer();
 					
 					ThreadLocalRandom rand = ThreadLocalRandom.current();
-					int monsterChance = rand.nextInt(12);
+					int monsterChance = rand.nextInt(20);
 					int classChance = rand.nextInt(4);
 					
 					player.getInventory().addItem(MonsterItemManager.zombieClass); // Guaranteed no matter what
@@ -160,7 +157,25 @@ public class MonsterEvents implements Listener {
 						}
 					}
 					else if (monsterChance == 12) {
+						player.getInventory().addItem(MonsterItemManager.cougarClass);
+						
+						if (classChance == 1) {
+							player.getInventory().addItem(MonsterItemManager.skeletonClass);
+						}
+						else if (classChance == 2) {
+							player.getInventory().addItem(MonsterItemManager.hungryPigClass);
+						}
+					}
+					else if (monsterChance == 14) {
 						player.getInventory().addItem(MonsterItemManager.chickenNuggetClass);
+						
+						if (classChance == 0) {
+							player.getInventory().addItem(MonsterItemManager.wolfClass);
+							player.getInventory().addItem(MonsterItemManager.spiderClass);
+						}
+					}
+					else if (monsterChance == 16) {
+						player.getInventory().addItem(MonsterItemManager.hungryPigClass);
 					}
 					
 					player.getInventory().removeItem(MonsterItemManager.monsterClassSelector);
@@ -313,7 +328,7 @@ public class MonsterEvents implements Listener {
 			Player damaged = (Player) event.getEntity();
 			
 			if (attacker.getInventory().getItemInMainHand().getType() == Material.SPIDER_EYE) {
-				Random rand = new Random();
+				ThreadLocalRandom rand = ThreadLocalRandom.current();
 				int randomEffectCounter = rand.nextInt(3);
 				
 				if (randomEffectCounter == 0) {
@@ -391,7 +406,7 @@ public class MonsterEvents implements Listener {
 					Player player = event.getPlayer();
 					World world = player.getWorld();
 					Location loc = event.getPlayer().getLocation();
-					world.createExplosion(loc, 6F, false);
+					world.createExplosion(loc, 5F, false);
 				}
 			}
 		}
@@ -685,6 +700,216 @@ public class MonsterEvents implements Listener {
 			Location location = egg.getLocation();
 			World world = event.getEntity().getWorld();
 			world.createExplosion(location, 2F);
+		}
+	}
+	
+	// HUNGRY PIG CLASS
+	@EventHandler
+	private void onHungryPigClassRightClick(PlayerInteractEvent event) {
+		if (event.getItem().getItemMeta().equals(MonsterItemManager.hungryPigClass.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
+					Player player = event.getPlayer();
+					
+					player.getInventory().clear();
+					
+					DisguiseAPI.disguiseToAll(player, new MobDisguise(DisguiseType.PIG, false));
+					DisguiseAPI.setViewDisguiseToggled(player, false);
+					DisguiseAPI.setActionBarShown(player, false);
+					
+					// HUNGRY PIG STARTING GEAR
+					player.getInventory().addItem(new ItemStack(Material.NETHER_WART, 1));
+					player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
+					player.getInventory().addItem(MonsterItemManager.suicidePill);
+					
+					player.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
+					player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
+					player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
+					player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+					
+					player.getInventory().remove(MonsterItemManager.hungryPigClass);
+					
+					plainsMonsterSpawn.setWorld(plainsWorld);
+					mountainMonsterSpawn.setWorld(mountainWorld);
+					desertMonsterSpawn.setWorld(desertWorld);
+					ruinsMonsterSpawn.setWorld(ruinsWorld);
+					
+					// -------------------------------------------
+					// CHANGE DEPENDING ON THE MAP
+					if (player.getWorld() == plainsWorld) {
+						player.teleport(plainsMonsterSpawn);
+					}
+					else if (player.getWorld() == mountainWorld) {
+						player.teleport(mountainMonsterSpawn);
+					}
+					else if (player.getWorld() == desertWorld) {
+						player.teleport(desertMonsterSpawn);
+					}
+					else if (player.getWorld() == ruinsWorld) {
+						player.teleport(ruinsMonsterSpawn);
+					}
+					// -------------------------------------------
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	private void onNetherWartUse(PlayerInteractEvent event) {
+		Block blockToBreak = event.getClickedBlock();
+		Player player = event.getPlayer();
+		
+		if (player.getInventory().getItemInMainHand().getType() == Material.NETHER_WART) {
+			if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
+					if (blockToBreak.getType().equals(Material.STONE_BRICKS) || blockToBreak.getType().equals(Material.MOSSY_STONE_BRICKS) || blockToBreak.getType().equals(Material.CRACKED_STONE_BRICKS) || blockToBreak.getType().equals(Material.CHISELED_STONE_BRICKS)) {
+						blockToBreak.breakNaturally();
+						
+						player.getWorld().spawnParticle(Particle.ASH, player.getEyeLocation(), 5);
+						player.giveExp(1);
+					} 
+				}
+			}
+			else if (event.getAction() == Action.RIGHT_CLICK_BLOCK && player.getTotalExperience() >= 91 || event.getAction() == Action.RIGHT_CLICK_AIR && player.getTotalExperience() >= 91) {
+				player.setExp(0);
+				DisguiseAPI.disguiseToAll(player, new MobDisguise(DisguiseType.PIG, true));
+				
+				player.getInventory().clear();
+				
+				ItemStack stoneSword = new ItemStack(Material.STONE_SWORD, 1);
+				stoneSword.addEnchantment(Enchantment.DAMAGE_ALL, 5);
+				
+				// HUNGRY PIG UPGRADE 2
+				player.getInventory().addItem(new ItemStack(Material.FERMENTED_SPIDER_EYE, 1));
+				player.getInventory().addItem(stoneSword);
+				player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
+				player.getInventory().addItem(MonsterItemManager.suicidePill);
+				
+				player.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
+				player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
+				player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
+				player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+			}
+		}
+	}
+	
+	@EventHandler
+	private void onFermentedSpiderEyeUse(PlayerInteractEvent event) {
+		Block blockToBreak = event.getClickedBlock();
+		Player player = event.getPlayer();
+		
+		if (player.getInventory().getItemInMainHand().getType() == Material.FERMENTED_SPIDER_EYE) {
+			if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
+					if (blockToBreak.getType().equals(Material.STONE_BRICKS) || blockToBreak.getType().equals(Material.MOSSY_STONE_BRICKS) || blockToBreak.getType().equals(Material.CRACKED_STONE_BRICKS) || blockToBreak.getType().equals(Material.CHISELED_STONE_BRICKS)) {
+						blockToBreak.breakNaturally();
+						player.giveExp(1);
+					} 
+				}
+			}
+			else if (event.getAction() == Action.RIGHT_CLICK_BLOCK && player.getTotalExperience() >= 160 || event.getAction() == Action.RIGHT_CLICK_AIR && player.getTotalExperience() >= 160) {
+				player.setExp(0);
+				//DisguiseAPI.disguiseToAll(player, new MobDisguise(DisguiseType.PIG_ZOMBIE)); -- Fix later on.
+				
+				player.getInventory().clear();
+				
+				ItemStack stoneSword = new ItemStack(Material.STONE_SWORD, 1);
+				stoneSword.addEnchantment(Enchantment.DAMAGE_ALL, 5);
+				
+				// HUNGRY PIG UPGRADE 3
+				player.getInventory().addItem(stoneSword);
+				player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
+				player.getInventory().addItem(MonsterItemManager.suicidePill);
+				
+				player.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET));
+				player.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE));
+				player.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS));
+				player.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS));
+			}
+		}
+	}
+	
+	// COUGAR CLASS
+	@EventHandler
+	private void onCougarClassRightClick(PlayerInteractEvent event) {
+		if (event.getItem().getItemMeta().equals(MonsterItemManager.cougarClass.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
+					Player player = event.getPlayer();
+					
+					player.getInventory().clear();
+					
+					DisguiseAPI.disguiseToAll(player, new MobDisguise(DisguiseType.OCELOT, false));
+					DisguiseAPI.setViewDisguiseToggled(player, false);
+					DisguiseAPI.setActionBarShown(player, false);
+					
+					// COUGAR STARTING GEAR
+					player.getInventory().addItem(new ItemStack(Material.INK_SAC, 1));
+					player.getInventory().addItem(new ItemStack(Material.STRING, 1));
+					player.getInventory().addItem(new ItemStack(Material.VINE, 24));
+					player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
+					player.getInventory().addItem(MonsterItemManager.suicidePill);
+					
+					player.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
+					player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
+					player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
+					player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+					
+					player.getInventory().remove(MonsterItemManager.cougarClass);
+					
+					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 29400, 0));
+					
+					plainsMonsterSpawn.setWorld(plainsWorld);
+					mountainMonsterSpawn.setWorld(mountainWorld);
+					desertMonsterSpawn.setWorld(desertWorld);
+					ruinsMonsterSpawn.setWorld(ruinsWorld);
+					
+					// -------------------------------------------
+					// CHANGE DEPENDING ON THE MAP
+					if (player.getWorld() == plainsWorld) {
+						player.teleport(plainsMonsterSpawn);
+					}
+					else if (player.getWorld() == mountainWorld) {
+						player.teleport(mountainMonsterSpawn);
+					}
+					else if (player.getWorld() == desertWorld) {
+						player.teleport(desertMonsterSpawn);
+					}
+					else if (player.getWorld() == ruinsWorld) {
+						player.teleport(ruinsMonsterSpawn);
+					}
+					// -------------------------------------------
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	private void onInkSacHit(EntityDamageByEntityEvent event) {
+		if (event.getDamager() instanceof Player && event.getEntity() instanceof Player) {
+			Player attacker = (Player) event.getDamager();
+			Player damaged = (Player) event.getEntity();
+			
+			if (attacker.getInventory().getItemInMainHand().getType() == Material.INK_SAC) {
+				PotionEffect hungerDrain = new PotionEffect(PotionEffectType.HUNGER, 100, 3);
+				hungerDrain.apply(damaged);
+			}
+		}
+	}
+	
+	@EventHandler
+	private void onStringUse(EntityDamageByEntityEvent event) {		
+		if (event.getDamager() instanceof Player && event.getEntity() instanceof Player) {
+			Player attacker = (Player) event.getDamager();
+			Player damaged = (Player) event.getEntity();
+			
+			if (attacker.getInventory().getItemInMainHand().getType() == Material.STRING) {
+				ItemStack item = damaged.getInventory().getItemInMainHand();
+				damaged.getInventory().remove(item);
+				
+				Item itemDropped = damaged.getWorld().dropItemNaturally(damaged.getLocation(), item);
+				itemDropped.setPickupDelay(30);
+			}
 		}
 	}
 	
