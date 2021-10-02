@@ -1,6 +1,7 @@
 package main.volt.dvz.commands;
 
 import main.volt.dvz.DvZ;
+import main.volt.dvz.events.MonsterEvents;
 import me.libraryaddict.disguise.DisguiseAPI;
 
 import org.bukkit.Bukkit;
@@ -15,6 +16,7 @@ public class StopCommand extends SubCommand {
 		if (StartCommand.gameStarted) {
 			for (Player players : Bukkit.getOnlinePlayers()) {
 				StartCommand.gameStarted = false;
+				MonsterEvents.canSpawn = false;
 				
 				players.getInventory().clear();
 				players.sendMessage(ChatColor.BLUE + "The game has ended! Please wait for the next round.");

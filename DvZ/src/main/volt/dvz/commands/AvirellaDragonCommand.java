@@ -6,7 +6,6 @@ import main.volt.dvz.items.MonsterItemManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -24,7 +23,7 @@ public class AvirellaDragonCommand extends SubCommand {
 		BossBar avirllaBar = Bukkit.createBossBar(ChatColor.BLUE + "Avirella" + ChatColor.DARK_PURPLE + " the Swift Dragon", BarColor.PURPLE, BarStyle.SOLID);
 		
 		for (Player players : Bukkit.getOnlinePlayers()) {
-			avirllaBar.addPlayer(player);
+			avirllaBar.addPlayer(players);
 			
 			Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
 				avirllaBar.removePlayer(players);
@@ -37,10 +36,10 @@ public class AvirellaDragonCommand extends SubCommand {
 		DisguiseAPI.setActionBarShown(player, false);
 		
 		player.setDisplayName(ChatColor.BLUE + "Avirella" + ChatColor.DARK_PURPLE + " the Swift Dragon" + ChatColor.WHITE);
-		player.setGameMode(GameMode.CREATIVE);
+		player.setFlying(true);
 		
 		player.getInventory().addItem(MonsterItemManager.lightningStick);
-		// Need to add the stick that sends dwarves in the air!
+		player.getInventory().addItem(MonsterItemManager.dwarfLauncher);
 	}
 
 	@Override

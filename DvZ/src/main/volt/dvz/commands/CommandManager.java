@@ -27,6 +27,7 @@ public class CommandManager implements CommandExecutor {
 	public String stop = "stop";
 	public String vlaurunga = "vlaurunga";
 	public String avirella = "avirella";
+	public String assassin = "assassin";
 			
 	public void setup() {
 		plugin.getCommand(main).setExecutor(this);
@@ -36,6 +37,7 @@ public class CommandManager implements CommandExecutor {
 		this.commands.add(new VlaurungaDragonCommand());
 		this.commands.add(new AvirellaDragonCommand());
 		this.commands.add(new HelpCommand());
+		this.commands.add(new AssassinCommand());
 	}
 	
 	@Override

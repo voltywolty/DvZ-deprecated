@@ -6,7 +6,6 @@ import main.volt.dvz.items.MonsterItemManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -24,7 +23,7 @@ public class VlaurungaDragonCommand extends SubCommand {
 		BossBar vlaurungaBar = Bukkit.createBossBar(ChatColor.RED + "Vlaurunga" + ChatColor.DARK_PURPLE + " the Mighty Dragon", BarColor.PURPLE, BarStyle.SOLID);
 		
 		for (Player players : Bukkit.getOnlinePlayers()) {
-			vlaurungaBar.addPlayer(player);
+			vlaurungaBar.addPlayer(players);
 			
 			Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
 				vlaurungaBar.removePlayer(players);
@@ -37,7 +36,7 @@ public class VlaurungaDragonCommand extends SubCommand {
 		DisguiseAPI.setActionBarShown(player, false);
 		
 		player.setDisplayName(ChatColor.RED + "Vlaurunga" + ChatColor.DARK_PURPLE + " the Mighty Dragon" + ChatColor.WHITE);
-		player.setGameMode(GameMode.CREATIVE);
+		player.setFlying(true);
 		
 		player.getInventory().addItem(MonsterItemManager.dragonFireball);
 	}

@@ -31,8 +31,13 @@ public class MonsterItemManager {
 	public static ItemStack cougarClass;
 	
 	// DRAGON / ADMIN ONLY
+	
+	// Vlaurunga
 	public static ItemStack dragonFireball;
+	
+	// Avirella
 	public static ItemStack lightningStick;
+	public static ItemStack dwarfLauncher;
 	
 	public static void init() {
 		createMonsterClassSelector();
@@ -58,7 +63,10 @@ public class MonsterItemManager {
 		createCougarClass();
 		
 		createDragonFireball();
+		
+		
 		createLightningStick();
+		createDwarfLauncher();
 	}
 	
 	private static void createMonsterClassSelector() {
@@ -254,5 +262,18 @@ public class MonsterItemManager {
 		item.setItemMeta(meta);
 		
 		lightningStick = item;
+	}
+	
+	private static void createDwarfLauncher() {
+		ItemStack item = new ItemStack(Material.FEATHER);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName("§4Dwarf Launcher§");
+		
+		List<String> lore = new ArrayList<>();
+		lore.add("§5Left clicking this will launch dwarves in the air!§");
+		meta.setLore(lore);
+		item.setItemMeta(meta);
+		
+		dwarfLauncher = item;
 	}
 }

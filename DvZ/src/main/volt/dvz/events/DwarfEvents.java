@@ -193,7 +193,7 @@ public class DwarfEvents implements Listener {
 					}
 					
 					player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.GLOWSTONE_DUST, 3));
-					player.giveExp(1);
+					player.giveExp(5);
 				}
 			}
 		}
@@ -285,7 +285,7 @@ public class DwarfEvents implements Listener {
 						}
 						
 						player.getInventory().removeItem(new ItemStack(Material.CLOCK, 3));
-						player.giveExp(1);
+						player.giveExp(5);
 					}
 					else if (!player.getInventory().containsAtLeast(clockCheck, 3)) {
 						player.sendMessage(ChatColor.DARK_AQUA + "You do not have three clocks in your inventory! Smelt gold and redstone and craft them into clocks.");
@@ -376,7 +376,7 @@ public class DwarfEvents implements Listener {
 						player.getWorld().dropItem(player.getEyeLocation(), newItem);
 						
 						player.getInventory().removeItem(new ItemStack(Material.ORANGE_DYE, 10));
-						player.giveExp(1);
+						player.giveExp(5);
 					}
 					else if (!player.getInventory().containsAtLeast(dyeCheck, 10)) {
 						player.sendMessage(ChatColor.DARK_AQUA + "You do not have 10 orange dye in your inventory! Use bonemeal and craft orange dye.");
@@ -406,7 +406,8 @@ public class DwarfEvents implements Listener {
 					player.getInventory().addItem(new ItemStack(Material.OAK_SIGN, 3));
 					player.getInventory().addItem(new ItemStack(Material.LAPIS_BLOCK, 64));
 					player.getInventory().addItem(new ItemStack(Material.GLASS, 64));
-					player.getInventory().addItem(new ItemStack(Material.WATER_BUCKET, 2));
+					player.getInventory().addItem(new ItemStack(Material.WATER_BUCKET, 1));
+					player.getInventory().addItem(new ItemStack(Material.WATER_BUCKET, 1));
 					
 					plainsSpawn.setWorld(plainsWorld);
 					mountainSpawn.setWorld(mountainWorld);
@@ -509,7 +510,7 @@ public class DwarfEvents implements Listener {
 						player.getInventory().removeItem(potionCheck);
 						player.getInventory().removeItem(potionCheck);
 						player.getInventory().removeItem(potionCheck);
-						player.giveExp(1);
+						player.giveExp(5);
 					}
 					else if (!player.getInventory().containsAtLeast(potionCheck, 4)) {
 						player.sendMessage(ChatColor.DARK_AQUA + "You do not have 4 mundane potions in your inventory! Fill your brew your bottles of water to get mundane potions.");
@@ -730,7 +731,7 @@ public class DwarfEvents implements Listener {
 						}
 						
 						player.getInventory().removeItem(new ItemStack(Material.BRICK, 10));
-						player.giveExp(1);
+						player.giveExp(5);
 					}
 					else if (!player.getInventory().containsAtLeast(brickCheck, 10)) {
 						player.sendMessage(ChatColor.DARK_AQUA + "You do not have 10 bricks in your inventory! Smelt clay to get bricks.");
@@ -763,6 +764,7 @@ public class DwarfEvents implements Listener {
 					ItemMeta stickMeta = stick.getItemMeta();
 					stick.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
 					stickMeta.setDisplayName("§4Fus Roh Dah Staff");
+					stick.setItemMeta(stickMeta);
 					
 					ItemStack helmet = new ItemStack(Material.GOLDEN_HELMET, 1);
 					helmet.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);

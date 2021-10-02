@@ -7,6 +7,7 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -41,6 +42,7 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
+import org.bukkit.util.Vector;
 
 import io.netty.util.internal.ThreadLocalRandom;
 
@@ -68,6 +70,19 @@ public class MonsterEvents implements Listener {
 	public Set<UUID> isMonster = new HashSet<UUID>();
 	public static boolean canSpawn = false;
 	
+	// --------------------
+	// MONSTER ARMOR
+	private ItemStack ironHelmet = new ItemStack(Material.IRON_HELMET, 1);
+	private ItemStack ironChestplate = new ItemStack(Material.IRON_CHESTPLATE, 1);
+	private ItemStack ironLeggings = new ItemStack(Material.IRON_LEGGINGS, 1);
+	private ItemStack ironBoots = new ItemStack(Material.IRON_BOOTS, 1);
+	
+	private ItemStack leatherHelmet = new ItemStack(Material.LEATHER_HELMET, 1);
+	private ItemStack leatherChestplate = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
+	private ItemStack leatherLeggings = new ItemStack(Material.LEATHER_LEGGINGS, 1);
+	private ItemStack leatherBoots = new ItemStack(Material.LEATHER_BOOTS, 1);
+	// --------------------
+	
 	@EventHandler
 	private void onDeath(PlayerDeathEvent event) {
 		Player player = event.getEntity();
@@ -84,8 +99,6 @@ public class MonsterEvents implements Listener {
 		
 		DisguiseAPI.undisguiseToAll(player);
 		
-		totalUses = 8;
-		canUse = true;
 		isMonster.remove(player.getUniqueId());
 		
 		if (StartCommand.gameStarted && canSpawn) {
@@ -96,6 +109,9 @@ public class MonsterEvents implements Listener {
 			DisguiseAPI.undisguiseToAll(player);
 			isMonster.remove(player.getUniqueId());
 		}
+		
+		totalUses = 8;
+		canUse = true;
 	}
 	
 	@EventHandler
@@ -109,6 +125,9 @@ public class MonsterEvents implements Listener {
 	                return;
 	            }
 	        }
+		}
+		else if (!(event.getTarget() instanceof Player)) {
+			return;
 		}
     }
 	
@@ -166,16 +185,16 @@ public class MonsterEvents implements Listener {
 							player.getInventory().addItem(MonsterItemManager.hungryPigClass);
 						}
 					}
-					else if (monsterChance == 14) {
+					else if (monsterChance == 16) {
+						player.getInventory().addItem(MonsterItemManager.hungryPigClass);
+					}
+					else if (monsterChance == 17) {
 						player.getInventory().addItem(MonsterItemManager.chickenNuggetClass);
 						
 						if (classChance == 0) {
 							player.getInventory().addItem(MonsterItemManager.wolfClass);
 							player.getInventory().addItem(MonsterItemManager.spiderClass);
 						}
-					}
-					else if (monsterChance == 16) {
-						player.getInventory().addItem(MonsterItemManager.hungryPigClass);
 					}
 					
 					player.getInventory().removeItem(MonsterItemManager.monsterClassSelector);
@@ -220,8 +239,13 @@ public class MonsterEvents implements Listener {
 					harmingPotion.setItemMeta(harmingMeta);
 					
 					ItemStack zombieSword = new ItemStack(Material.IRON_SWORD, 1);
-					zombieSword.addEnchantment(Enchantment.DAMAGE_ALL, 1);
+					zombieSword.addEnchantment(Enchantment.DAMAGE_ALL, 3);
 					zombieSword.addEnchantment(Enchantment.DURABILITY, 2);
+					
+					ironHelmet.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					ironChestplate.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					ironLeggings.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					ironBoots.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
 					
 					// ZOMBIE STARTING GEAR
 					player.getInventory().addItem(zombieSword);
@@ -229,10 +253,10 @@ public class MonsterEvents implements Listener {
 					player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
 					player.getInventory().addItem(MonsterItemManager.suicidePill);
 					
-					player.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET));
-					player.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE));
-					player.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS));
-					player.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS));
+					player.getInventory().setHelmet(ironHelmet);
+					player.getInventory().setChestplate(ironChestplate);
+					player.getInventory().setLeggings(ironLeggings);
+					player.getInventory().setBoots(ironBoots);
 					
 					player.getInventory().remove(MonsterItemManager.zombieClass);
 					
@@ -280,16 +304,21 @@ public class MonsterEvents implements Listener {
 					poisonMeta.setBasePotionData(new PotionData(PotionType.POISON, false, false));
 					poisonPotion.setItemMeta(poisonMeta);
 					
+					ironHelmet.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					ironChestplate.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					ironLeggings.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					ironBoots.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					
 					// SPIDER STARTING GEAR
 					player.getInventory().addItem(new ItemStack(Material.SPIDER_EYE, 1));
 					player.getInventory().addItem(poisonPotion);
 					player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
 					player.getInventory().addItem(MonsterItemManager.suicidePill);
 					
-					player.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET));
-					player.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE));
-					player.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS));
-					player.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS));
+					player.getInventory().setHelmet(ironHelmet);
+					player.getInventory().setChestplate(ironChestplate);
+					player.getInventory().setLeggings(ironLeggings);
+					player.getInventory().setBoots(ironBoots);
 					
 					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 29400, 1));
 					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 29400, 4));
@@ -360,16 +389,16 @@ public class MonsterEvents implements Listener {
 					DisguiseAPI.disguiseToAll(player, new MobDisguise(DisguiseType.CREEPER, true));
 					DisguiseAPI.setViewDisguiseToggled(player, false);
 					DisguiseAPI.setActionBarShown(player, false);
-					
+
 					// CREEPER STARTING GEAR
 					player.getInventory().addItem(MonsterItemManager.gunpowderItem);
 					player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
 					player.getInventory().addItem(MonsterItemManager.suicidePill);
 					
-					player.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
-					player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-					player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-					player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+					player.getInventory().setHelmet(leatherHelmet);
+					player.getInventory().setChestplate(leatherChestplate);
+					player.getInventory().setLeggings(leatherLeggings);
+					player.getInventory().setBoots(leatherBoots);
 					
 					player.getInventory().remove(MonsterItemManager.creeperClass);
 					
@@ -431,6 +460,11 @@ public class MonsterEvents implements Listener {
 					skeletonBow.addEnchantment(Enchantment.DURABILITY, 2);
 					skeletonBow.addEnchantment(Enchantment.ARROW_DAMAGE, 1);
 					
+					leatherHelmet.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					leatherChestplate.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					leatherLeggings.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					leatherBoots.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					
 					// SKELETON STARTING GEAR
 					player.getInventory().addItem(skeletonBow);
 					player.getInventory().addItem(new ItemStack(Material.ARROW, 64));
@@ -438,10 +472,10 @@ public class MonsterEvents implements Listener {
 					player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
 					player.getInventory().addItem(MonsterItemManager.suicidePill);
 					
-					player.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
-					player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-					player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-					player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+					player.getInventory().setHelmet(leatherHelmet);
+					player.getInventory().setChestplate(leatherChestplate);
+					player.getInventory().setLeggings(leatherLeggings);
+					player.getInventory().setBoots(leatherBoots);
 					
 					player.getInventory().remove(MonsterItemManager.skeletonClass);
 					
@@ -491,6 +525,11 @@ public class MonsterEvents implements Listener {
 					goldSword.addEnchantment(Enchantment.FIRE_ASPECT, 2);
 					goldSword.addEnchantment(Enchantment.KNOCKBACK, 2);
 					
+					ironHelmet.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					ironChestplate.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					ironLeggings.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					ironBoots.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					
 					// WOLF STARTING GEAR
 					player.getInventory().addItem(ironSword);
 					player.getInventory().addItem(goldSword);
@@ -499,10 +538,10 @@ public class MonsterEvents implements Listener {
 					player.getInventory().addItem(new ItemStack(Material.BONE, 64));
 					player.getInventory().addItem(MonsterItemManager.suicidePill);
 					
-					player.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET));
-					player.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE));
-					player.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS));
-					player.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS));
+					player.getInventory().setHelmet(ironHelmet);
+					player.getInventory().setChestplate(ironChestplate);
+					player.getInventory().setLeggings(ironLeggings);
+					player.getInventory().setBoots(ironBoots);
 					
 					player.getInventory().remove(MonsterItemManager.skeletonClass);
 					
@@ -545,6 +584,11 @@ public class MonsterEvents implements Listener {
 					DisguiseAPI.setViewDisguiseToggled(player, false);
 					DisguiseAPI.setActionBarShown(player, false);
 					
+					leatherHelmet.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					leatherChestplate.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					leatherLeggings.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					leatherBoots.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					
 					// BROODMOTHER STARTING GEAR
 					player.getInventory().addItem(new ItemStack(Material.COOKED_COD, 1));
 					player.getInventory().addItem(new ItemStack(Material.COD, 1));
@@ -553,10 +597,10 @@ public class MonsterEvents implements Listener {
 					player.getInventory().addItem(new ItemStack(Material.SILVERFISH_SPAWN_EGG, 5));
 					player.getInventory().addItem(MonsterItemManager.suicidePill);
 					
-					player.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
-					player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-					player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-					player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+					player.getInventory().setHelmet(leatherHelmet);
+					player.getInventory().setChestplate(leatherChestplate);
+					player.getInventory().setLeggings(leatherLeggings);
+					player.getInventory().setBoots(leatherBoots);
 					
 					player.getInventory().remove(MonsterItemManager.broodmotherClass);
 					
@@ -717,15 +761,20 @@ public class MonsterEvents implements Listener {
 					DisguiseAPI.setViewDisguiseToggled(player, false);
 					DisguiseAPI.setActionBarShown(player, false);
 					
+					leatherHelmet.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					leatherChestplate.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					leatherLeggings.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					leatherBoots.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					
 					// HUNGRY PIG STARTING GEAR
 					player.getInventory().addItem(new ItemStack(Material.NETHER_WART, 1));
 					player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
 					player.getInventory().addItem(MonsterItemManager.suicidePill);
 					
-					player.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
-					player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-					player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-					player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+					player.getInventory().setHelmet(leatherHelmet);
+					player.getInventory().setChestplate(leatherChestplate);
+					player.getInventory().setLeggings(leatherLeggings);
+					player.getInventory().setBoots(leatherBoots);
 					
 					player.getInventory().remove(MonsterItemManager.hungryPigClass);
 					
@@ -779,16 +828,21 @@ public class MonsterEvents implements Listener {
 				ItemStack stoneSword = new ItemStack(Material.STONE_SWORD, 1);
 				stoneSword.addEnchantment(Enchantment.DAMAGE_ALL, 5);
 				
+				leatherHelmet.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+				leatherChestplate.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+				leatherLeggings.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+				leatherBoots.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+				
 				// HUNGRY PIG UPGRADE 2
 				player.getInventory().addItem(new ItemStack(Material.FERMENTED_SPIDER_EYE, 1));
 				player.getInventory().addItem(stoneSword);
 				player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
 				player.getInventory().addItem(MonsterItemManager.suicidePill);
 				
-				player.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
-				player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-				player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-				player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+				player.getInventory().setHelmet(leatherHelmet);
+				player.getInventory().setChestplate(leatherChestplate);
+				player.getInventory().setLeggings(leatherLeggings);
+				player.getInventory().setBoots(leatherBoots);
 			}
 		}
 	}
@@ -816,15 +870,20 @@ public class MonsterEvents implements Listener {
 				ItemStack stoneSword = new ItemStack(Material.STONE_SWORD, 1);
 				stoneSword.addEnchantment(Enchantment.DAMAGE_ALL, 5);
 				
+				ironHelmet.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+				ironChestplate.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+				ironLeggings.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+				ironBoots.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+				
 				// HUNGRY PIG UPGRADE 3
 				player.getInventory().addItem(stoneSword);
 				player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
 				player.getInventory().addItem(MonsterItemManager.suicidePill);
 				
-				player.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET));
-				player.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE));
-				player.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS));
-				player.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS));
+				player.getInventory().setHelmet(ironHelmet);
+				player.getInventory().setChestplate(ironChestplate);
+				player.getInventory().setLeggings(ironLeggings);
+				player.getInventory().setBoots(ironBoots);
 			}
 		}
 	}
@@ -843,6 +902,11 @@ public class MonsterEvents implements Listener {
 					DisguiseAPI.setViewDisguiseToggled(player, false);
 					DisguiseAPI.setActionBarShown(player, false);
 					
+					leatherHelmet.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					leatherChestplate.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					leatherLeggings.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					leatherBoots.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 6);
+					
 					// COUGAR STARTING GEAR
 					player.getInventory().addItem(new ItemStack(Material.INK_SAC, 1));
 					player.getInventory().addItem(new ItemStack(Material.STRING, 1));
@@ -850,10 +914,10 @@ public class MonsterEvents implements Listener {
 					player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
 					player.getInventory().addItem(MonsterItemManager.suicidePill);
 					
-					player.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
-					player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-					player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-					player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+					player.getInventory().setHelmet(leatherHelmet);
+					player.getInventory().setChestplate(leatherChestplate);
+					player.getInventory().setLeggings(leatherLeggings);
+					player.getInventory().setBoots(leatherBoots);
 					
 					player.getInventory().remove(MonsterItemManager.cougarClass);
 					
@@ -897,6 +961,8 @@ public class MonsterEvents implements Listener {
 		}
 	}
 	
+	HashMap<String, Long> spellCooldown = new HashMap<String, Long>();
+	
 	@EventHandler
 	private void onStringUse(EntityDamageByEntityEvent event) {		
 		if (event.getDamager() instanceof Player && event.getEntity() instanceof Player) {
@@ -904,6 +970,16 @@ public class MonsterEvents implements Listener {
 			Player damaged = (Player) event.getEntity();
 			
 			if (attacker.getInventory().getItemInMainHand().getType() == Material.STRING) {
+				if (spellCooldown.containsKey(attacker.getName())) {
+					if (spellCooldown.get(attacker.getName()) > System.currentTimeMillis()) {
+						long secondsLeft = (spellCooldown.get(attacker.getName()) - System.currentTimeMillis()) / 1000;
+						attacker.sendMessage(ChatColor.DARK_AQUA + "Spell is on cooldown for " + secondsLeft + " seconds.");
+						return;
+					}
+				}
+				
+				spellCooldown.put(attacker.getName(), System.currentTimeMillis() + (5 * 1000));
+				
 				ItemStack item = damaged.getInventory().getItemInMainHand();
 				damaged.getInventory().remove(item);
 				
@@ -938,6 +1014,21 @@ public class MonsterEvents implements Listener {
 				if (event.getItem() != null) {
 					Player player = event.getPlayer();
 					player.getWorld().strikeLightning(player.getTargetBlock(null, 50).getLocation());
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	private void onDwarfLauncherLeftClick(PlayerInteractEvent event) {
+		if (event.getItem().getItemMeta().equals(MonsterItemManager.dwarfLauncher.getItemMeta())) {
+			if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (event.getItem() != null) {
+					Player player = event.getPlayer();
+					
+					for (Entity entity : player.getNearbyEntities(10, 10, 10)) {
+						entity.setVelocity(new Vector(0.0, 5, 0.0));
+					}
 				}
 			}
 		}
