@@ -1,31 +1,11 @@
-What is DvZ?
---------------------
+# Dwarves vs. Zombies
 
-Dwarves vs. Zombies is a gamemode that was thought of by Rurikar22 aka Rob. Dwarves build a keep to protect their core. There are 5 dwarf classes: Alchemist, Baker, Blacksmith, Builder, and Tailor. Each class is useful for every single dwarf. The dwarfs have one full night to build a keep before a dragon comes in to cause some chaos. Once the dragon is destroyed, monsters spawn to attack the keep. Monsters appear by dwarves dying. Monsters win by either killing all of the dwarves, or if the dwarves have ran out of time.
+Dwarves vs. Zombies is a large scale role-playing game. MC Evolved games will start when there is at least 10 players, however, if it is not met, a staff member can start a game manually. 
 
-What does each dwarf class do?
---------------------
+When the game beings, all players spawn as a dwarf and their task is to gather supplies, weapons, and fortify their keep for the coming invasion. The dwarves will have one Minecraft day to prepare for the invasion. The dwarves ultimate goal is to defend their shrines from the oncoming hordes of monsters - however, they will fall eventually. The hordes are endless, and the dwarves are few. Additionally, dwarves cannot respawn - once dead, they become a monster.
 
-Here is what each class does.
+As night falls, a small amount of dwarves will be randomly selected to die or partake in an event. The most common event being the plague. The goal of the monsters is to destroy all the dwarven shrines. It is very difficult for most monsters to fight a dwarf in single combat - monsters must rely on numbers to overwhelm and destroy the dwarves. As more dwarves are killed, the ranks of the monsters will grow and the dwarves will be forced to retreat. Eventually, the monsters will overwhelm the first shrine, which will move their spawn up to that point, forcing the dwarves to fall back to the next shrine. This process repeats until the last shrine is destroyed. The game ends when all the dwarves are dead or all the shrines have been destroyed.
 
-* **Alchemist - An Alchemist crafs potions. It's recommended they set up shop near a blacksmith as they will provide them with redstone needed to make potions. Alchemists can transmute with their books if they have 4 mundane potions. Transmuting will allow them to either get healing potions, speed potions, or strength potions, as well as sand, a milk bucket, and bones.**
+> [Discord Link](https://discord.gg/6B4Dea6QRC)
 
-* **Baker - A Baker creates food. They make cakes and cookies to satisfy the dwarves' hunger! Transmuting using bricks can get them cakes, cookies, and more clay.**
-
-* **Blacksmith - A Blacksmith creates tools. They should settle near tailors as they supply them with gold ore needed to create tools. Blacksmiths can transmute using their book if they have 3 clocks to either get a diamond sword, pickaxe, axe, or shovel. Transmuting also gets them redstone, a bow, arrows, dirt, and coal.**
-
-* **Builder - A Builder is the most common class. Builders are the ones to build a keep to protect fellow dwarves. Transmuting can get them any kind of stone bricks and glowstone dust to light up the keep.**
-
-* **Tailor - A Tailor provides better armor for the dwarves. Tailors are recommended to set up near alchemists as they provide them with bonemeal. Tailors can transmute with their book if they have at least 10 orange dye. Transmuting can get them a random piece of diamond armor.**
-
-My DvZ FAQ
---------------------
-
-When do games start?
-* Games are announced in the Discord server. The server will only be online when games are beginning.
-
-What version do I need for DvZ?
-* Minecraft 1.17.1.
-
-Can I fork the project for my own?
-* Since this originally wasn't my idea, yes. However, this version of DvZ is made from scratch with me.
+*Private use only.*
