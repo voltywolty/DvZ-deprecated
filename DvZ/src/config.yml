@@ -1,0 +1,58 @@
+auto-start-time: 90
+monster-release-time: 660
+score-interval: 3
+percent-monsters: 20
+kill-dwarves-on-join: false
+min-players: 1
+
+map-name: Thontodur
+map-spawn: -352,93,-541
+mob-spawn: -537,78,-247,180
+mob-spawn-pulse-range: 120
+mob-spawn-invuln: 15
+shrines:
+  1:
+    name: "Courtyard Shrine"
+    coords: 146,72,110,90
+    dwarf-value: 0.4
+    monster-value: 1
+    restore: true
+    pulse-range: 0
+    mob-spawn: 137,72,111,-90
+    mob-spawn-pulse-range: 20
+    mob-spawn-invuln: 6
+  2:
+    name: "Lobby Shrine"
+    coords: 255,84,112,90
+    capture-radius: 10
+    dwarf-value: 0.7
+    monster-value: 1
+    restore: true
+    pulse-range: 72
+    mob-spawn: 250,84,112,-90
+    mob-spawn-pulse-range: 10
+    mob-spawn-invuln: 5
+  3:
+    name: "Final Shrine"
+    coords: 307,119,104,-90
+    capture-radius: 10
+    dwarf-value: 10
+    monster-value: 2
+    pulse-range: 20
+
+start-end-timer-at-percent: 0
+end-timer-duration: 300
+xp-multiplier: 1.0
+
+become-dwarf-spell: dwarf_become_dwarf
+become-monster-spell: becomezombie
+
+#monster-special-interval: 120
+#monster-special-spell: monster_specialevent
+
+start-commands: [time day]
+monster-release-commands:
+  - "say THE MONSTERS HAVE BEEN RELEASED!"
+  - "say THE MONSTERS HAVE BEEN RELEASED!"
+  - "say THE MONSTERS HAVE BEEN RELEASED!"
+

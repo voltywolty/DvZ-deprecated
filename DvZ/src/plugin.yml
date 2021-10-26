@@ -1,19 +1,50 @@
 name: DvZ
-version: 1.3.0
-author: Volt
-main: main.volt.dvz.DvZ
+version: 1.0.0
+main: main.me.volt.dvz.DvZ
 api-version: 1.14
-dependencies: [LibDisguises]
+depend: [ MagicSpells, MCEvolved ]
+
 commands:
-   givedwarfclass:
-      description: Gives a magma cream that gives random classes to the player.
-      usage: /<command>
-   dvz:
-      description: All DvZ commands.
-      usage: /<command>
-   givemonsterclass:
-      description: Gives a gold nugget that gives you a random monster class.
-      usage: /<command>
-   givedragonwarrior:
-      description: Gives the dragon warrior disc.
-      usage: /<command>
+  startgame:
+    description: Starts the game.
+    permission: dvz.admin
+  override:
+    description: Allows admin to control the game.
+    permission: dvz.admin
+  event:
+    description: Allows admin to start event.
+    permission: dvz.admin
+  warpshrine:
+    description: Warp to current dwarf shrine.
+    permissions: dvz.admin
+  releasemonsters:
+    description: Releases the monsters.
+    permission: dvz.admin
+  setdwarf:
+    description: Set a player as a dwarf.
+    permission: dvz.admin
+  setmonster:
+    description: Set a player as a monster.
+    permission: dvz.admin
+  sethero:
+    description: Set a player as a hero.
+    permission: dvz.admin
+    aliases: [sethero, hero, heroset]
+  specialmonsterinterval:
+    description: Sets the special monster interval.
+    permission: dvz.admin
+    aliases: [monsterspecialinterval, specialmonster, monsterspecial]
+
+permissions:
+  dvz.admin:
+    description: Permissions for admin commands.
+    default: op
+  game.ignore:
+    description: Ignores the player for the game.
+    default: false
+  dvz.nojoindeath:
+    description: Makes the player able to rejoin without dying.
+    default: false
+  dvz.immune:
+    description: Makes the player immune to the plague.
+    default: false
