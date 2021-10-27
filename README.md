@@ -11,6 +11,5 @@ This version of DvZ was recreated by me from scratch. All code and configs are s
 > Java Version 1.17.1
 - **Discord**: https://discord.gg/6B4Dea6QRC
 - **Releases**: [![Github Releases](https://img.shields.io/github/downloads/voltywolty/DvZ/total.svg)](https://github.com/voltywolty/DvZ/releases)
-- **Wiki**: https://github.com/voltywolty/DvZ/wiki
 
-*Any use of this code is prohibited and will not work due to external API.*
+*Any use of this code is prohibited and will not work due to external API. Although this GitHub is private, it is used to store backups. The releases are official versions to regain just incase of corruption or loss of data.*
