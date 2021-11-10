@@ -17,6 +17,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class ShrineManager {
 
     SpawnProtector spawnProtector;
     Location startingMobSpawn;
-    ShrineBarManager shrineBarManager = new ShrineBarManager("Shrine Power");
+    ShrineBarManager shrineBarManager = DvZ.plugin.shrineBarManager; //new ShrineBarManager("Shrine Power");
 
     int startingMobSpawnInvuln;
     int startingMobSpawnPulseRange;
@@ -61,7 +62,7 @@ public class ShrineManager {
     }
 
     public void startPulse() {
-        Bukkit.getScheduler().runTaskTimer((Plugin) this.plugin, new Runnable() {
+        Bukkit.getScheduler().runTaskTimer(this.plugin, new Runnable() {
             public void run() {
                 ShrineManager.this.pulse();
             }
@@ -77,29 +78,27 @@ public class ShrineManager {
 
                 for (Player player : DvZ.plugin.monsters) {
                     if (playerNearShrineForCapture(player)) {
-                        shrineBarManager.changeBarHealth(-(float) shrines.get(currentShrine).monsterValue);
-
-                        // TEST TEXT
-                        Bukkit.broadcastMessage("Shrine taking damage. Health is at: " + shrineBarManager.health);
+                        DvZ.plugin.shrineBarManager.changeBarHealth(-shrines.get(currentShrine).monsterValue);
+                        //Bukkit.broadcastMessage("Shrine taking damage. Health is at: " + DvZ.plugin.shrineBarManager.health);
                     }
                 }
                 for (Player player : DvZ.plugin.dwarves) {
                     if (playerNearShrineForCapture(player)) {
-                        if (shrineBarManager.health != 200.0) {
-                            shrineBarManager.changeBarHealth((float) shrines.get(currentShrine).dwarfValue);
+                        if (DvZ.plugin.shrineBarManager.health != 200) {
+                            DvZ.plugin.shrineBarManager.changeBarHealth(shrines.get(currentShrine).dwarfValue);
                         }
-                        // TEST TEXT
-                        Bukkit.broadcastMessage("Shrine being healed to: " + shrineBarManager.health);
+                        //Bukkit.broadcastMessage("Shrine being healed to: " + DvZ.plugin.shrineBarManager.health);
                     }
                 }
 
-                if (shrineBarManager.health <= 0) {
+                if (DvZ.plugin.shrineBarManager.health <= 0) {
                     if (shrines.size() <= 0) {
                         DvZ.plugin.endGame();
                         running = false;
                     }
                     ShrineManager.this.destroyCurrentShrine();
-                    shrineBarManager.health = 200.0D;
+                    ShrineManager.this.getCurrentShrine();
+                    DvZ.plugin.shrineBarManager.health = 200.0D;
                     //shrineBarManager.setBarName();
                 }
             }
@@ -276,11 +275,11 @@ public class ShrineManager {
         public void protectFor(final Player player, int duration) {
             this.protect.add(player.getName());
 
-            Bukkit.getScheduler().scheduleSyncDelayedTask((Plugin) ShrineManager.this.plugin, new Runnable() {
+            new BukkitRunnable() {
                 public void run() {
                     SpawnProtector.this.protect.remove(player.getPlayer());
                 }
-            }, (duration * 20));
+            }.runTaskLater(plugin, duration*20);
         }
 
         @EventHandler
@@ -300,7 +299,7 @@ public class ShrineManager {
         Location center;
         Location mobSpawn;
 
-        String name;
+        public String name;
 
         BoundingBox captureBoundingBox;
         BoundingBox pointsBoundingBox;
@@ -369,7 +368,7 @@ public class ShrineManager {
                         if (block.getType() == Material.END_PORTAL_FRAME) {
                             block.setType(Material.AIR);
 
-                            FallingBlock fallBlock = block.getWorld().spawnFallingBlock(block.getLocation(), Material.END_PORTAL_FRAME, (byte) 0);
+                            FallingBlock fallBlock = block.getWorld().spawnFallingBlock(block.getLocation(), Material.END_PORTAL_FRAME.createBlockData());
 
                             fallBlock.setDropItem(false);
                             fallBlock.setVelocity(new Vector(ShrineManager.this.plugin.random.nextDouble() * 10.0D - 5.0D, ShrineManager.this.plugin.random.nextDouble() * 5.0D, ShrineManager.this.plugin.random.nextDouble() * 10.0D - 5.0D));

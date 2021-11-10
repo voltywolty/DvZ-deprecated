@@ -8,6 +8,7 @@ commands:
   startgame:
     description: Starts the game.
     permission: dvz.admin
+    aliases: [start, gamestart, sg]
   override:
     description: Allows admin to control the game.
     permission: dvz.admin
@@ -20,12 +21,15 @@ commands:
   releasemonsters:
     description: Releases the monsters.
     permission: dvz.admin
+    aliases: [release, rm, monstersrelease]
   setdwarf:
     description: Set a player as a dwarf.
     permission: dvz.admin
+    aliases: [dwarf]
   setmonster:
     description: Set a player as a monster.
     permission: dvz.admin
+    aliases: [monster]
   sethero:
     description: Set a player as a hero.
     permission: dvz.admin
@@ -34,6 +38,11 @@ commands:
     description: Sets the special monster interval.
     permission: dvz.admin
     aliases: [monsterspecialinterval, specialmonster, monsterspecial]
+  compass:
+    description: Shows different locations to dwarves.
+  sharedchest:
+    description: Allows dwarves to share items with a system wide chest.
+    aliases: [chest, sharechest]
 
 permissions:
   dvz.admin:

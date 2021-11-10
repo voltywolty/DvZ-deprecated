@@ -1,10 +1,12 @@
 package main.me.volt.dvz;
 
 import com.nisovin.magicspells.util.managers.PassiveManager;
+
 import main.me.volt.dvz.conditions.*;
 import main.me.volt.dvz.events.doom.DireWolvesEvent;
 import main.me.volt.dvz.events.doom.DoomEvent;
 import main.me.volt.dvz.events.doom.GolemEvent;
+import main.me.volt.dvz.items.DwarfItems;
 import me.volt.main.mcevolved.GameMode;
 import me.volt.main.mcevolved.MCEvolved;
 
@@ -23,6 +25,8 @@ import com.nisovin.magicspells.Spell;
 import com.nisovin.magicspells.util.BlockUtils;
 
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
@@ -30,8 +34,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -62,6 +66,7 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
     public int monsterReleaseTime;
 
     public int minPlayers;
+    public int minPlayersForHeroes;
 
     public int scoreInterval;
     public int percentMonsters;
@@ -80,12 +85,16 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
     public List<String> startCommands;
     public List<String> monsterReleaseCommands;
 
-    public List<String> specialDwarves;
-
     public Location mapSpawn;
+    public Location mobSpawn;
+
+    public Location quarryLocation;
+    public Location blacksmithTablesLocation;
+    public Location sawmillLocation;
 
     public ShrineManager shrineManager;
-    public double shrinePower = 100.0D;
+    public ShrineBarManager shrineBarManager;
+    public double shrinePower = 200.0D;
 
     public Set<Player> dwarves;
     public Set<Player> monsters;
@@ -94,13 +103,20 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
     Scoreboard scoreboard;
     Objective objective;
 
+    public Score vaultScore;
+    public int totalVaultAmount = 1000;
+
     public Score remainingDwarvesScore;
+
     public Score monsterKillsScore;
     public int monsterKills = 0;
+
     public Score timeScore;
     private int totalTime = 0;
+
     public Score doomScore;
-    private int doomTimer = 10;
+    private int doomTimer = 1200;
+    private int doomTimerAfter = 20;
 
     BukkitTask counterTask;
     BukkitTask monsterReleaseTask;
@@ -108,14 +124,25 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
     BukkitTask monsterSpecialTask;
 
     private Bleeder bleeder;
+
     public GameEvent gameEvent;
     public DoomEvent doomEvent;
-    public ShrineBarManager volatileCode;
+
+    public BarCountdown barCountdown;
 
     public Random random = new Random();
 
     private ConditionManager conditionManager = new ConditionManager();
     private PassiveManager passiveManager = new PassiveManager();
+
+    public ArrayList<String> worldNames = new ArrayList<String>();
+    List<String> excludeFolders = Arrays.asList("plugins", "logs", "crash-reports", "cache");
+    public int randomWorld;
+
+    private World newWorld;
+    private World currentWorld;
+
+    public Inventory srChestInventory;
 
     public int getGameModeId() {
         return 1;
@@ -137,9 +164,11 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
     public void loadMagicSpellsConditions() {
         conditionManager.addCondition("isdwarf", IsDwarfCondition.class);
         conditionManager.addCondition("ismonster", IsMonsterCondition.class);
+
         conditionManager.addCondition("monstersreleased", MonstersReleasedCondition.class);
         conditionManager.addCondition("nearmapspawn", NearMapSpawnCondition.class);
         conditionManager.addCondition("dwarvesremaininglessthan", DwarvesRemainingLessThanCondition.class);
+
         conditionManager.addCondition("shrinepowerlessthan", ShrinePowerLessThanCondition.class);
         conditionManager.addCondition("shrinedistancelessthan", ShrineDistanceLessThanCondition.class);
         conditionManager.addCondition("shrinedistancemorethan", ShrineDistanceMoreThanCondition.class);
@@ -147,19 +176,38 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         passiveManager.addListener("shrinedestroyed", ShrineDestroyedListener.class);
     }
 
+    //File mapsFolder = new File(Bukkit.getWorldContainer(), "maps");
     public void onEnable() {
         if (gameRunning) {
             if (!Bukkit.getOnlinePlayers().isEmpty()) {
-                for (Player online : Bukkit.getOnlinePlayers()) {
-                    this.initializeScoreboard();
-                }
+                this.initializeScoreboard();
             }
         }
 
+        DwarfItems.init();
+        srChestInventory = this.getServer().createInventory(null, 54, ChatColor.DARK_BLUE + "Shared Resource Chest");
+
         File configFile = new File(getDataFolder(), "config.yml");
 
+//        for (File file : Bukkit.getWorldContainer().listFiles()) {
+//            if (file.isDirectory() && !excludeFolders.contains(file.getName())) {
+//                worldNames.add(file.getName());
+//            }
+//        }
+
+        //randomWorld = random.nextInt(worldNames.size());
+        //newWorld = this.getServer().createWorld(new WorldCreator(worldNames.get(randomWorld)));
+        //this.getServer().unloadWorld("world", false);
+        //this.getLogger().info("Loaded map: " + worldNames.get(randomWorld));
+
+        //currentWorld = getServer().getWorld(worldNames.get(randomWorld));
+
         if (!configFile.exists()) {
+            System.out.println("Config file not found! Creating default config file...");
             saveDefaultConfig();
+        }
+        else {
+            System.out.println("Config file found!");
         }
 
         YamlConfiguration config = new YamlConfiguration();
@@ -181,6 +229,8 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
 
         Bukkit.getWorlds().get(0).setGameRule(GameRule.DO_TILE_DROPS, false);
         Bukkit.getWorlds().get(0).setGameRule(GameRule.SPAWN_RADIUS, 1);
+        Bukkit.getWorlds().get(0).setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
+        Bukkit.getWorlds().get(0).setGameRule(GameRule.KEEP_INVENTORY, false);
 
         this.mapName = config.getString("map-name", "map");
         this.autoStartTime = config.getInt("auto-start-time", 0);
@@ -204,9 +254,36 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         this.startCommands = config.getStringList("start-commands");
         this.monsterReleaseCommands = config.getStringList("monster-release-commands");
 
-        this.specialDwarves = config.getStringList("special-dwarves");
-
         String mapSpawnString = config.getString("map-spawn", "");
+        String mobSpawnString = config.getString("mob-spawn", "");
+
+        String quarryLocString = config.getString("quarry-location", "");
+        String blacksmithTableLocString = config.getString("blacksmith-location", "");
+        String sawmillLocString = config.getString("sawmill-location", "");
+
+        if (quarryLocString.isEmpty()) {
+            this.quarryLocation = Bukkit.getWorlds().get(0).getSpawnLocation();
+        }
+        else {
+            String[] split = quarryLocString.split(",");
+            this.quarryLocation = new Location(Bukkit.getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        }
+
+        if (blacksmithTableLocString.isEmpty()) {
+            this.blacksmithTablesLocation = Bukkit.getWorlds().get(0).getSpawnLocation();
+        }
+        else {
+            String[] split = blacksmithTableLocString.split(",");
+            this.blacksmithTablesLocation = new Location(Bukkit.getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        }
+
+        if (sawmillLocString.isEmpty()) {
+            this.sawmillLocation = Bukkit.getWorlds().get(0).getSpawnLocation();
+        }
+        else {
+            String[] split = sawmillLocString.split(",");
+            this.sawmillLocation = new Location(Bukkit.getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        }
 
         if (mapSpawnString.isEmpty()) {
             this.mapSpawn = Bukkit.getWorlds().get(0).getSpawnLocation();
@@ -214,6 +291,14 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         else {
             String[] split = mapSpawnString.split(",");
             this.mapSpawn = new Location(Bukkit.getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        }
+
+        if (mobSpawnString.isEmpty()) {
+            this.mobSpawn = Bukkit.getWorlds().get(0).getSpawnLocation();
+        }
+        else {
+            String[] split = mobSpawnString.split(",");
+            this.mobSpawn = new Location(Bukkit.getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
         }
 
         this.shrineManager = new ShrineManager(this, config);
@@ -238,7 +323,7 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         }
 
         Bukkit.getPluginManager().registerEvents(new GameListener(this), this);
-        this.volatileCode = new ShrineBarManager(this.shrineManager.getCurrentShrineName() + " Power");
+        this.shrineBarManager = new ShrineBarManager(this.shrineManager.getCurrentShrineName() + " Power"); //+ "(" + this.shrineManager.currentShrine + "/" + this.shrineManager.shrines.size() + ")");
 
         int r = this.random.nextInt(15);
 
@@ -250,17 +335,43 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         }
 
         MCEvolved.initializeGameMode(this);
+
+        barCountdown = new BarCountdown();
+        barCountdown.barWaitingForPlayers();
     }
 
     public void onDisable() {
         endGame();
     }
 
+    private void loadRandomWorld(Player player) {
+        Random rand = new Random();
+        int randomMap = rand.nextInt(worldNames.size());
+
+        newWorld = getServer().createWorld(new WorldCreator(worldNames.get(randomMap)));
+        getServer().unloadWorld(currentWorld, false);
+
+        player.teleport(newWorld.getSpawnLocation());
+
+        System.out.println("Changing map to: " + worldNames.get(randomMap));
+    }
+
+//    @EventHandler
+//    private void onJoin(PlayerJoinEvent event) {
+//        new BukkitRunnable() {
+//            public void run() {
+//                Player player = event.getPlayer();
+//                player.teleport(newWorld.getSpawnLocation());
+//            }
+//        }.runTaskLater(this, 1L);
+//    }
+
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (command.getName().equalsIgnoreCase("startgame")) {
             if (!this.gameRunning && !this.gameEnded) {
                 startGame();
                 MCEvolved.stopCountdown();
+                barCountdown.removeBarFromAll();
                 sender.sendMessage("Game started.");
             }
             else {
@@ -305,7 +416,7 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                 plagueEvent = new PlagueEvent(this);
             }
             else {
-                sender.sendMessage("Usage: / event [rage|plague]");
+                sender.sendMessage("Usage: /event [rage|plague]");
                 return true;
             }
 
@@ -418,6 +529,32 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                 sender.sendMessage("Invalid interval.");
             }
         }
+        else if (command.getName().equalsIgnoreCase("compass")) {
+            if (gameRunning) {
+                if (sender instanceof Player && this.dwarves.contains(((Player) sender).getPlayer())) {
+                    Player player = (Player) sender;
+                    if (player.getInventory().contains(Material.COMPASS)) {
+                        player.sendMessage(ChatColor.RED + "You already have a compass!");
+                    }
+                    else {
+                        player.getInventory().addItem(DwarfItems.dwarvenCompass);
+                    }
+                }
+            }
+        }
+        else if (command.getName().equalsIgnoreCase("sharedchest")) {
+            if (gameRunning) {
+                if (sender instanceof Player && this.dwarves.contains(((Player) sender).getPlayer())) {
+                    Player player = (Player) sender;
+                    if (player.getInventory().contains(Material.CHEST)) {
+                        player.sendMessage(ChatColor.RED + "You already have a shared resource chest!");
+                    }
+                    else {
+                        player.getInventory().addItem(DwarfItems.sharedResourceChest);
+                    }
+                }
+            }
+        }
         return true;
     }
 
@@ -431,18 +568,29 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
             }
         }
 
-
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!player.hasPermission("game.ignore")) {
+            if (!player.hasPermission("game.ignore") && !player.getName().equals("voltxd") && !player.getName().equals("BluXDXD") && !player.getName().equals("Kamchatka")) {
                 setAsDwarf(player);
             }
-            initializeScoreboard();
+            else if (player.getName().equals("voltxd")) {
+                setAsVoltHero(player);
+            }
+            else if (player.getName().equals("BluXDXD")) {
+                setAsBlueHero(player);
+            }
+            else if (player.getName().equals("Kamchatka")) {
+                setAsKamchatkaHero(player);
+            }
+
+            barCountdown.removeBarFromPlayer(player);
 
             Bukkit.getScheduler().runTaskLater(plugin, () -> player.sendTitle(ChatColor.BLUE + "It's time to play...", "", 10, 20, 10), 20L);
             Bukkit.getScheduler().runTaskLater(plugin, () -> player.sendTitle(ChatColor.RED + "Dwarves " + ChatColor.WHITE + "vs" + ChatColor.DARK_GREEN + " Zombies", "", 20, 60, 30), 80L);
         }
 
-        this.shrinePower = 100.D;
+        initializeScoreboard();
+
+        this.shrinePower = 200.D;
 
         if (this.monsterReleaseTime > 0 && !this.override && this.monsterReleaseCommands != null && this.monsterReleaseCommands.size() > 0) {
             this.monsterReleaseTask = Bukkit.getScheduler().runTaskLater(this, new Runnable() {
@@ -459,8 +607,8 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
 
         this.bleeder = new Bleeder(this);
 
-        if (this.volatileCode != null) {
-            this.volatileCode.sendBarToAllPlayers();
+        if (this.shrineBarManager != null) {
+            this.shrineBarManager.sendBarToAllPlayers();
         }
     }
 
@@ -505,6 +653,10 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
     public void releaseMonsters() {
         for (String comm : this.monsterReleaseCommands) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), comm);
+        }
+
+        for (Player players : Bukkit.getOnlinePlayers()) {
+            players.playSound(players.getLocation(), "brucemonsters", 0.3F, 1F);
         }
 
         this.shrineManager.startPulse();
@@ -597,9 +749,10 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                 this.aiMonsters.add(creeper);
             }
             else {
+                AttributeModifier followRange = new AttributeModifier("followRange", 40D, AttributeModifier.Operation.ADD_NUMBER);
+
                 Zombie zombie = loc.getWorld().spawn(loc, Zombie.class);
-                //MagicSpells.getAttributeManager().addEntityAttribute(zombie, Attribute.GENERIC_FOLLOW_RANGE, null);
-                //MagicSpells.getAttributeManager().addEntityAttribute(zombie, Attribute.GENERIC_ATTACK_DAMAGE, null);
+                MagicSpells.getAttributeManager().addEntityAttribute(zombie, Attribute.GENERIC_FOLLOW_RANGE, followRange);
                 zombie.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 1000000, 3, true));
                 zombie.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 1000000, 3, true));
 
@@ -640,47 +793,129 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                 this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);
             }
 
+            this.vaultScore = this.objective.getScore(ChatColor.GOLD + "Vault");
+            this.vaultScore.setScore(totalVaultAmount);
             this.remainingDwarvesScore = this.objective.getScore(ChatColor.GREEN + "Remaining");
             this.remainingDwarvesScore.setScore(dwarves.size());
             this.timeScore = this.objective.getScore(ChatColor.LIGHT_PURPLE + "Time");
             this.timeScore.setScore(totalTime);
 
-            Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-                public void run() {
-                    if (monstersReleasedFully) {
-                        if (doomTimer != -1) {
-                            doomTimer--;
-
-                            if (doomTimer <= 0) {
-                                doomTimer = 0;
-
-                                Random randomDoomEvent = new Random();
-                                int randomDoom = randomDoomEvent.nextInt(25);
-
-                                if (randomDoom < 10) {
-                                    DvZ.this.doomEvent = new GolemEvent(DvZ.this);
-                                }
-                                else if (randomDoom < 20) {
-                                    DvZ.this.doomEvent = new DireWolvesEvent(DvZ.this);
-                                }
-
-                                doomEvent.run();
-                                Bukkit.getScheduler().runTaskLater(plugin, () -> players.sendTitle(ChatColor.RED + doomEvent.getName(), "", 20, 60, 30), 20L);
-
-                                doomTimer = 1200;
-                            }
-                        }
-                    }
-                    updateScoreboards();
-                }
-            }, 20L, 20L);
-
             players.setScoreboard(scoreboard);
         }
+
+        final BukkitTask timer = new BukkitRunnable() {
+            public void run() {
+                if (!gameEnded) {
+                    totalTime++;
+                    totalVaultAmount++;
+                }
+                else {
+                    cancel();
+                }
+            }
+        }.runTaskTimer(this, 0L, 20L);
+
+        final BukkitTask doomTimerCountdown = new BukkitRunnable() {
+            public void run() {
+                if (monstersReleasedFully) {
+                    if (doomTimer != -1) {
+                        doomTimer--;
+
+                        if (doomTimer <= 0) {
+                            doomTimer = 0;
+
+                            doomEventStart();
+                            cancel();
+                        }
+                    }
+                }
+            }
+        }.runTaskTimer(this, 0L, 20L);
+
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+            public void run() {
+                updateScoreboards();
+            }
+        }, 20L, 20L);
+    }
+
+    private void doomEventTimer() {
+        final BukkitTask doomTimerCountdown = new BukkitRunnable() {
+            public void run() {
+                if (monstersReleasedFully) {
+                    if (doomTimer != -1) {
+                        doomTimer--;
+
+                        if (doomTimer <= 0) {
+                            doomTimer = 0;
+
+                            doomEventStart();
+                            cancel();
+                        }
+                    }
+                }
+            }
+        }.runTaskTimer(this, 0L, 20L);
+    }
+
+    private void doomEventStart() {
+        final BukkitTask doomTimerSound = new BukkitRunnable() {
+            public void run() {
+                if (doomTimerAfter != -1) {
+                    doomTimerAfter--;
+
+                    for (Player players : Bukkit.getOnlinePlayers()) {
+                        if (doomTimerAfter == 10) {
+                            players.playSound(players.getLocation(), "drum", 1, 1);
+                        }
+                        if (doomTimerAfter == 8) {
+                            players.playSound(players.getLocation(), "drum", 1, 1);
+                        }
+                        if (doomTimerAfter == 6) {
+                            players.playSound(players.getLocation(), "drum", 1, 1);
+                        }
+                        if (doomTimerAfter == 4) {
+                            players.playSound(players.getLocation(), "drum", 1, 1);
+                        }
+                        if (doomTimerAfter == 2) {
+                            players.playSound(players.getLocation(), "drum", 1, 1);
+                        }
+                        if (doomTimerAfter == 0) {
+                            players.playSound(players.getLocation(), "drum", 1, 1);
+                        }
+                    }
+
+                    if (doomTimerAfter <= 0) {
+                        doomTimerAfter = 0;
+
+                        Random randomDoomEvent = new Random();
+                        int randomDoom = randomDoomEvent.nextInt(25);
+
+                        if (randomDoom < 10) {
+                            DvZ.this.doomEvent = new GolemEvent(DvZ.this);
+                        }
+                        else if (randomDoom < 20) {
+                            DvZ.this.doomEvent = new DireWolvesEvent(DvZ.this);
+                        }
+
+                        doomEvent.run();
+
+                        for (Player players : Bukkit.getOnlinePlayers())
+                            Bukkit.getScheduler().runTaskLater(plugin, () -> players.sendTitle(ChatColor.RED + doomEvent.getName(), "", 20, 60, 30), 20L);
+
+                        doomTimer = 1200;
+                        doomEventTimer();
+                        cancel();
+                    }
+                }
+            }
+        }.runTaskTimer(this, 0L, 20L);
     }
 
     public void updateScoreboards() {
         for (Player online : Bukkit.getOnlinePlayers()) {
+            this.vaultScore = this.objective.getScore(ChatColor.GOLD + "Vault");
+            this.vaultScore.setScore(totalVaultAmount);
             this.remainingDwarvesScore = this.objective.getScore(ChatColor.GREEN + "Remaining");
             this.remainingDwarvesScore.setScore(dwarves.size());
             this.monsterKillsScore = this.objective.getScore(ChatColor.RED + "Kills");
@@ -748,10 +983,10 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
             }
             else {
                 //ShrineDestroyedListener.initialize("");
-                this.shrinePower = 100.0D;
+                this.shrinePower = 200.0D;
 
-                if (this.volatileCode != null) {
-                    this.volatileCode.setBarName(this.shrineManager.getCurrentShrineName() + " Power");
+                if (this.shrineBarManager != null) {
+                    this.shrineBarManager.setBarName(this.shrineManager.getCurrentShrineName() + " Power"); //+ "(" + this.shrineManager.currentShrine + "/" + this.shrineManager.shrines.size() + ")");
                 }
 
                 Bukkit.broadcastMessage(ChatColor.GOLD + "=================================================");
@@ -767,8 +1002,8 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
             }, (this.endTimerDuration * 20));
         }
 
-        if (shrinePowerMod != 0.0D && this.volatileCode != null)
-            this.volatileCode.changeBarHealth((int)Math.floor(this.shrinePower * 2.0D));
+        if (shrinePowerMod != 0.0D && this.shrineBarManager != null)
+            this.shrineBarManager.changeBarHealth((int)Math.floor(this.shrinePower * 2.0D));
     }
 
     public void endGame() {
@@ -793,8 +1028,8 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                 this.monsterSpecialTask = null;
             }
 
-            if (this.volatileCode != null) {
-                this.volatileCode.removeBarForAllPlayers();
+            if (this.shrineBarManager != null) {
+                this.shrineBarManager.removeBarForAllPlayers();
             }
 
             for (Player playerName : this.monsters) {
@@ -820,8 +1055,6 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                     player.getInventory().setArmorContents(null);
                 }
             }
-
-            objective.getScoreboard().resetScores("Dwarves");
         }
     }
 

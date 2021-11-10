@@ -1,5 +1,6 @@
 package main.me.volt.dvz.utils;
 
+import main.me.volt.dvz.DvZ;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.boss.BarColor;
@@ -11,7 +12,7 @@ public class ShrineBarManager {
     String name = "Shrine Power";
     public double health = 200.0D;
 
-    private BossBar shrineBar = Bukkit.createBossBar(this.name + "Shrine Power", BarColor.BLUE, BarStyle.SOLID);
+    private BossBar shrineBar = Bukkit.createBossBar(this.name + "Shrine Power" + " (" + (DvZ.plugin.shrineManager.currentShrine+1) + "/" + DvZ.plugin.shrineManager.shrines.size() + ")", BarColor.BLUE, BarStyle.SOLID);
 
     public ShrineBarManager(String name) {
         this.name = name.replace("Shrine Power", "");
@@ -19,7 +20,7 @@ public class ShrineBarManager {
 
     public void sendBarToAllPlayers() {
         for (Player players : Bukkit.getOnlinePlayers()) {
-            shrineBar.setTitle(this.name + "Shrine Power");
+            shrineBar.setTitle(this.name + "Shrine Power" + " (" + (DvZ.plugin.shrineManager.currentShrine+1) + "/" + DvZ.plugin.shrineManager.shrines.size() + ")");
             shrineBar.addPlayer(players);
         }
     }
@@ -34,7 +35,7 @@ public class ShrineBarManager {
         }
     }
 
-    public void changeBarHealth(float healthChange) {
+    public void changeBarHealth(double healthChange) {
         this.health += healthChange;
         if (this.health < 0) {
             this.health = 0;
@@ -45,20 +46,11 @@ public class ShrineBarManager {
         }
 
         //Bukkit.broadcastMessage("New Health: " + health + ", Progress: " + health / 200.0D);
-        this.shrineBar.setProgress(health / 200.0D);
+        this.shrineBar.setProgress(this.health / 200D);
     }
 
     public void setBarName(String name) {
         this.name = name.replace("Shrine Power", "");
         this.shrineBar.setTitle(name);
-    }
-
-    public String getPercent() {
-        int captured = (int)((200.0D - this.health) / 20.0D);
-
-        StringBuilder startString = new StringBuilder(ChatColor.RED + "||||||||");
-        startString.insert(captured + 2, ChatColor.GREEN);
-
-        return startString.toString();
     }
 }

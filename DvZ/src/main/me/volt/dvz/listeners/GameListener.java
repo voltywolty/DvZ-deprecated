@@ -1,6 +1,8 @@
 package main.me.volt.dvz.listeners;
 
+import main.me.volt.dvz.BarCountdown;
 import main.me.volt.dvz.DvZ;
+import main.me.volt.dvz.screens.LobbyScreen;
 import main.me.volt.dvz.trackers.LightBreakTracker;
 import me.volt.main.mcevolved.MCEvolved;
 
@@ -11,10 +13,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
@@ -26,15 +30,20 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 
-import java.util.Iterator;
+import java.util.TreeMap;
 
 public class GameListener implements Listener {
     DvZ plugin;
     LightBreakTracker lightBreakTracker;
 
+    BarCountdown barCountdown;
+    LobbyScreen lobbyScreen;
+
     public GameListener(DvZ plugin) {
         this.plugin = plugin;
         this.lightBreakTracker = new LightBreakTracker();
+        this.barCountdown = new BarCountdown();
+        this.lobbyScreen = new LobbyScreen();
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -45,6 +54,8 @@ public class GameListener implements Listener {
 
         boolean isDwarf = this.plugin.dwarves.contains(p.getPlayer());
         boolean isMonster = this.plugin.monsters.contains(p.getPlayer());
+
+        p.setDisplayName(p.getName());
 
         if (isDwarf) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(this.plugin, new Runnable() {
@@ -93,6 +104,104 @@ public class GameListener implements Listener {
         }
     }
 
+    int counter = 0;
+    @EventHandler
+    public void onCompassRightClick(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        Action action = event.getAction();
+
+        if (action == Action.RIGHT_CLICK_AIR && event.getItem().getType().equals(Material.COMPASS)) {
+            if (counter == 0) {
+                player.setCompassTarget(plugin.quarryLocation);
+                player.sendMessage(ChatColor.YELLOW + "Your compass is now pointing at " + ChatColor.AQUA + "the gold mine and quarry" + ChatColor.YELLOW + ".");
+                counter++;
+            }
+            else if (counter == 1) {
+                player.setCompassTarget(plugin.blacksmithTablesLocation);
+                player.sendMessage(ChatColor.YELLOW + "Your compass is now pointing at " + ChatColor.AQUA + "the blacksmith" + ChatColor.YELLOW + ".");
+                counter++;
+            }
+            else if (counter == 2) {
+                player.setCompassTarget(plugin.sawmillLocation);
+                player.sendMessage(ChatColor.YELLOW + "Your compass is now pointing at " + ChatColor.AQUA + "the lumber mill and oil" + ChatColor.YELLOW + ".");
+                counter++;
+            }
+            else if (counter == 3) {
+                player.setCompassTarget(plugin.mobSpawn);
+                player.sendMessage(ChatColor.YELLOW + "Your compass is now pointing at " + ChatColor.AQUA + "the monster spawn" + ChatColor.YELLOW + ".");
+                counter = 0;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onResourceChestLeftClick(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        Action action = event.getAction();
+
+        if (event.getItem() == null) {
+            return;
+        }
+
+        if (action == Action.LEFT_CLICK_AIR && event.getItem().getType().equals(Material.CHEST)) {
+            player.openInventory(this.plugin.srChestInventory);
+        }
+    }
+
+    @EventHandler
+    public void onChestOpen(PlayerInteractEvent event) {
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            if (event.getClickedBlock() instanceof Chest) {
+                event.getPlayer().openInventory(this.plugin.srChestInventory);
+            }
+            else {
+                return;
+            }
+        }
+        else {
+            return;
+        }
+    }
+
+    @EventHandler
+    public void onLobbyBookLeftClick(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        Action action = event.getAction();
+
+        if (event.getItem() == null) {
+            return;
+        }
+
+        if (action == Action.LEFT_CLICK_AIR && event.getItem().getType() == Material.BOOK || action == Action.LEFT_CLICK_BLOCK && event.getItem().getType() == Material.BOOK) {
+            player.openInventory(this.lobbyScreen.menuInventory);
+        }
+    }
+
+    @EventHandler
+    public void onLobbyInventoryClick(InventoryClickEvent event) {
+        if (event.getClickedInventory() == null)
+            return;
+
+        if (event.getClickedInventory().getHolder() instanceof LobbyScreen) {
+            event.setCancelled(true);
+
+            if (event.isLeftClick()) {
+                Player player = (Player) event.getWhoClicked();
+                if (event.getCurrentItem() == null) {
+                    return;
+                }
+
+                if (event.getCurrentItem().getType() == Material.NAME_TAG) {
+                    player.openInventory(lobbyScreen.titleInventory);
+                }
+
+                if (event.getCurrentItem().getType() == Material.DIAMOND_AXE) {
+                    player.sendMessage(ChatColor.GOLD + "You will now have the Paladin name when the game starts.");
+                }
+            }
+        }
+    }
+
     @EventHandler
     public void onPlayerItemConsume(PlayerItemConsumeEvent event) {
         if (event.getItem() != null && event.getItem().hasItemMeta() && event.getItem().getItemMeta().hasDisplayName() && event.getItem().getItemMeta().getDisplayName().contains("Healing Ale")) {
@@ -104,19 +213,33 @@ public class GameListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         neededPlayers++;
-        if (this.plugin.autoStartTime > 0 && !this.plugin.gameRunning && neededPlayers == this.plugin.minPlayers) {
+        if (!plugin.gameRunning) {
+            barCountdown.addBarToPlayer(event.getPlayer());
+            barCountdown.countdownBar.setProgress(0D);
+
+//            if (event.getPlayer().getInventory().contains(DwarfItems.lobbyMenuBook)) {
+//                return;
+//            }
+//            else {
+//                event.getPlayer().getInventory().addItem(DwarfItems.lobbyMenuBook);
+//            }
+        }
+
+        if (this.plugin.autoStartTime > 0 && !this.plugin.gameRunning && neededPlayers == this.plugin.minPlayers && !this.plugin.override) {
             MCEvolved.startCountdown(this.plugin.autoStartTime, this.plugin.minPlayers);
+            barCountdown.countdownBar();
         }
 
         if (this.plugin.gameRunning) {
             this.plugin.initializeScoreboard();
             this.plugin.updateScoreboards();
 
-
             final Player player = event.getPlayer();
 
-            if (this.plugin.volatileCode != null) {
-                this.plugin.volatileCode.sendBarToPlayer(event.getPlayer());
+            barCountdown.removeBarFromPlayer(player);
+
+            if (this.plugin.shrineBarManager != null) {
+                this.plugin.shrineBarManager.sendBarToPlayer(event.getPlayer());
             }
 
             if (player.hasPermission("game.ignore")) {
@@ -156,6 +279,11 @@ public class GameListener implements Listener {
 
         if (neededPlayers != this.plugin.minPlayers) {
             MCEvolved.stopCountdown();
+            barCountdown.barWaitingForPlayers();
+        }
+        else if (!this.plugin.override) {
+            MCEvolved.stopCountdown();
+            barCountdown.removeBarFromAll();
         }
     }
 
@@ -173,7 +301,7 @@ public class GameListener implements Listener {
                     GameListener.this.plugin.dwarves.remove(player.getPlayer());
                     GameListener.this.plugin.monsters.add(player.getPlayer());
 
-                    if (GameListener.this.plugin.volatileCode != null) {
+                    if (GameListener.this.plugin.shrineBarManager != null) {
                         //GameListener.this.plugin.volatileCode.sendBarToPlayer(player);
                     }
                 }
@@ -204,6 +332,10 @@ public class GameListener implements Listener {
             }
         }
 
+        if (event.getBlock().getType() == Material.CHEST) {
+            event.setCancelled(true);
+        }
+
         if (event.getBlock().getType() == Material.ZOMBIE_HEAD) {
             event.setCancelled(true);
         }
@@ -211,6 +343,8 @@ public class GameListener implements Listener {
 
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
+        Player player = (Player) event.getEntity();
+
         if (!this.plugin.gameRunning) {
             event.setCancelled(true);
             return;
@@ -223,39 +357,53 @@ public class GameListener implements Listener {
             event.setCancelled(true);
         }
 
-        if (this.plugin.monsters.contains(event.getEntity().getName()) && event.getCause() == EntityDamageEvent.DamageCause.FALL || event.getCause() == EntityDamageEvent.DamageCause.FIRE || event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK || event.getCause() == EntityDamageEvent.DamageCause.DROWNING || event.getCause() == EntityDamageEvent.DamageCause.SUFFOCATION || event.getCause() == EntityDamageEvent.DamageCause.LAVA) {
+        if (this.plugin.monsters.contains(player.getPlayer()) && event.getCause() == EntityDamageEvent.DamageCause.FALL || event.getCause() == EntityDamageEvent.DamageCause.FIRE || event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK || event.getCause() == EntityDamageEvent.DamageCause.DROWNING || event.getCause() == EntityDamageEvent.DamageCause.SUFFOCATION || event.getCause() == EntityDamageEvent.DamageCause.LAVA) {
             event.setCancelled(true);
+        }
+        else {
+            event.setCancelled(false);
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onDamage2(EntityDamageByEntityEvent event) {
-        LivingEntity livingEntity = null;
-
-        if (event.getDamager() instanceof Player && this.plugin.dwarves.contains(event.getDamager().getName()))
-            event.setCancelled(true);
-
-        if (event.getEntity().getType() == EntityType.ZOMBIE && event.getDamager() instanceof Player && this.plugin.monsters.contains(event.getDamager().getName()))
-            event.setCancelled(true);
-
-        if (!(event.getEntity() instanceof Player))
-            return;
-
-        Player attacked = (Player)event.getEntity();
-        Entity e = event.getDamager();
-
-        if (e instanceof Projectile && ((Projectile)e).getShooter() instanceof Player)
-            livingEntity = (LivingEntity)((Projectile)e).getShooter();
-
-        if (!(livingEntity instanceof Player))
-            return;
-
-        Player attacker = (Player)livingEntity;
-
-        if (this.plugin.dwarves.contains(attacked.getPlayer()) && this.plugin.dwarves.contains(attacker.getPlayer())) {
-            event.setCancelled(true);
+    private boolean sameTeam(Player victim, Player attacker) {
+        if (this.plugin.dwarves.contains(victim.getPlayer()) && this.plugin.dwarves.contains(attacker.getPlayer())) {
+            return true;
         }
-        else if (this.plugin.monsters.contains(attacked.getPlayer()) && this.plugin.monsters.contains(attacker.getPlayer())) {
+        else if (!this.plugin.dwarves.contains(victim.getPlayer()) && !this.plugin.dwarves.contains(attacker.getPlayer())) {
+            return true;
+        }
+        return false;
+    }
+
+    @EventHandler
+    public void onTeamDamage(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Player)) {
+            return;
+        }
+
+        Player victim = (Player) event.getEntity();
+        Player attacker = null;
+
+        if (event.getDamager() instanceof Player) {
+            attacker = (Player) event.getDamager();
+        }
+        else if (event.getDamager() instanceof Projectile) {
+            Projectile projectile = (Projectile) event.getDamager();
+            if (!(projectile.getShooter() instanceof Player)) {
+                return;
+            }
+            attacker = (Player) projectile.getShooter();
+        }
+
+        if (victim == attacker) {
+            return;
+        }
+
+        if (attacker == null) {
+            return;
+        }
+
+        if (sameTeam(victim, attacker)) {
             event.setCancelled(true);
         }
     }
@@ -352,12 +500,16 @@ public class GameListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         event.setExpToDrop(0);
-        if (!event.getPlayer().hasPermission("game.ignore")) {
+        if (!event.getPlayer().hasPermission("game.ignore") || event.getPlayer().isOp()) {
             Material type = event.getBlock().getType();
-            if (type == Material.IRON_BLOCK || type == Material.DIAMOND_BLOCK || type == Material.GLASS || type == Material.PISTON_HEAD || type == Material.PISTON || type == Material.MOVING_PISTON || type == Material.STICKY_PISTON || type == Material.REDSTONE_TORCH || type == Material.REDSTONE_BLOCK || type == Material.BEACON || type == Material.END_PORTAL_FRAME || type == Material.POWERED_RAIL || type == Material.DETECTOR_RAIL || type == Material.RAIL || type == Material.ACTIVATOR_RAIL || type == Material.LADDER || type == Material.SPONGE || type == Material.IRON_BARS || type == Material.OAK_SIGN || type == Material.OAK_WALL_SIGN || type == Material.QUARTZ_BLOCK || type == Material.NETHER_BRICK || type == Material.CHEST) {
+            if (type == Material.IRON_BLOCK || type == Material.DIAMOND_BLOCK || type == Material.GLASS || type == Material.PISTON_HEAD || type == Material.PISTON || type == Material.MOVING_PISTON || type == Material.STICKY_PISTON || type == Material.REDSTONE_TORCH || type == Material.REDSTONE_BLOCK || type == Material.BEACON || type == Material.END_PORTAL_FRAME || type == Material.POWERED_RAIL || type == Material.DETECTOR_RAIL || type == Material.RAIL || type == Material.ACTIVATOR_RAIL || type == Material.LADDER || type == Material.SPONGE || type == Material.IRON_BARS || type == Material.OAK_SIGN || type == Material.OAK_WALL_SIGN || type == Material.QUARTZ_BLOCK || type == Material.NETHER_BRICK || type == Material.CHEST && !event.getPlayer().isOp()) {
                 event.setCancelled(true);
             } else if (!this.plugin.monstersReleased && this.plugin.dwarves.contains(event.getPlayer().getPlayer()) && (type == Material.GLOWSTONE || type == Material.TORCH|| type == Material.REDSTONE_LAMP)) {
                 this.lightBreakTracker.addLightBreak(event.getPlayer());
+            }
+
+            if (type == Material.GOLD_ORE && this.plugin.dwarves.contains(event.getPlayer())) {
+                DvZ.plugin.totalVaultAmount++;
             }
         }
     }
@@ -404,6 +556,96 @@ public class GameListener implements Listener {
             return;
         if (event.getRightClicked() instanceof Hanging)
             event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onCommand(PlayerCommandPreprocessEvent event) {
+       String cmd = event.getMessage().split(" ")[0].toLowerCase();
+       if (cmd.equals("/list") || cmd.equals("/who")) {
+           event.setCancelled(true);
+           Player player = event.getPlayer();
+
+           TreeMap<String, String> d = new TreeMap<>();
+           TreeMap<String, String> m = new TreeMap<>();
+           TreeMap<String, String> o = new TreeMap<>();
+
+           for (Player p : Bukkit.getOnlinePlayers()) {
+               if (player.canSee(p)) {
+                   if (this.plugin.dwarves.contains(p.getName())) {
+                       if (!p.getDisplayName().contains(p.getName())) {
+                            d.put(p.getName().toLowerCase(), p.getDisplayName() + "(" + p.getName() + ")");
+                       }
+                       else {
+                           d.put(p.getName().toLowerCase(), p.getDisplayName());
+                       }
+                   }
+                   else if (this.plugin.monsters.contains(p.getName())) {
+                       if (!p.getDisplayName().contains(p.getName())) {
+                           m.put(p.getName().toLowerCase(), p.getDisplayName() + "(" + p.getName() + ")");
+                       }
+                       else {
+                           m.put(p.getName().toLowerCase(), p.getDisplayName());
+                       }
+                   }
+                   else {
+                       o.put(p.getName().toLowerCase(), p.getDisplayName());
+                   }
+               }
+           }
+           int c = 0;
+           int lineLength = 55;
+
+           player.sendMessage(ChatColor.YELLOW + "PLAYERS ONLINE (" + (d.size() + m.size() + o.size()) + "):");
+
+           if (d.size() > 0) {
+               player.sendMessage(ChatColor.AQUA + "Dwarves (" + d.size() + "):");
+
+               c = 0;
+               String msg = " ";
+               for (String name : d.values()) {
+                   if (ChatColor.stripColor(msg).length() + ChatColor.stripColor(name).length() + 2 > lineLength) {
+                       player.sendMessage(msg);
+                       msg = "";
+                   }
+                   msg = msg + name;
+                   if (c++ < d.size()) {
+                       msg = msg + ChatColor.WHITE + ", ";
+                   }
+               }
+               player.sendMessage(msg);
+           }
+           if (m.size() > 0) {
+               player.sendMessage(ChatColor.RED + "  Monsters (" + m.size() + "):");
+
+               c = 0;
+               String msg = "    ";
+               for (String name : m.values()) {
+                   if (ChatColor.stripColor(msg).length() + ChatColor.stripColor(name).length() + 2 > lineLength) {
+                       player.sendMessage(msg);
+                       msg = "    ";
+                   }
+                   msg = msg + name;
+                   if (++c < m.size())
+                       msg = msg + ChatColor.WHITE + ", ";
+               }
+               player.sendMessage(msg);
+           }
+           if (o.size() > 0) {
+               player.sendMessage(ChatColor.GRAY + "  Others:");
+               c = 0;
+               String msg = "    ";
+               for (String name : o.values()) {
+                   if (ChatColor.stripColor(msg).length() + ChatColor.stripColor(name).length() + 2 > lineLength) {
+                       player.sendMessage(msg);
+                       msg = "    ";
+                   }
+                   msg = msg + name;
+                   if (++c < o.size())
+                       msg = msg + ChatColor.WHITE + ", ";
+               }
+               player.sendMessage(msg);
+           }
+       }
     }
 
     @EventHandler
