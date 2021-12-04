@@ -3,7 +3,6 @@ package main.me.volt.dvz.managers;
 import com.nisovin.magicspells.util.BoundingBox;
 import main.me.volt.dvz.DvZ;
 
-import main.me.volt.dvz.utils.ShrineBarManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.Configuration;
@@ -14,7 +13,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -30,7 +28,6 @@ public class ShrineManager {
 
     SpawnProtector spawnProtector;
     Location startingMobSpawn;
-    ShrineBarManager shrineBarManager = DvZ.plugin.shrineBarManager; //new ShrineBarManager("Shrine Power");
 
     int startingMobSpawnInvuln;
     int startingMobSpawnPulseRange;
@@ -73,33 +70,39 @@ public class ShrineManager {
     public void decreaseShrineHealth() {
         Bukkit.getScheduler().runTaskTimer(this.plugin, new Runnable() {
             public void run() {
+                String currentShrineName = getCurrentShrineName();
+
                 if (!running)
                     return;
 
-                for (Player player : DvZ.plugin.monsters) {
-                    if (playerNearShrineForCapture(player)) {
-                        DvZ.plugin.shrineBarManager.changeBarHealth(-shrines.get(currentShrine).monsterValue);
-                        //Bukkit.broadcastMessage("Shrine taking damage. Health is at: " + DvZ.plugin.shrineBarManager.health);
-                    }
-                }
-                for (Player player : DvZ.plugin.dwarves) {
-                    if (playerNearShrineForCapture(player)) {
-                        if (DvZ.plugin.shrineBarManager.health != 200) {
-                            DvZ.plugin.shrineBarManager.changeBarHealth(shrines.get(currentShrine).dwarfValue);
+                if (plugin.shrineBarManager.health > 0 ) {
+                    for (Player player : DvZ.plugin.monsters) {
+                        if (playerNearShrineForCapture(player) && player.getGameMode().equals(GameMode.SURVIVAL)) {
+                            DvZ.plugin.shrineBarManager.changeBarHealth(-shrines.get(currentShrine).monsterValue);
                         }
-                        //Bukkit.broadcastMessage("Shrine being healed to: " + DvZ.plugin.shrineBarManager.health);
+                    }
+                    for (Player player : DvZ.plugin.dwarves) {
+                        if (playerNearShrineForCapture(player) && player.getGameMode().equals(GameMode.SURVIVAL)) {
+                            if (DvZ.plugin.shrineBarManager.health < 200 && DvZ.plugin.shrineBarManager.health > 0) {
+                                DvZ.plugin.shrineBarManager.changeBarHealth(shrines.get(currentShrine).dwarfValue);
+                            }
+                        }
                     }
                 }
-
-                if (DvZ.plugin.shrineBarManager.health <= 0) {
+                else if (DvZ.plugin.shrineBarManager.health <= 0) {
                     if (shrines.size() <= 0) {
-                        DvZ.plugin.endGame();
                         running = false;
+                        DvZ.plugin.endGame();
                     }
-                    ShrineManager.this.destroyCurrentShrine();
-                    ShrineManager.this.getCurrentShrine();
+                    destroyCurrentShrine();
+
                     DvZ.plugin.shrineBarManager.health = 200.0D;
-                    //shrineBarManager.setBarName();
+                    DvZ.plugin.shrinePower = 200.0D;
+                    DvZ.plugin.shrineBarManager.setBarName(getCurrentShrineName() + " (" + (DvZ.plugin.shrineManager.currentShrine+1) + "/" + DvZ.plugin.shrineManager.shrines.size() + ")");
+
+                    Bukkit.broadcastMessage(ChatColor.GOLD + "=================================================");
+                    Bukkit.broadcastMessage(ChatColor.YELLOW + "THE " + currentShrineName.toUpperCase() + " HAS FALLEN!");
+                    Bukkit.broadcastMessage(ChatColor.GOLD + "=================================================");
                 }
             }
         }, 20, 20);
@@ -213,9 +216,9 @@ public class ShrineManager {
             Shrine shrine = this.shrines.get(i);
             int rangeSq = shrine.pulseRange * shrine.pulseRange;
             for (Player p : Bukkit.getOnlinePlayers()) {
-                if (p.isValid() && !this.shrineImmune.contains(p.getPlayer()) && this.plugin.monsters.contains(p.getPlayer()) && shrine.center.distanceSquared(p.getLocation()) < rangeSq) {
+                if (p.isValid() && !this.shrineImmune.contains(p.getPlayer()) && this.plugin.monsters.contains(p.getPlayer()) && shrine.center.distanceSquared(p.getLocation()) < rangeSq && p.getGameMode().equals((GameMode.SURVIVAL))) {
                     p.getWorld().strikeLightningEffect(p.getLocation());
-                    p.setHealth(0.0D);
+                    p.damage(40);
                     p.sendMessage(ChatColor.RED + "You have been killed by the dwarven shrine! You must attack the weaker shrine first!");
                 }
             }
@@ -269,7 +272,7 @@ public class ShrineManager {
         Set<String> protect = new HashSet<>();
 
         public SpawnProtector() {
-            Bukkit.getPluginManager().registerEvents(this, (Plugin)ShrineManager.this.plugin);
+            Bukkit.getPluginManager().registerEvents(this, ShrineManager.this.plugin);
         }
 
         public void protectFor(final Player player, int duration) {
@@ -295,9 +298,9 @@ public class ShrineManager {
         }
     }
 
-    class Shrine {
+    public class Shrine {
         Location center;
-        Location mobSpawn;
+        public Location mobSpawn;
 
         public String name;
 
@@ -360,6 +363,20 @@ public class ShrineManager {
             world.createExplosion(this.center.clone().add(3.0D, 0.0D, -3.0D), 3.0F);
             world.createExplosion(this.center.clone().add(-3.0D, 0.0D, 3.0D), 3.0F);
             world.createExplosion(this.center.clone().add(-3.0D, 0.0D, -3.0D), 3.0F);
+
+            for (Player player : plugin.monsters) {
+                if (player.isValid() && !player.isDead()) {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 200, 3, false));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 200, 1, false));
+                }
+            }
+
+            for (Player player : plugin.dwarves) {
+                if (player.isValid() && !player.isDead()) {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 200, 1, false));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 200, 1, false));
+                }
+            }
 
             for (int x = this.center.getBlockX() - 10; x <= this.center.getBlockX() + 10; x++) {
                 for (int y = this.center.getBlockY() - 10; y <= this.center.getBlockY() + 10; y++) {

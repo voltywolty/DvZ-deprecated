@@ -10,6 +10,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class BarCountdown {
     public BossBar countdownBar = Bukkit.createBossBar(ChatColor.RED + "Waiting for more players...", BarColor.BLUE, BarStyle.SOLID);
+    boolean running = false;
 
     public void barWaitingForPlayers() {
         for (Player players : Bukkit.getOnlinePlayers()) {
@@ -22,16 +23,19 @@ public class BarCountdown {
 
     public void countdownBar() {
         new BukkitRunnable() {
+            int time = 0;
+            int maxTime = 90;
             public void run() {
                 int neededPlayers = DvZ.plugin.minPlayers;
-                if ((DvZ.plugin.autoStartTime -= 1) <= 0 || DvZ.plugin.minPlayers < neededPlayers) {
+                if (time >= maxTime || DvZ.plugin.minPlayers < neededPlayers) {
                     cancel();
                     removeBarFromAll();
+                    return;
                 }
-                else {
-                    countdownBar.setTitle(ChatColor.BLUE + "Charging shrines... (" + ChatColor.AQUA + DvZ.plugin.autoStartTime + " seconds" + ChatColor.BLUE + ")");
-                    countdownBar.setProgress(DvZ.plugin.autoStartTime / 30D);
-                }
+                running = true;
+                countdownBar.setTitle(ChatColor.BLUE + DvZ.plugin.mapName + " (" + ChatColor.AQUA + Bukkit.getOnlinePlayers().size() + " players" + ChatColor.BLUE + ")");
+                countdownBar.setProgress(time / 90D);
+                time++;
             }
         }.runTaskTimer(DvZ.plugin, 0, 20);
     }
@@ -51,5 +55,9 @@ public class BarCountdown {
             countdownBar.removePlayer(players);
             countdownBar.setVisible(false);
         }
+    }
+
+    public void stopBarTimer() {
+        running = false;
     }
 }

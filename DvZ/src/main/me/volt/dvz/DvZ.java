@@ -3,17 +3,18 @@ package main.me.volt.dvz;
 import com.nisovin.magicspells.util.managers.PassiveManager;
 
 import main.me.volt.dvz.conditions.*;
+import main.me.volt.dvz.events.PlagueEvent;
 import main.me.volt.dvz.events.doom.DireWolvesEvent;
 import main.me.volt.dvz.events.doom.DoomEvent;
+import main.me.volt.dvz.events.doom.GoblinSquadEvent;
 import main.me.volt.dvz.events.doom.GolemEvent;
+import main.me.volt.dvz.gui.HatGUI;
 import main.me.volt.dvz.items.DwarfItems;
 import me.volt.main.mcevolved.GameMode;
 import me.volt.main.mcevolved.MCEvolved;
 
-import main.me.volt.dvz.events.PlagueEvent;
 import main.me.volt.dvz.passives.ShrineDestroyedListener;
 import main.me.volt.dvz.utils.Bleeder;
-import main.me.volt.dvz.events.RageEvent;
 import main.me.volt.dvz.listeners.GameListener;
 import main.me.volt.dvz.managers.ShrineManager;
 import main.me.volt.dvz.utils.ShrineBarManager;
@@ -55,10 +56,11 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
     public boolean monstersReleased = false;
     public boolean monstersReleasedFully = false;
 
+    public Set<Player> tips;
+
     public boolean override = false;
 
     public long gameStartTime = 0L;
-    public int gameStartAttempts = 0;
 
     public String mapName;
 
@@ -84,9 +86,13 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
 
     public List<String> startCommands;
     public List<String> monsterReleaseCommands;
+    public List<String> specialDwarves;
+
+    public Map<Player, String> heroes;
 
     public Location mapSpawn;
     public Location mobSpawn;
+    public Location dwarfSpawn;
 
     public Location quarryLocation;
     public Location blacksmithTablesLocation;
@@ -99,12 +105,17 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
     public Set<Player> dwarves;
     public Set<Player> monsters;
 
+    public Set<Player> rangerClass;
+
     ScoreboardManager manager;
     Scoreboard scoreboard;
     Objective objective;
 
+    public Team dwarfTeam;
+    public Team monsterTeam;
+
     public Score vaultScore;
-    public int totalVaultAmount = 1000;
+    public int totalVaultAmount = 500;
 
     public Score remainingDwarvesScore;
 
@@ -167,7 +178,9 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
 
         conditionManager.addCondition("monstersreleased", MonstersReleasedCondition.class);
         conditionManager.addCondition("nearmapspawn", NearMapSpawnCondition.class);
+
         conditionManager.addCondition("dwarvesremaininglessthan", DwarvesRemainingLessThanCondition.class);
+        conditionManager.addCondition("goldremaininggreaterthan", GoldRemainingGreaterThan.class);
 
         conditionManager.addCondition("shrinepowerlessthan", ShrinePowerLessThanCondition.class);
         conditionManager.addCondition("shrinedistancelessthan", ShrineDistanceLessThanCondition.class);
@@ -231,11 +244,13 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         Bukkit.getWorlds().get(0).setGameRule(GameRule.SPAWN_RADIUS, 1);
         Bukkit.getWorlds().get(0).setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
         Bukkit.getWorlds().get(0).setGameRule(GameRule.KEEP_INVENTORY, false);
+        Bukkit.getWorlds().get(0).setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
 
         this.mapName = config.getString("map-name", "map");
         this.autoStartTime = config.getInt("auto-start-time", 0);
 
         this.minPlayers = config.getInt("min-players", 0);
+        this.minPlayersForHeroes = config.getInt("min-players-for-heroes", 5);
 
         this.monsterReleaseTime = config.getInt("monster-release-time", 0);
         this.scoreInterval = config.getInt("score-interval", 30);
@@ -253,9 +268,12 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
 
         this.startCommands = config.getStringList("start-commands");
         this.monsterReleaseCommands = config.getStringList("monster-release-commands");
+        this.specialDwarves = config.getStringList("special-dwarves");
+        this.heroes = new HashMap<>();
 
         String mapSpawnString = config.getString("map-spawn", "");
         String mobSpawnString = config.getString("mob-spawn", "");
+        String dwarfSpawnString = config.getString("dwarf-spawn", "");
 
         String quarryLocString = config.getString("quarry-location", "");
         String blacksmithTableLocString = config.getString("blacksmith-location", "");
@@ -301,10 +319,22 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
             this.mobSpawn = new Location(Bukkit.getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
         }
 
+        if (dwarfSpawnString.isEmpty()) {
+            this.dwarfSpawn = Bukkit.getWorlds().get(0).getSpawnLocation();
+        }
+        else {
+            String[] split = dwarfSpawnString.split(",");
+            this.dwarfSpawn = new Location(Bukkit.getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        }
+
         this.shrineManager = new ShrineManager(this, config);
+
+        this.tips = Collections.synchronizedSet(new HashSet<>());
 
         this.dwarves = Collections.synchronizedSet(new HashSet<>());
         this.monsters = Collections.synchronizedSet(new HashSet<>());
+
+        this.rangerClass = Collections.synchronizedSet(new HashSet<>());
 
         if (this.becomeDwarfSpell == null) {
             getLogger().severe("BECOME-DWARF-SPELL IS INVALID!");
@@ -323,15 +353,12 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         }
 
         Bukkit.getPluginManager().registerEvents(new GameListener(this), this);
-        this.shrineBarManager = new ShrineBarManager(this.shrineManager.getCurrentShrineName() + " Power"); //+ "(" + this.shrineManager.currentShrine + "/" + this.shrineManager.shrines.size() + ")");
+        this.shrineBarManager = new ShrineBarManager(this.shrineManager.getCurrentShrineName());
 
         int r = this.random.nextInt(15);
 
-        if (r < 1) {
+        if (r < 15) {
             this.gameEvent = new PlagueEvent(this);
-        }
-        else if (r < 15) {
-            this.gameEvent = new RageEvent(this);
         }
 
         MCEvolved.initializeGameMode(this);
@@ -372,76 +399,76 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                 startGame();
                 MCEvolved.stopCountdown();
                 barCountdown.removeBarFromAll();
-                sender.sendMessage("Game started.");
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Game started.");
             }
             else {
-                sender.sendMessage("Game has already started.");
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Game has already started.");
             }
         }
         else if (command.getName().equalsIgnoreCase("override")) {
             if (!this.gameRunning) {
                 this.override = true;
-                sender.sendMessage("Override mode enabled. You will need to manually /startgame and /releasemonsters.");
+                this.barCountdown.stopBarTimer();
+                this.barCountdown.removeBarFromAll();
+                MCEvolved.stopCountdown();
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Override mode enabled. You will need to manually /startgame and /releasemonsters.");
             }
             else if (!this.monstersReleased) {
                 if (this.monsterReleaseTask != null) {
                     this.monsterReleaseTask.cancel();
                 }
                 this.override = true;
-                sender.sendMessage("Override mode enabled. You will need to manually /releasemonsters.");
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Override mode enabled. You will need to manually /releasemonsters.");
             }
             else {
-                sender.sendMessage("The game has already started and monsters have already been released.");
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "The game has already started and monsters have already been released.");
             }
         }
         else if (command.getName().equalsIgnoreCase("event")) {
-            PlagueEvent plagueEvent = new PlagueEvent(this);
+            PlagueEvent plagueEvent;
             if (args.length == 0) {
-                sender.sendMessage("Active event: " + this.gameEvent.getName());
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Active event: " + this.gameEvent.getName());
                 if (this.override) {
-                    sender.sendMessage("Except the game is overwritten!");
+                    sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Except the game is overwritten!");
                 }
                 return true;
             }
             if (this.monstersReleased) {
-                sender.sendMessage("The monsters are already released.");
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "The monsters are already released.");
                 return true;
             }
 
             GameEvent event = null;
-            if (args[0].equalsIgnoreCase("rage")) {
-                RageEvent rageEvent = new RageEvent(this);
-            }
-            else if (args[0].equalsIgnoreCase("plague")) {
+            if (args[0].equalsIgnoreCase("plague")) {
                 plagueEvent = new PlagueEvent(this);
             }
             else {
-                sender.sendMessage("Usage: /event [rage|plague]");
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Usage: /event [plague]");
                 return true;
             }
 
             if (!this.gameRunning || !this.override) {
                 this.gameEvent = plagueEvent;
-                sender.sendMessage("Game event set to " + this.gameEvent.getName());
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Game event set to " + this.gameEvent.getName());
             }
             else {
                 this.gameEvent = plagueEvent;
                 this.gameEvent.run();
                 this.monstersReleased = true;
 
-                sender.sendMessage("Game event set to " + this.gameEvent.getName() + " and activated.");
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Game event set to " + this.gameEvent.getName() + " and activated.");
             }
         }
         else if (command.getName().equalsIgnoreCase("releasemonsters")) {
             if (this.gameRunning) {
                 if (!this.monstersReleased) {
                     beginMonsterRelease();
-                    sender.sendMessage("Monsters released.");
+                    sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Monsters released.");
                 } else {
-                    sender.sendMessage("Monsters have already been released.");
+                    sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Monsters have already been released.");
                 }
             } else {
-                sender.sendMessage("Game hasn't started.");
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Game hasn't started.");
             }
         }
         else if (command.getName().equalsIgnoreCase("warpshrine")) {
@@ -458,34 +485,37 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         }
         else if (command.getName().equalsIgnoreCase("setdwarf")) {
             if (args.length != 1) {
-                sender.sendMessage("Usage: /setdwarf playername");
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Usage: /setdwarf playername");
             } else {
                 Player player = Bukkit.getPlayer(args[0]);
                 if (player == null) {
-                    sender.sendMessage("No player found");
+                    sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "No player found");
                 }
                 else {
                     this.gameEvent.setDwarf(player);
                     this.monsters.remove(player.getPlayer());
-                    this.dwarves.add(player.getPlayer());
-                    this.becomeDwarfSpell.cast(player, 1.0F, null);
-                    sender.sendMessage("Player " + player.getName() + " is now a dwarf.");
+                    setAsDwarf(player);
+                    sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Player " + player.getName() + " is now a dwarf.");
                 }
             }
         }
         else if (command.getName().equalsIgnoreCase("setmonster")) {
             if (args.length != 1) {
-                sender.sendMessage("Usage: /setmonster playername");
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Usage: /setmonster playername");
             } else {
                 Player player = Bukkit.getPlayer(args[0]);
                 if (player == null) {
-                    sender.sendMessage("No player found");
+                    sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "No player found");
                 }
                 else {
                     this.dwarves.remove(player.getPlayer());
                     this.monsters.add(player.getPlayer());
+
+                    this.dwarfTeam.removeEntry(player.getPlayer().getName());
+                    this.monsterTeam.addEntry(player.getPlayer().getName());
+
                     this.becomeMonsterSpell.cast(player, 1.0F, null);
-                    sender.sendMessage("Player " + player.getName() + " is now a monster.");
+                    sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Player " + player.getName() + " is now a monster.");
                 }
             }
         }
@@ -493,24 +523,24 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
             if (gameRunning) {
                 Player player = Bukkit.getPlayer(args[0]);
                 if (player == null) {
-                    sender.sendMessage("No player found");
+                    sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "No player found");
                 }
                 else {
-                    sender.sendMessage("Player " + player.getName() + " is now a hero.");
+                    sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Player " + player.getName() + " is now a hero.");
                 }
 
-                if (args[1].equalsIgnoreCase("volt")){
-                    setAsVoltHero(player);
+                if (args[1].equalsIgnoreCase("charles")){
+                    setAsCharles(player);
                 }
-                else if (args[1].equalsIgnoreCase("kamchatka")) {
-                    setAsKamchatkaHero(player);
+                else if (args[1].equalsIgnoreCase("marsh")) {
+                    setAsMarsh(player);
                 }
-                else if (args[1].equalsIgnoreCase("blu")) {
-                    setAsBlueHero(player);
+                else if (args[1].equalsIgnoreCase("apollo")) {
+                    setAsApollo(player);
                 }
             }
             else if (args.length != 2) {
-                sender.sendMessage("Usage: /sethero playername hero");
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Usage: /sethero playername [charles|marsh|apollo]");
             }
         }
         else if (command.getName().equalsIgnoreCase("specialmonsterinterval")) {
@@ -523,10 +553,10 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                     }
                     startMonsterSpecialTask();
                 }
-                sender.sendMessage("Special monster interval set to " + this.monsterSpecialInterval + " seconds.");
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Special monster interval set to " + this.monsterSpecialInterval + " seconds.");
             }
             else {
-                sender.sendMessage("Invalid interval.");
+                sender.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Invalid interval.");
             }
         }
         else if (command.getName().equalsIgnoreCase("compass")) {
@@ -534,7 +564,7 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                 if (sender instanceof Player && this.dwarves.contains(((Player) sender).getPlayer())) {
                     Player player = (Player) sender;
                     if (player.getInventory().contains(Material.COMPASS)) {
-                        player.sendMessage(ChatColor.RED + "You already have a compass!");
+                        player.sendMessage("You already have a compass!");
                     }
                     else {
                         player.getInventory().addItem(DwarfItems.dwarvenCompass);
@@ -547,7 +577,7 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                 if (sender instanceof Player && this.dwarves.contains(((Player) sender).getPlayer())) {
                     Player player = (Player) sender;
                     if (player.getInventory().contains(Material.CHEST)) {
-                        player.sendMessage(ChatColor.RED + "You already have a shared resource chest!");
+                        player.sendMessage("You already have a shared resource chest!");
                     }
                     else {
                         player.getInventory().addItem(DwarfItems.sharedResourceChest);
@@ -555,7 +585,37 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                 }
             }
         }
+        else if (command.getName().equalsIgnoreCase("tutorial")) {
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                if (this.tips.contains(player)) {
+                    player.sendMessage(ChatColor.GOLD + "Tutorial mode has been disabled. You can re-enable it using /tutorial.");
+                    this.tips.remove(player);
+                }
+                else if (!this.tips.contains(player)) {
+                    player.sendMessage(ChatColor.GOLD + "Tutorial mode has been enabled. You can disable it using /tutorial.");
+                    this.tips.add(player);
+                }
+            }
+        }
+        else if (command.getName().equalsIgnoreCase("hats")) {
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                HatGUI.openGUI(player);
+            }
+        }
         return true;
+    }
+
+    private void setInventorySlots(Player player ) {
+        player.getInventory().setItem(9, DwarfItems.inventorySlotHolder);
+        player.getInventory().setItem(10, DwarfItems.inventorySlotHolder);
+        player.getInventory().setItem(11, DwarfItems.inventorySlotHolder);
+        player.getInventory().setItem(12, DwarfItems.inventorySlotHolder);
+        player.getInventory().setItem(14, DwarfItems.inventorySlotHolder);
+        player.getInventory().setItem(15, DwarfItems.inventorySlotHolder);
+        player.getInventory().setItem(16, DwarfItems.inventorySlotHolder);
+        player.getInventory().setItem(17, DwarfItems.inventorySlotHolder);
     }
 
     public void startGame() {
@@ -568,27 +628,102 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
             }
         }
 
+        initializeScoreboard();
+
+        this.dwarfTeam = this.scoreboard.registerNewTeam("dwarf");
+        this.monsterTeam = this.scoreboard.registerNewTeam("monster");
+
+        this.dwarfTeam.setColor(ChatColor.DARK_AQUA);
+        this.monsterTeam.setColor(ChatColor.DARK_RED);
+
+        this.dwarfTeam.setAllowFriendlyFire(false);
+        this.monsterTeam.setAllowFriendlyFire(false);
+
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!player.hasPermission("game.ignore") && !player.getName().equals("voltxd") && !player.getName().equals("BluXDXD") && !player.getName().equals("Kamchatka")) {
+            barCountdown.removeBarFromPlayer(player);
+            barCountdown.stopBarTimer();
+
+            if (!player.hasPermission("game.ignore") && !rangerClass.contains(player)) {
                 setAsDwarf(player);
             }
-            else if (player.getName().equals("voltxd")) {
-                setAsVoltHero(player);
+            else if (!player.hasPermission("game.ignore") && rangerClass.contains(player)) {
+                setAsRanger(player);
             }
-            else if (player.getName().equals("BluXDXD")) {
-                setAsBlueHero(player);
-            }
-            else if (player.getName().equals("Kamchatka")) {
-                setAsKamchatkaHero(player);
-            }
-
-            barCountdown.removeBarFromPlayer(player);
 
             Bukkit.getScheduler().runTaskLater(plugin, () -> player.sendTitle(ChatColor.BLUE + "It's time to play...", "", 10, 20, 10), 20L);
             Bukkit.getScheduler().runTaskLater(plugin, () -> player.sendTitle(ChatColor.RED + "Dwarves " + ChatColor.WHITE + "vs" + ChatColor.DARK_GREEN + " Zombies", "", 20, 60, 30), 80L);
+
+            if (this.tips.contains(player)) {
+                player.sendMessage(ChatColor.GOLD + "====================[DvZ Tutorial]===================");
+                player.sendMessage(ChatColor.YELLOW + "Welcome to Dwarves vs. Zombies! Your goal as a dwarf is to");
+                player.sendMessage(ChatColor.YELLOW + "protect your shrines and kill monsters. When a shrine falls,");
+                player.sendMessage(ChatColor.YELLOW + "you'll want to fall back to the next shrine. If you ever get");
+                player.sendMessage(ChatColor.YELLOW + "lost, you can use /compass to see where everything is. Take a");
+                player.sendMessage(ChatColor.YELLOW + "moment to see where everything is and gather the items you");
+                player.sendMessage(ChatColor.YELLOW + "need. When night hits, a random selected group of dwarves will");
+                player.sendMessage(ChatColor.YELLOW + "randomly die from a plague event and turn into monsters. As a");
+                player.sendMessage(ChatColor.YELLOW + "monster, your goal is to kill all dwarves.");
+                player.sendMessage(ChatColor.GOLD + "===================================================");
+            }
+        }
+        int playerCount = Bukkit.getOnlinePlayers().size();
+        if (this.specialDwarves != null && this.specialDwarves.size() > 0 && playerCount >= minPlayersForHeroes) {
+            List<Player> list = new ArrayList<>(this.dwarves);
+
+            for (String heroName : this.specialDwarves)
+                list.remove(heroName);
+
+            Iterator<Player> iter = list.iterator();
+            while (iter.hasNext()) {
+                Player player = Bukkit.getPlayerExact(iter.next().getPlayer().getName());
+                if (player == null) {
+                    iter.remove();
+                    continue;
+                }
+            }
+            if (list.size() < 3) {
+                list = new ArrayList<>(this.dwarves);
+                for (String heroName : this.specialDwarves)
+                    list.remove(heroName);
+            }
+            String first = this.specialDwarves.remove(0);
+            Collections.shuffle(this.specialDwarves);
+            this.specialDwarves.add(0, first);
+
+            int totalSpecialDwarves = 3;
+            int specialDwarvesCreated = 0;
+
+            for (int i = 0; i < this.specialDwarves.size(); i++) {
+                String heroName = this.specialDwarves.get(i);
+                Player player = Bukkit.getPlayerExact(heroName);
+
+                if (player == null) {
+                    if (player == null && specialDwarvesCreated < totalSpecialDwarves && list.size() > 0) {
+                        Player randomPlayer = list.remove(this.random.nextInt(list.size()));
+                        player = Bukkit.getPlayerExact(randomPlayer.getName());
+                    }
+                    if (player != null && player.isValid()) {
+                        Spell spell = MagicSpells.getSpellByInternalName("become_" + heroName);
+                        if (spell != null) {
+                            spell.castSpell(player, Spell.SpellCastState.NORMAL, 1.0F, null);
+                            this.heroes.put(player, heroName);
+                            specialDwarvesCreated++;
+                        }
+                    }
+                }
+            }
         }
 
-        initializeScoreboard();
+        final BukkitTask timer = new BukkitRunnable() {
+            public void run() {
+                if (!gameEnded) {
+                    totalTime++;
+                }
+                else {
+                    cancel();
+                }
+            }
+        }.runTaskTimer(this, 0L, 20L);
 
         this.shrinePower = 200.D;
 
@@ -605,6 +740,19 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
             }, (this.scoreInterval * 20), (this.scoreInterval * 20));
         }
 
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+            public void run() {
+                for (Player player : dwarves) {
+                    if (!player.getInventory().contains(Material.ARROW, 64)) {
+                        player.getInventory().addItem(new ItemStack(Material.ARROW, 1));
+                    }
+                    else {
+                        return;
+                    }
+                }
+            }
+        },  0L, 600L);
+
         this.bleeder = new Bleeder(this);
 
         if (this.shrineBarManager != null) {
@@ -615,24 +763,50 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
     public void setAsDwarf(Player player) {
         this.becomeDwarfSpell.cast(player, 1.0F, null);
         this.dwarves.add(player.getPlayer());
+        dwarfTeam.addEntry(player.getName());
+
+        setInventorySlots(player);
+        player.getInventory().setItem(13, new ItemStack(Material.ARROW));
+        player.teleport(dwarfSpawn);
     }
 
-    public void setAsVoltHero(Player player) {
-        Spell heroSpell = MagicSpells.getSpellByInternalName("become_volt_real");
-        heroSpell.castSpell(player, Spell.SpellCastState.NORMAL, 1.0F, null);
+    public void setAsRanger(Player player) {
+        Spell rangerSpell = MagicSpells.getSpellByInternalName("ranger_become_ranger");
+        rangerSpell.cast(player, 1.0F, null);
         this.dwarves.add(player.getPlayer());
+
+        setInventorySlots(player);
+        player.getInventory().setItem(13, new ItemStack(Material.ARROW));
+        player.teleport(dwarfSpawn);
     }
 
-    public void setAsKamchatkaHero(Player player) {
-        Spell heroSpell = MagicSpells.getSpellByInternalName("become_kamchatka_real");
+    public void setAsCharles(Player player) {
+        Spell heroSpell = MagicSpells.getSpellByInternalName("become_charles");
         heroSpell.castSpell(player, Spell.SpellCastState.NORMAL, 1.0F, null);
         this.dwarves.add(player.getPlayer());
+
+        setInventorySlots(player);
+        player.getInventory().setItem(13, new ItemStack(Material.ARROW));
+        player.teleport(dwarfSpawn);
     }
 
-    public void setAsBlueHero(Player player) {
-        Spell heroSpell = MagicSpells.getSpellByInternalName("become_blu_real");
+    public void setAsMarsh(Player player) {
+        Spell heroSpell = MagicSpells.getSpellByInternalName("become_marsh");
         heroSpell.castSpell(player, Spell.SpellCastState.NORMAL, 1.0F, null);
         this.dwarves.add(player.getPlayer());
+
+        setInventorySlots(player);
+        player.getInventory().setItem(13, new ItemStack(Material.ARROW));
+        player.teleport(dwarfSpawn);
+    }
+
+    public void setAsApollo(Player player) {
+        Spell heroSpell = MagicSpells.getSpellByInternalName("become_apollo");
+        heroSpell.castSpell(player, Spell.SpellCastState.NORMAL, 1.0F, null);
+
+        setInventorySlots(player);
+        player.getInventory().setItem(13, new ItemStack(Material.ARROW));
+        player.teleport(dwarfSpawn);
     }
 
     private void beginMonsterRelease() {
@@ -654,6 +828,7 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         for (String comm : this.monsterReleaseCommands) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), comm);
         }
+        startMonsterSpecialTask();
 
         for (Player players : Bukkit.getOnlinePlayers()) {
             players.playSound(players.getLocation(), "brucemonsters", 0.3F, 1F);
@@ -662,52 +837,70 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         this.shrineManager.startPulse();
         this.shrineManager.decreaseShrineHealth();
 
-        this.doomScore = this.objective.getScore(ChatColor.DARK_RED + "Doom Clock");
-        this.doomScore.setScore(doomTimer);
-
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             public void run() {
                 DvZ.this.spawnZombies(15);
             }
-        }, 200L, 50L);
+        },  200L, 50L);
+
+        this.doomScore = this.objective.getScore(ChatColor.DARK_RED + "Doom Clock");
+        this.doomScore.setScore(doomTimer);
 
         this.monstersReleasedFully = true;
+
+        final BukkitTask doomTimerCountdown = new BukkitRunnable() {
+            public void run() {
+                if (monstersReleasedFully) {
+                    if (doomTimer != -1) {
+                        doomTimer--;
+
+                        if (doomTimer <= 0) {
+                            doomTimer = 0;
+
+                            doomEventStart();
+                            cancel();
+                        }
+                    }
+                }
+            }
+        }.runTaskTimer(this, 0L, 20L);
+
         System.out.println("END MONSTER RELEASE");
     }
 
     Set<Monster> aiMonsters = new HashSet<>();
     List<String> aiMonsterNames = new ArrayList<>();
-    public void spawnZombies(int count) {
+    private void spawnZombies(int count) {
         int dwarvesRemaining = this.remainingDwarvesScore.getScore();
         int aiMonsterCap = (int)Math.round(dwarvesRemaining * 1.5D);
 
-        if (dwarvesRemaining < 1) {
-            return;
+        for (Player players : this.monsters) {
+            aiMonsterNames.add(players.getName());
         }
 
-        if (dwarvesRemaining < 3) {
-            count /=2;
-        }
+        if (dwarvesRemaining < 1)
+            return;
 
         Iterator<Monster> iter = this.aiMonsters.iterator();
         while (iter.hasNext()) {
             Monster m = iter.next();
+
             if (m.isDead()) {
+                iter.remove();
                 continue;
             }
-            if (m.getTicksLived() > 600) {
+            if (m.getTicksLived() > 800) {
                 m.setHealth(0);
                 iter.remove();
             }
         }
-        if (this.aiMonsters.size() >= aiMonsterCap) {
+        if (this.aiMonsters.size() >= aiMonsterCap)
             return;
-        }
+
         List<Player> targets = new ArrayList<>();
         for (Player p : Bukkit.getOnlinePlayers()) {
-            if (!p.isDead() && this.monsters.contains(p.getPlayer()) && p.getLocation().distanceSquared(this.mapSpawn) > 10000.0D) {
+            if (!p.isDead() && this.monsters.contains(p) && p.getLocation().distanceSquared(this.mapSpawn) > 10000.0D)
                 targets.add(p);
-            }
         }
         Collections.shuffle(targets);
 
@@ -717,17 +910,19 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
 
             for (int attempts = 0; attempts < 10; attempts++) {
                 loc = loc.clone().add((this.random.nextInt(40) - 20), 1.0D, (this.random.nextInt(40) - 20));
+
                 if (BlockUtils.isPathable(loc.getBlock()) && BlockUtils.isPathable(loc.getBlock().getRelative(BlockFace.UP))) {
                     Block block = loc.getBlock();
-                    while (!BlockUtils.isPathable(block)) {
+
+                    while (!BlockUtils.isPathable(block))
                         block = block.getRelative(BlockFace.DOWN);
-                    }
+
                     loc = block.getLocation().add(0.5D, 0.5D, 0.5D);
                     break;
                 }
                 int c = 0;
-
                 Block b = loc.getBlock();
+
                 while (!BlockUtils.isPathable(b) && !BlockUtils.isPathable(b.getRelative(BlockFace.UP)) && c < 10) {
                     b = b.getRelative(BlockFace.UP);
                     c++;
@@ -737,27 +932,32 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                     break;
                 }
             }
-            if (dwarvesRemaining > 20 && this.shrineManager.atFinalShrine() && loc.getWorld().getHighestBlockYAt(loc) > loc.getY() + 2.0D) {
+            if (dwarvesRemaining > 10 && this.shrineManager.atFinalShrine() && loc.getWorld().getHighestBlockYAt(loc) > loc.getY() + 2.0D) {
                 Creeper creeper = loc.getWorld().spawn(loc, Creeper.class);
-                creeper.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 1000000, 3, true));
-                creeper.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 1000000, 3, true));
+
+                creeper.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, Integer.MAX_VALUE, 3, false));
+                creeper.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 3, false));
 
                 if (this.aiMonsterNames != null && this.aiMonsterNames.size() > 25) {
-                    creeper.setCustomName(ChatColor.DARK_RED + this.aiMonsterNames.get(this.random.nextInt(this.aiMonsterNames.size())));
-                    creeper.setCustomNameVisible(true);
+                    creeper.setCustomName(ChatColor.DARK_RED + (String)this.aiMonsterNames.get(this.random.nextInt(this.aiMonsterNames.size())));
+                    creeper.setCustomNameVisible(false);
                 }
                 this.aiMonsters.add(creeper);
             }
             else {
                 AttributeModifier followRange = new AttributeModifier("followRange", 40D, AttributeModifier.Operation.ADD_NUMBER);
+                AttributeModifier attackDamage = new AttributeModifier("attackDamage", 8D, AttributeModifier.Operation.ADD_NUMBER);
 
                 Zombie zombie = loc.getWorld().spawn(loc, Zombie.class);
                 MagicSpells.getAttributeManager().addEntityAttribute(zombie, Attribute.GENERIC_FOLLOW_RANGE, followRange);
-                zombie.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 1000000, 3, true));
-                zombie.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 1000000, 3, true));
+                MagicSpells.getAttributeManager().addEntityAttribute(zombie, Attribute.GENERIC_ATTACK_DAMAGE, attackDamage);
+
+                zombie.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, Integer.MAX_VALUE, 3, false));
+                zombie.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 4, false));
 
                 zombie.getEquipment().setItemInMainHand(new ItemStack(Material.CLAY_BALL));
                 zombie.getEquipment().setItemInMainHandDropChance(0.0F);
+
                 zombie.getEquipment().setBoots(null);
                 zombie.getEquipment().setLeggings(null);
                 zombie.getEquipment().setChestplate(null);
@@ -765,7 +965,7 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
 
                 if (this.aiMonsterNames != null && this.aiMonsterNames.size() > 25) {
                     zombie.setCustomName(ChatColor.DARK_RED + this.aiMonsterNames.get(this.random.nextInt(this.aiMonsterNames.size())));
-                    zombie.setCustomNameVisible(true);
+                    zombie.setCustomNameVisible(false);
                 }
                 this.aiMonsters.add(zombie);
             }
@@ -802,35 +1002,6 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
 
             players.setScoreboard(scoreboard);
         }
-
-        final BukkitTask timer = new BukkitRunnable() {
-            public void run() {
-                if (!gameEnded) {
-                    totalTime++;
-                    totalVaultAmount++;
-                }
-                else {
-                    cancel();
-                }
-            }
-        }.runTaskTimer(this, 0L, 20L);
-
-        final BukkitTask doomTimerCountdown = new BukkitRunnable() {
-            public void run() {
-                if (monstersReleasedFully) {
-                    if (doomTimer != -1) {
-                        doomTimer--;
-
-                        if (doomTimer <= 0) {
-                            doomTimer = 0;
-
-                            doomEventStart();
-                            cancel();
-                        }
-                    }
-                }
-            }
-        }.runTaskTimer(this, 0L, 20L);
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             public void run() {
@@ -889,13 +1060,16 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                         doomTimerAfter = 0;
 
                         Random randomDoomEvent = new Random();
-                        int randomDoom = randomDoomEvent.nextInt(25);
+                        int randomDoom = randomDoomEvent.nextInt(20);
 
-                        if (randomDoom < 10) {
+                        if (randomDoom < 5) {
                             DvZ.this.doomEvent = new GolemEvent(DvZ.this);
                         }
-                        else if (randomDoom < 20) {
+                        else if (randomDoom < 10) {
                             DvZ.this.doomEvent = new DireWolvesEvent(DvZ.this);
+                        }
+                        else if (randomDoom < 15) {
+                            DvZ.this.doomEvent = new GoblinSquadEvent(DvZ.this);
                         }
 
                         doomEvent.run();
@@ -903,9 +1077,10 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                         for (Player players : Bukkit.getOnlinePlayers())
                             Bukkit.getScheduler().runTaskLater(plugin, () -> players.sendTitle(ChatColor.RED + doomEvent.getName(), "", 20, 60, 30), 20L);
 
-                        doomTimer = 1200;
+                        doomTimer = 1000;
                         doomEventTimer();
                         cancel();
+                        //doomTimerAfter = 20;
                     }
                 }
             }
@@ -939,7 +1114,7 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
     }
 
     public void recount() {
-        double shrinePowerMod = 0.0D;
+        double shrinePowerMod = this.shrineBarManager.health;
         int c = 0;
 
         double dwarfValue = this.shrineManager.getDwarfValue();
@@ -951,10 +1126,12 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                     c++;
                     if (this.shrineManager.playerNearShrineForCapture(p)) {
                         shrinePowerMod += dwarfValue;
+                        shrinePower += dwarfValue;
                     }
                 }
                 else if (this.monsters.contains(p.getPlayer()) && this.shrineManager.playerNearShrineForCapture(p)) {
                     shrinePowerMod -= monsterValue;
+                    shrinePower -= monsterValue;
                 }
             }
         }
@@ -983,10 +1160,11 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
             }
             else {
                 //ShrineDestroyedListener.initialize("");
+                this.shrineBarManager.health = 200.0D;
                 this.shrinePower = 200.0D;
 
                 if (this.shrineBarManager != null) {
-                    this.shrineBarManager.setBarName(this.shrineManager.getCurrentShrineName() + " Power"); //+ "(" + this.shrineManager.currentShrine + "/" + this.shrineManager.shrines.size() + ")");
+                    this.shrineBarManager.setBarName(this.shrineManager.getCurrentShrineName() + " (" + (DvZ.plugin.shrineManager.currentShrine+1) + "/" + DvZ.plugin.shrineManager.shrines.size() + ")");
                 }
 
                 Bukkit.broadcastMessage(ChatColor.GOLD + "=================================================");
@@ -1001,9 +1179,6 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                 }
             }, (this.endTimerDuration * 20));
         }
-
-        if (shrinePowerMod != 0.0D && this.shrineBarManager != null)
-            this.shrineBarManager.changeBarHealth((int)Math.floor(this.shrinePower * 2.0D));
     }
 
     public void endGame() {
@@ -1014,6 +1189,9 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
             Bukkit.broadcastMessage(ChatColor.RED + "=================================================");
             Bukkit.broadcastMessage(ChatColor.DARK_RED + "THE FINAL DWARVEN SHRINE HAS FALLEN!");
             Bukkit.broadcastMessage(ChatColor.RED + "=================================================");
+
+            dwarfTeam.unregister();
+            monsterTeam.unregister();
 
             if (this.counterTask != null) {
                 this.counterTask.cancel();
@@ -1063,18 +1241,18 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
             System.out.println("SPECIAL MONSTER TIME!");
 
             for (int i = 0; i < 15; i++) {
-                List<String> list = new ArrayList(this.monsters);
+                List<Player> list = new ArrayList<>(this.monsters);
                 System.out.println("Choosing random number between 0 and " + list.size());
 
                 int r = this.random.nextInt(list.size());
 
-                String playerName = list.get(r);
+                Player playerName = list.get(r);
                 System.out.println("Chose " + r + ", which is " + playerName);
-                Player player = Bukkit.getPlayerExact(playerName);
+                Player player = Bukkit.getPlayerExact(playerName.getPlayer().getName());
 
                 if (player != null && player.isValid()) {
                     System.out.println("All good, running special...");
-                    this.monsterSpecialSpell.castSpell(player, Spell.SpellCastState.NORMAL, 1.0F, null);
+                    this.monsterSpecialSpell.cast(player, 1.0F, null);
                     break;
                 }
                 System.out.println("Invalid player.");

@@ -24,6 +24,7 @@ public class GolemEvent extends DoomEvent {
     public void run() {
         for (Player players : this.plugin.monsters) {
             golemSpell.castSpell(players, Spell.SpellCastState.NORMAL, 1.0F, null);
+            players.playSound(players.getLocation(), "doomevent5", 0.5F, 1.0F);
         }
     }
 }

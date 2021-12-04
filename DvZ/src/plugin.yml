@@ -1,5 +1,5 @@
 name: DvZ
-version: 1.0.0
+version: 1.1.2
 main: main.me.volt.dvz.DvZ
 api-version: 1.14
 depend: [ MagicSpells, MCEvolved ]
@@ -43,6 +43,11 @@ commands:
   sharedchest:
     description: Allows dwarves to share items with a system wide chest.
     aliases: [chest, sharechest]
+  tutorial:
+    description: Get tips on how to play Dwarves vs. Zombies.
+  hats:
+    description: Open the hat selector menu.
+    aliases: [hat]
 
 permissions:
   dvz.admin:
@@ -56,4 +61,7 @@ permissions:
     default: false
   dvz.immune:
     description: Makes the player immune to the plague.
+    default: false
+  dvz.testing:
+    description: Testing permissions for experimental features.
     default: false

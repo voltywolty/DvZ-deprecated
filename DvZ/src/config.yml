@@ -47,8 +47,8 @@ xp-multiplier: 1.0
 become-dwarf-spell: dwarf_become_dwarf
 become-monster-spell: becomezombie
 
-#monster-special-interval: 120
-#monster-special-spell: monster_specialevent
+monster-special-interval: 120
+monster-special-spell: monster_specialevent
 
 start-commands: [time day]
 monster-release-commands:
