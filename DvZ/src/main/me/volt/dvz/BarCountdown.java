@@ -9,12 +9,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class BarCountdown {
-    public BossBar countdownBar = Bukkit.createBossBar(ChatColor.RED + "Waiting for more players...", BarColor.BLUE, BarStyle.SOLID);
+    public BossBar countdownBar = Bukkit.createBossBar(ChatColor.RED + "Waiting for more players (" + DvZ.plugin.minPlayers + " needed)", BarColor.BLUE, BarStyle.SOLID);
     boolean running = false;
 
     public void barWaitingForPlayers() {
         for (Player players : Bukkit.getOnlinePlayers()) {
-            countdownBar.setTitle(ChatColor.RED + "Waiting for more players...");
+            countdownBar.setTitle(ChatColor.RED + "Waiting for more players (" + DvZ.plugin.minPlayers + " needed)");
             countdownBar.setProgress(0D);
             countdownBar.addPlayer(players);
             countdownBar.setVisible(true);

@@ -4,6 +4,7 @@ import main.me.volt.dvz.BarCountdown;
 import main.me.volt.dvz.DvZ;
 import main.me.volt.dvz.gui.ClassGUI;
 import main.me.volt.dvz.gui.HatGUI;
+import main.me.volt.dvz.gui.KitGUI;
 import main.me.volt.dvz.items.DwarfItems;
 import main.me.volt.dvz.trackers.LightBreakTracker;
 import me.volt.main.mcevolved.MCEvolved;
@@ -30,6 +31,7 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
+import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.potion.PotionEffect;
@@ -103,7 +105,7 @@ public class GameListener implements Listener {
         if (event.getDamage() >= player.getHealth()) {
             event.setCancelled(true);
             player.setHealth(20.0D);
-            damager.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 2, false));
+            damager.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 40, 2, false));
             damager.playSound(damager.getLocation(), "proc", 1.0F, 1.0F);
 
             if (player.getKiller() == damager) {
@@ -263,6 +265,19 @@ public class GameListener implements Listener {
         }
     }
 
+    @EventHandler
+    public void onServerStatusChange(ServerListPingEvent event) {
+        if (!this.plugin.gameRunning) {
+            event.setMotd(ChatColor.YELLOW + "" + ChatColor.BOLD + "Map: " + ChatColor.WHITE + "" + ChatColor.ITALIC + this.plugin.mapName + ChatColor.YELLOW + "" + ChatColor.BOLD + " In Lobby: " + ChatColor.WHITE + Bukkit.getOnlinePlayers().size() + " players");
+        }
+        else if (this.plugin.gameRunning && !this.plugin.monstersReleasedFully) {
+            event.setMotd(ChatColor.YELLOW + "" + ChatColor.BOLD + "Map: " + ChatColor.WHITE + "" + ChatColor.ITALIC + this.plugin.mapName + ChatColor.GREEN + "" + ChatColor.BOLD + " Online: " + ChatColor.DARK_AQUA + this.plugin.dwarves.size() + " dwarves" + ChatColor.YELLOW + "" + ChatColor.BOLD + " Build Phase");
+        }
+        else if (this.plugin.gameRunning && this.plugin.monstersReleasedFully) {
+            event.setMotd(ChatColor.YELLOW + "" + ChatColor.BOLD + "Map: " + ChatColor.WHITE + "" + ChatColor.ITALIC + this.plugin.mapName + ChatColor.GREEN + "" + ChatColor.BOLD + " Online: " + ChatColor.DARK_AQUA + this.plugin.dwarves.size() + " dwarves" + ChatColor.WHITE + ", " + ChatColor.RED + "" + this.plugin.monsters.size() + " monsters" + ChatColor.YELLOW + " Shrine: " + ChatColor.WHITE + "" + ChatColor.ITALIC + this.plugin.shrineManager.getCurrentShrineName() + " (" + (DvZ.plugin.shrineManager.currentShrine+1) + "/" + DvZ.plugin.shrineManager.shrines.size() + ")");
+        }
+    }
+
     int counter = 0;
     @EventHandler
     public void onCompassRightClick(PlayerInteractEvent event) {
@@ -392,6 +407,22 @@ public class GameListener implements Listener {
                 player.getEquipment().setHelmet(DwarfItems.warriorCap);
                 player.sendMessage(ChatColor.GOLD + "Your hat has been set to " + ChatColor.LIGHT_PURPLE + "Wolf Hunter" + ChatColor.GOLD + ".");
             }
+            else if (clickedType == Material.DIAMOND_HELMET) {
+                player.getEquipment().setHelmet(DwarfItems.dwarvenCap);
+                player.sendMessage(ChatColor.GOLD + "Your hat has been set to " + ChatColor.LIGHT_PURPLE + "Dwarven Cap" + ChatColor.GOLD + ".");
+            }
+            else if (clickedType == Material.YELLOW_STAINED_GLASS) {
+                player.getEquipment().setHelmet(DwarfItems.dwarvenBeard);
+                player.sendMessage(ChatColor.GOLD + "Your hat has been set to " + ChatColor.LIGHT_PURPLE + "Dwarven Beard" + ChatColor.GOLD + ".");
+            }
+            else if (clickedType == Material.WHITE_WOOL) {
+                player.getEquipment().setHelmet(DwarfItems.santaHat);
+                player.sendMessage(ChatColor.GOLD + "Your hat has been set to " + ChatColor.LIGHT_PURPLE + "Dwarven Santa Hat" + ChatColor.GOLD + ".");
+            }
+            else if (clickedType == Material.BARRIER) {
+                player.getEquipment().setHelmet(null);
+                player.sendMessage(ChatColor.GOLD + "You are no longer wearing any hats.");
+            }
             event.setCancelled(true);
             player.closeInventory();
         }
@@ -431,12 +462,34 @@ public class GameListener implements Listener {
             ItemStack clicked = event.getCurrentItem();
             Material clickedType = clicked.getType();
 
-            if (clickedType == Material.EMERALD) {
-                GameListener.this.plugin.rangerClass.add(player);
+            if (clickedType == Material.BROWN_DYE) {
+                GameListener.this.plugin.warriorKit.add(player);
+                GameListener.this.plugin.rangerKit.remove(player);
+                player.sendMessage(ChatColor.GOLD + "Your kit has been set to " + ChatColor.LIGHT_PURPLE + "Warrior" + ChatColor.GOLD + ".");
+            }
+            if (clickedType == Material.BOW) {
+                GameListener.this.plugin.rangerKit.add(player);
+                GameListener.this.plugin.warriorKit.remove(player);
                 player.sendMessage(ChatColor.GOLD + "Your kit has been set to " + ChatColor.LIGHT_PURPLE + "Ranger" + ChatColor.GOLD + ".");
             }
             event.setCancelled(true);
             player.closeInventory();
+        }
+    }
+
+    @EventHandler
+    public void onDwarfLoadoutClick(InventoryClickEvent event) {
+        Player player = (Player) event.getWhoClicked();
+
+        if (event.getView().getTitle().equals("Dwarf Loadout") && event.getSlotType() != InventoryType.SlotType.OUTSIDE) {
+            ItemStack clicked = event.getCurrentItem();
+            Material clickedType = clicked.getType();
+
+            if (clickedType == Material.MELON_SEEDS) {
+                KitGUI.openMeleeGUI(player);
+            }
+
+            event.setCancelled(true);
         }
     }
 
@@ -513,9 +566,9 @@ public class GameListener implements Listener {
                 event.getPlayer().getInventory().addItem(new ItemStack(DwarfItems.hatSelector));
             }
 
-//            if (!event.getPlayer().getInventory().contains(DwarfItems.classSelectorBook)) {
-//                event.getPlayer().getInventory().addItem(new ItemStack(DwarfItems.classSelectorBook));
-//            }
+            if (!event.getPlayer().getInventory().contains(DwarfItems.classSelectorBook)) {
+                event.getPlayer().getInventory().addItem(new ItemStack(DwarfItems.classSelectorBook));
+            }
         }
 
         if (!event.getPlayer().hasPlayedBefore()) {
@@ -685,18 +738,18 @@ public class GameListener implements Listener {
             return;
         }
 
-        if (event.getEntity() instanceof Zombie && event.getCause() == EntityDamageEvent.DamageCause.FALL) {
-            event.setCancelled(true);
-        }
-        else {
-            event.setCancelled(false);
-        }
-
         if (this.plugin.monsters.contains(player) && event.getCause() == EntityDamageEvent.DamageCause.FALL || this.plugin.monsters.contains(player) && event.getCause() == EntityDamageEvent.DamageCause.FIRE || this.plugin.monsters.contains(player) && event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK || this.plugin.monsters.contains(player) && event.getCause() == EntityDamageEvent.DamageCause.DROWNING || this.plugin.monsters.contains(player) && event.getCause() == EntityDamageEvent.DamageCause.SUFFOCATION || this.plugin.monsters.contains(player) && event.getCause() == EntityDamageEvent.DamageCause.LAVA) {
             event.setCancelled(true);
         }
         else {
             event.setCancelled(false);
+        }
+    }
+
+    @EventHandler
+    public void onDamage2(EntityDamageByEntityEvent event) {
+        if (event.getEntity().getType() == EntityType.ZOMBIE && event.getDamager() instanceof Player && this.plugin.monsters.contains((((Player) event.getDamager()).getPlayer()))) {
+            event.setCancelled(true);
         }
     }
 
@@ -905,8 +958,8 @@ public class GameListener implements Listener {
     @EventHandler
     public void onHungerBar(FoodLevelChangeEvent event) {
         event.setCancelled(true);
-        //event.setFoodLevel(20);
-        //(event.getEntity()).setSaturation(20.0F);
+        event.setFoodLevel(20);
+        (event.getEntity()).setSaturation(20.0F);
     }
 
     @EventHandler

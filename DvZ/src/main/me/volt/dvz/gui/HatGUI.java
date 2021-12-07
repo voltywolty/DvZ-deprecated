@@ -18,6 +18,10 @@ public class HatGUI {
         hatGUI.setItem(2, DwarfItems.warriorCap);
         hatGUI.setItem(3, DwarfItems.dragonsBreathHat);
         hatGUI.setItem(4, DwarfItems.wolfHunterHat);
+        hatGUI.setItem(5, DwarfItems.dwarvenCap);
+        hatGUI.setItem(6, DwarfItems.dwarvenBeard);
+        hatGUI.setItem(7, DwarfItems.santaHat);
+        hatGUI.setItem(8, DwarfItems.clearHat);
 
         player.openInventory(hatGUI);
         return true;

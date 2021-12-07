@@ -13,11 +13,8 @@ public class ClassGUI {
     }
 
     public static boolean openGUI(Player player) {
-        //classGUI.setItem(0, DwarfItems.pharaohHat);
-        //classGUI.setItem(1, DwarfItems.goggles);
-        classGUI.setItem(2, DwarfItems.rangerClass);
-        //classGUI.setItem(3, DwarfItems.dragonsBreathHat);
-        //classGUI.setItem(4, DwarfItems.wolfHunterHat);
+        classGUI.setItem(0, DwarfItems.warriorKit);
+        classGUI.setItem(2, DwarfItems.rangerKit);
 
         player.openInventory(classGUI);
         return true;

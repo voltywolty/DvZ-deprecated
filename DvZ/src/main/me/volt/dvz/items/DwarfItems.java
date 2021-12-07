@@ -20,8 +20,13 @@ public class DwarfItems {
     public static ItemStack goggles;
     public static ItemStack warriorCap;
     public static ItemStack dragonsBreathHat;
+    public static ItemStack dwarvenCap;
+    public static ItemStack dwarvenBeard;
+    public static ItemStack clearHat;
 
-    public static ItemStack rangerClass;
+    public static ItemStack warriorKit;
+    public static ItemStack rangerKit;
+    public static ItemStack clearKit;
 
     public static ItemStack inventorySlotHolder;
 
@@ -38,8 +43,13 @@ public class DwarfItems {
         createGoggles();
         createWarriorCap();
         createDragonsBreath();
+        createDwarvenCap();
+        createDwarvenBeard();
+        createClearHat();
 
+        createWarriorClass();
         createRangerClass();
+        createClearKit();
 
         createInventorySlotHolder();
     }
@@ -110,7 +120,7 @@ public class DwarfItems {
     private static void createSantaHat() {
         ItemStack item = new ItemStack(Material.WHITE_WOOL, 1);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§bDwarven Santa Cap");
+        meta.setDisplayName("§bDwarven §cSanta §aHat");
 
         item.setItemMeta(meta);
         santaHat = item;
@@ -128,7 +138,7 @@ public class DwarfItems {
     private static void createGoggles() {
         ItemStack item = new ItemStack(Material.GRAY_WOOL, 1);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§bGoggles");
+        meta.setDisplayName("§bGnomish Goggles");
 
         item.setItemMeta(meta);
         goggles = item;
@@ -152,10 +162,56 @@ public class DwarfItems {
         dragonsBreathHat = item;
     }
 
-    private static void createRangerClass() {
-        ItemStack item = new ItemStack(Material.EMERALD, 1);
+    private static void createDwarvenCap() {
+        ItemStack item = new ItemStack(Material.DIAMOND_HELMET, 1);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§bRanger");
+        meta.setDisplayName("§bDwarven Cap");
+        meta.setUnbreakable(true);
+
+        item.setItemMeta(meta);
+        dwarvenCap = item;
+    }
+
+    private static void createDwarvenBeard() {
+        ItemStack item = new ItemStack(Material.YELLOW_STAINED_GLASS, 1);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName("§bDwarven Beard");
+
+        item.setItemMeta(meta);
+        dwarvenBeard = item;
+    }
+
+    private static void createClearHat() {
+        ItemStack item = new ItemStack(Material.BARRIER, 1);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName("§cRemove Hat");
+
+        List<String> lore = new ArrayList<>();
+        lore.add("§5§oClears any hat you have equipped.");
+        meta.setLore(lore);
+
+        item.setItemMeta(meta);
+        clearHat = item;
+    }
+
+    private static void createWarriorClass() {
+        ItemStack item = new ItemStack(Material.BROWN_DYE, 1);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName("§bWarrior Kit");
+
+        List<String> lore = new ArrayList<>();
+        lore.add("§5§oWarriors are the fighters of the front line.");
+        lore.add("§5§oThey wield a powerful sword, this sword gives PROC for 3 seconds.");
+        meta.setLore(lore);
+
+        item.setItemMeta(meta);
+        warriorKit = item;
+    }
+
+    private static void createRangerClass() {
+        ItemStack item = new ItemStack(Material.BOW, 1);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName("§bRanger Kit");
 
         List<String> lore = new ArrayList<>();
         lore.add("§5§oRangers are the defenders of the keep.");
@@ -164,7 +220,20 @@ public class DwarfItems {
         meta.setLore(lore);
 
         item.setItemMeta(meta);
-        rangerClass = item;
+        rangerKit = item;
+    }
+
+    private static void createClearKit() {
+        ItemStack item = new ItemStack(Material.BARRIER, 1);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName("§cClear Kit");
+
+        List<String> lore = new ArrayList<>();
+        lore.add("§5§oClears the kit you currently have selected.");
+        meta.setLore(lore);
+
+        item.setItemMeta(meta);
+        clearKit = item;
     }
 
     private static void createInventorySlotHolder() {

@@ -25,13 +25,11 @@ public abstract class GameEvent {
     public abstract DamageResult checkDamage(Player paramPlayer1, Player paramPlayer2);
 
     protected int getMonstersNeeded() {
-        int needed = Math.round((Bukkit.getOnlinePlayers()).toArray().length * this.plugin.percentMonsters / 100.0F);
-
+        int needed = Math.round((Bukkit.getOnlinePlayers()).size() * this.plugin.percentMonsters / 100.0F);
         for (Player player : Bukkit.getOnlinePlayers()) {
             needed--;
-            if ((player.isDead()) || this.plugin.monsters.contains(player.getName()) && needed == 0) {
+            if ((player.isDead() || this.plugin.monsters.contains(player)) && needed == 0)
                 break;
-            }
         }
         return (needed > 0) ? needed : 0;
     }

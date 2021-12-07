@@ -12,7 +12,7 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.*;
 
 public class PlagueEvent extends GameEvent {
-    private Set<Player> plagued = new HashSet<>();
+    public Set<Player> plagued = new HashSet<>();
 
     public PlagueEvent(DvZ plugin) {
         super(plugin);
@@ -22,49 +22,62 @@ public class PlagueEvent extends GameEvent {
         return "plague";
     }
 
+    boolean done = false;
     public void run() {
-        List<UUID> players = new ArrayList<>();
+        List<Player> players = new ArrayList<>();
         for (Player p : Bukkit.getOnlinePlayers()) {
-            players.add(p.getUniqueId());
+            players.add(p);
             p.sendMessage(ChatColor.RED + "You feel other around you beginning to feel a bit sick...");
         }
 
+        int shuffleCount = this.random.nextInt(5) + 1;
+        for (int i = 0; i < shuffleCount; i++) {
+            Collections.shuffle(players, this.random);
+        }
+
         int monsterCount = this.plugin.monsters.size();
-        int monstersWanted = 4;
+        int monstersNeeded = 4;
 
         if (Bukkit.getOnlinePlayers().size() <= 7) {
-            monstersWanted = Bukkit.getOnlinePlayers().size() / 2;
+            monstersNeeded = Bukkit.getOnlinePlayers().size() / 2;
         }
-        System.out.println("Monster Count: " + monsterCount + " | Monsters Wanted: " + monstersWanted);
 
-        if (monsterCount < monstersWanted) {
-            for (int i = monsterCount; i < monstersWanted; i++) {
-                System.out.println("Monsters not full. Finding more victims.");
+        System.out.println("Monster Count: " + monsterCount + " | Monsters Wanted: " + monstersNeeded);
 
-                for (UUID uuid : players) {
-                    Player player = Bukkit.getPlayer(uuid);
+        if (monsterCount < monstersNeeded) {
+            int c = 0;
 
-                    if (player == null)
-                        continue;
+            if (!done) {
+                System.out.println("Getting more plague victims...");
+                for (int j = 0; j < players.size(); j++) {
+                    Player player = players.get(j);
 
-                    if (!this.plugin.dwarves.contains(player.getPlayer())) {
-                        System.out.println("Tried to infect " + player.getName() + ", but that player is not a dwarf!");
-                        continue;
+                    if (player.hasPermission("dvz.immune")) {
+                        System.out.println("Tried to plague " + player.getName() + ", but that player is immune.");
                     }
-                    if (this.plagued.contains(player.getPlayer())) {
-                        System.out.println("Tried to infect " + player.getName() + ", but that player already has the plague!");
+                    else if (!this.plugin.dwarves.contains(player)) {
+                        System.out.println("Tried to plague" + player.getName() + ", but that player is not a dwarf.");
                     }
-
-                    System.out.println("Player " + player.getName() + " has been given the plague!");
-                    plaguePlayer(player);
-                    continue;
+                    else if (this.plagued.contains(player)) {
+                        System.out.println("Tried to plague" + player.getName() + ", but that player already has the plague.");
+                    }
+                    else {
+                        System.out.println("Player " + player.getName() + " has been given the plague!");
+                        plaguePlayer(player);
+                        c++;
+                        if (c++ >= monstersNeeded) {
+                            System.out.println("Plague completed " + c);
+                            done = true;
+                            break;
+                        }
+                    }
                 }
             }
         }
         this.plugin.releaseMonsters();
     }
 
-    private void plaguePlayer(final Player player) {
+    private void plaguePlayer(Player player) {
         this.plagued.add(player.getPlayer());
 
         player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, Integer.MAX_VALUE, 3));
@@ -88,18 +101,17 @@ public class PlagueEvent extends GameEvent {
         }, 600L);
     }
 
-    public void setDwarf(Player paramPlayer) {
-        this.plagued.remove(paramPlayer);
+    public void setDwarf(Player player) {
+        this.plagued.remove(player);
     }
 
-    public boolean deathCountsAsKillForMonsterTeam(Player paramPlayer) {
-        return !this.plagued.contains(paramPlayer);
+    public boolean deathCountsAsKillForMonsterTeam(Player player) {
+        return !this.plagued.contains(player);
     }
 
-    public DamageResult checkDamage(Player attacker, Player defender) {
-        if (this.plugin.dwarves.contains(attacker) && this.plugin.dwarves.contains(defender) && this.plagued.contains(defender)) {
-            return DamageResult.ALLOW;
-        }
-        return DamageResult.NORMAL;
+    public GameEvent.DamageResult checkDamage(Player attacker, Player defender) {
+        if (this.plugin.dwarves.contains(attacker) && this.plugin.dwarves.contains(defender) && this.plagued.contains(defender))
+            return GameEvent.DamageResult.ALLOW;
+        return GameEvent.DamageResult.NORMAL;
     }
 }
