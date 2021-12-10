@@ -6,6 +6,7 @@ import main.me.volt.dvz.gui.ClassGUI;
 import main.me.volt.dvz.gui.HatGUI;
 import main.me.volt.dvz.gui.KitGUI;
 import main.me.volt.dvz.items.DwarfItems;
+import main.me.volt.dvz.items.DwarfLoadoutItems;
 import main.me.volt.dvz.trackers.LightBreakTracker;
 import me.volt.main.mcevolved.MCEvolved;
 
@@ -16,6 +17,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -32,12 +34,16 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerListPingEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TreeMap;
 
 public class GameListener implements Listener {
@@ -339,7 +345,7 @@ public class GameListener implements Listener {
     public void onCrouch(PlayerToggleSneakEvent event) {
         Player player = event.getPlayer();
 
-        if (event.isSneaking() && plugin.dwarves.contains(player)) {
+        if (event.isSneaking() && !plugin.monsters.contains(player) && plugin.rangerKit.contains(player)) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 0));
         }
         else {
@@ -432,25 +438,26 @@ public class GameListener implements Listener {
     public void onDwarfMenu(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
         ItemStack clicked = event.getCurrentItem();
-        Material clickedType = clicked.getType();
 
-        if (clickedType == null) {
+        if (clicked == null || !clicked.hasItemMeta()) {
             return;
         }
 
-        if (this.plugin.dwarves.contains(player)) {
-            if (clickedType != null && clickedType == Material.ARROW) {
-                event.setCancelled(true);
-            }
-            else if (clickedType != null && clickedType == Material.BLACK_STAINED_GLASS_PANE) {
-                event.setCancelled(true);
+        if (!event.getView().getTitle().equals("Select a Kit - BETA")) {
+            if (this.plugin.dwarves.contains(player)) {
+                if (clicked.getType() != null && clicked.getType() == Material.ARROW) {
+                    event.setCancelled(true);
+                }
+                else if (clicked.getType() != null && clicked.getType() == Material.BLACK_STAINED_GLASS_PANE) {
+                    event.setCancelled(true);
+                }
+                else {
+                    event.setCancelled(false);
+                }
             }
             else {
                 event.setCancelled(false);
             }
-        }
-        else {
-            event.setCancelled(false);
         }
     }
 
@@ -465,11 +472,19 @@ public class GameListener implements Listener {
             if (clickedType == Material.BROWN_DYE) {
                 GameListener.this.plugin.warriorKit.add(player);
                 GameListener.this.plugin.rangerKit.remove(player);
+                GameListener.this.plugin.paladinKit.remove(player);
                 player.sendMessage(ChatColor.GOLD + "Your kit has been set to " + ChatColor.LIGHT_PURPLE + "Warrior" + ChatColor.GOLD + ".");
             }
-            if (clickedType == Material.BOW) {
+            else if (clickedType == Material.STONE_SWORD) {
+                GameListener.this.plugin.paladinKit.add(player);
+                GameListener.this.plugin.rangerKit.remove(player);
+                GameListener.this.plugin.warriorKit.remove(player);
+                player.sendMessage(ChatColor.GOLD + "Your kit has been set to " + ChatColor.LIGHT_PURPLE + "Paladin" + ChatColor.GOLD + ".");
+            }
+            else if (clickedType == Material.BOW) {
                 GameListener.this.plugin.rangerKit.add(player);
                 GameListener.this.plugin.warriorKit.remove(player);
+                GameListener.this.plugin.paladinKit.remove(player);
                 player.sendMessage(ChatColor.GOLD + "Your kit has been set to " + ChatColor.LIGHT_PURPLE + "Ranger" + ChatColor.GOLD + ".");
             }
             event.setCancelled(true);
@@ -480,17 +495,179 @@ public class GameListener implements Listener {
     @EventHandler
     public void onDwarfLoadoutClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
+        ItemStack clicked = event.getCurrentItem();
 
-        if (event.getView().getTitle().equals("Dwarf Loadout") && event.getSlotType() != InventoryType.SlotType.OUTSIDE) {
-            ItemStack clicked = event.getCurrentItem();
-            Material clickedType = clicked.getType();
+        if (event.getView().getTitle().equals("Select a Kit - BETA") && event.getSlotType() != InventoryType.SlotType.OUTSIDE) {
+            if (clicked == null || !clicked.hasItemMeta())
+                return;
 
-            if (clickedType == Material.MELON_SEEDS) {
-                KitGUI.openMeleeGUI(player);
+            if (clicked.getType() == Material.BROWN_DYE) {
+                if (clicked.getItemMeta().getLore().contains("§d(Click to Un-equip Class)") || this.plugin.rangerKit.contains(player) || this.plugin.paladinKit.contains(player)) {
+                    GameListener.this.plugin.warriorKit.remove(player);
+
+                    event.setCurrentItem(DwarfItems.warriorKit);
+                    event.getInventory().setItem(45, DwarfLoadoutItems.pointsRemaining);
+
+                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 0.3F);
+                }
+                else {
+                    GameListener.this.plugin.warriorKit.add(player);
+                    GameListener.this.plugin.rangerKit.remove(player);
+                    GameListener.this.plugin.paladinKit.remove(player);
+
+                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1.0F);
+
+                    ItemStack item = clicked;
+                    warriorUnequipped(item);
+
+                    ItemStack points = event.getInventory().getItem(45);
+                    ItemMeta pointsMeta = points.getItemMeta();
+                    points.setAmount(1);
+                    points.setItemMeta(pointsMeta);
+
+                    event.getInventory().setItem(45, points);
+
+                    event.setCurrentItem(item);
+                }
             }
+            else if (clicked.getType() == Material.STONE_SWORD) {
+                if (clicked.getItemMeta().getLore().contains("§d(Click to Un-equip Class)") || this.plugin.rangerKit.contains(player) || this.plugin.warriorKit.contains(player)) {
+                    GameListener.this.plugin.paladinKit.remove(player);
 
+                    event.setCurrentItem(DwarfItems.paladinKit);
+                    event.getInventory().setItem(45, DwarfLoadoutItems.pointsRemaining);
+
+                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 0.3F);
+                }
+                else {
+                    GameListener.this.plugin.warriorKit.remove(player);
+                    GameListener.this.plugin.rangerKit.remove(player);
+                    GameListener.this.plugin.paladinKit.add(player);
+
+                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1.0F);
+
+                    ItemStack item = clicked;
+                    paladinUnequipped(item);
+
+                    ItemStack points = event.getInventory().getItem(45);
+                    ItemMeta pointsMeta = points.getItemMeta();
+                    points.setAmount(1);
+                    points.setItemMeta(pointsMeta);
+
+                    event.getInventory().setItem(45, points);
+
+                    event.setCurrentItem(item);
+                }
+            }
+            else if (clicked.getType() == Material.BOW) {
+                if (clicked.getItemMeta().getLore().contains("§d(Click to Un-equip Class)") || this.plugin.paladinKit.contains(player) || this.plugin.warriorKit.contains(player)) {
+                    GameListener.this.plugin.rangerKit.remove(player);
+
+                    event.setCurrentItem(DwarfItems.rangerKit);
+                    event.getInventory().setItem(45, DwarfLoadoutItems.pointsRemaining);
+
+                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 0.3F);
+                }
+                else {
+                    GameListener.this.plugin.rangerKit.add(player);
+                    GameListener.this.plugin.warriorKit.remove(player);
+                    GameListener.this.plugin.paladinKit.remove(player);
+
+                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1.0F);
+
+                    ItemStack item = clicked;
+                    rangerUnequipped(item);
+
+                    ItemStack points = event.getInventory().getItem(45);
+                    ItemMeta pointsMeta = points.getItemMeta();
+                    points.setAmount(1);
+                    points.setItemMeta(pointsMeta);
+
+                    event.getInventory().setItem(45, points);
+
+                    event.setCurrentItem(item);
+                }
+            }
+            else if (clicked.getType() == Material.MELON_SEEDS) {
+                player.openInventory(KitGUI.kitGUI);
+            }
             event.setCancelled(true);
         }
+
+        if (event.getView().getTitle().equals("Dwarf Loadout") && event.getSlotType() != InventoryType.SlotType.OUTSIDE) {
+            if (clicked.getType() == Material.PUMPKIN_SEEDS) {
+                player.openInventory(KitGUI.kitSelectorGUI);
+            }
+            else if (clicked.getType() == Material.MELON_SEEDS) {
+                player.openInventory(KitGUI.kitMeleeGUI);
+            }
+            event.setCancelled(true);
+        }
+    }
+
+    public static void warriorUnequipped(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        item.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 1);
+        meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS);
+
+        List<String> lore = new ArrayList<>();
+        lore.add("§a64 points");
+        lore.add("§d(Click to Un-equip Class)");
+        lore.add(" ");
+
+        lore.add("§eType: §bClass");
+        lore.add(" ");
+
+        lore.add("§5§oWarriors are the fighters of the front line.");
+        lore.add("§5§oThey wield a powerful sword, this sword gives PROC for 3 seconds.");
+        meta.setLore(lore);
+
+        item.setAmount(1);
+        item.setItemMeta(meta);
+    }
+
+    public static void paladinUnequipped(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        item.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 1);
+        meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS);
+
+        List<String> lore = new ArrayList<>();
+        lore.add("§a64 points");
+        lore.add("§d(Click to Un-equip Class)");
+        lore.add(" ");
+
+        lore.add("§eType: §bClass");
+        lore.add(" ");
+
+        lore.add("§5§oPaladins are the protecting the light.");
+        lore.add("§5§oThey wield a powerful mace to hold the line and tools");
+        lore.add("§5§oto call forth the light to battle.");
+        meta.setLore(lore);
+
+        item.setAmount(1);
+        item.setItemMeta(meta);
+    }
+
+    public static void rangerUnequipped(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        item.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 1);
+        meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS);
+
+        List<String> lore = new ArrayList<>();
+        lore.add("§a64 points");
+        lore.add("§d(Click to Un-equip Class)");
+        lore.add(" ");
+
+        lore.add("§eType: §bClass");
+        lore.add(" ");
+
+        lore.add("§5§oRangers are the defenders of the keep.");
+        lore.add("§5§oThey wield a powerful bow, heal allies, and repair");
+        lore.add("§5§othe walls in desperate situations against the demons.");
+        meta.setLore(lore);
+
+        item.setAmount(1);
+        item.setItemMeta(meta);
     }
 
     @EventHandler
@@ -556,9 +733,51 @@ public class GameListener implements Listener {
 
     public int neededPlayers;
     @EventHandler
+    public void onMapChange(PlayerChangedWorldEvent event) {
+        Player player = event.getPlayer();
+
+        if (player.getWorld().equals(this.plugin.newWorld)) {
+            if (!plugin.gameRunning) {
+                barCountdown.addBarToPlayer(player);
+                barCountdown.countdownBar.setProgress(0D);
+
+                for (PotionEffect effect : player.getActivePotionEffects())
+                    player.removePotionEffect(effect.getType());
+
+                player.getInventory().setArmorContents(null);
+                player.getInventory().clear();
+
+                if (!player.getInventory().contains(DwarfItems.hatSelector)) {
+                    player.getInventory().addItem(new ItemStack(DwarfItems.hatSelector));
+                }
+
+                if (!player.getInventory().contains(DwarfItems.classSelectorBook)) {
+                    player.getInventory().addItem(new ItemStack(DwarfItems.classSelectorBook));
+                }
+            }
+
+            if (this.plugin.autoStartTime > 0 && !this.plugin.gameRunning && neededPlayers == this.plugin.minPlayers && !this.plugin.override) {
+                MCEvolved.startCountdown(this.plugin.autoStartTime, this.plugin.minPlayers);
+                barCountdown.countdownBar();
+            }
+        }
+        else if (!player.getWorld().equals(this.plugin.newWorld)) {
+            neededPlayers--;
+
+            if (neededPlayers != this.plugin.minPlayers && !this.plugin.gameRunning) {
+                MCEvolved.stopCountdown();
+                barCountdown.barWaitingForPlayers();
+                barCountdown.stopBarTimer();
+            }
+        }
+    }
+
+    @EventHandler
     public void onJoin(PlayerJoinEvent event) {
+        Player players = event.getPlayer();
+
         neededPlayers++;
-        if (!plugin.gameRunning) {
+        if (!plugin.gameRunning && players.getWorld().equals(this.plugin.newWorld)) {
             barCountdown.addBarToPlayer(event.getPlayer());
             barCountdown.countdownBar.setProgress(0D);
 
@@ -578,12 +797,12 @@ public class GameListener implements Listener {
             plugin.tips.remove(event.getPlayer());
         }
 
-        if (this.plugin.autoStartTime > 0 && !this.plugin.gameRunning && neededPlayers == this.plugin.minPlayers && !this.plugin.override) {
+        if (this.plugin.autoStartTime > 0 && !this.plugin.gameRunning && neededPlayers == this.plugin.minPlayers && !this.plugin.override && players.getWorld().equals(this.plugin.newWorld)) {
             MCEvolved.startCountdown(this.plugin.autoStartTime, this.plugin.minPlayers);
             barCountdown.countdownBar();
         }
 
-        if (this.plugin.gameRunning) {
+        if (this.plugin.gameRunning && players.getWorld().equals(this.plugin.newWorld)) {
             this.plugin.initializeScoreboard();
             this.plugin.updateScoreboards();
 
@@ -628,7 +847,7 @@ public class GameListener implements Listener {
     public void onQuit(PlayerQuitEvent event) {
         neededPlayers--;
 
-        if (neededPlayers != this.plugin.minPlayers && !this.plugin.gameRunning) {
+        if (neededPlayers != this.plugin.minPlayers && !this.plugin.gameRunning && event.getPlayer().getWorld().equals(this.plugin.newWorld)) {
             MCEvolved.stopCountdown();
             barCountdown.barWaitingForPlayers();
             barCountdown.stopBarTimer();

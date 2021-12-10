@@ -1,6 +1,5 @@
 package main.me.volt.dvz.items;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -16,7 +15,9 @@ public class DwarfLoadoutItems {
     public static ItemStack leftArrow;
     public static ItemStack rightArrow;
 
-    // DEFAULT AT THE MOMENT
+    public static ItemStack pointsRemaining;
+
+    // ITEMS TO SHOW FOR EQUIPPED
     public static ItemStack dwarvenRunebladeEquipped;
     public static ItemStack dwarvenShortbowEquipped;
     public static ItemStack jimmyJuiceEquipped;
@@ -27,12 +28,19 @@ public class DwarfLoadoutItems {
     public static ItemStack stoneMason1Equipped;
     public static ItemStack torchbearer1Equipped;
 
+    // ITEMS TO SHOW IN GENERAL
+    public static ItemStack dwarvenRuneblade;
+
     public static void init() {
         createDivider();
         createLeftArrow();
         createRightArrow();
 
+        createPointsRemaining();
+
         createRunebladeEquipped();
+        createRuneblade();
+
         createShortbowEquipped();
         createJimmyJuiceEquipped();
         createDwarvenArmorEquipped();
@@ -41,6 +49,15 @@ public class DwarfLoadoutItems {
         createWigglyWrenches1Equipped();
         createStoneMason1Equipped();
         createTorchbearer1Equipped();
+    }
+
+    private static void createPointsRemaining() {
+        ItemStack item = new ItemStack(Material.GOLD_INGOT, 64);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName("§bPoints Remaining");
+
+        item.setItemMeta(meta);
+        pointsRemaining = item;
     }
 
     private static void createDivider() {
@@ -96,6 +113,33 @@ public class DwarfLoadoutItems {
 
         item.setItemMeta(meta);
         dwarvenRunebladeEquipped = item;
+    }
+
+    private static void createRuneblade() {
+        ItemStack item = new ItemStack(Material.DIAMOND_AXE, 16);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName("§bDwarven Runeblade");
+
+        List<String> lore = new ArrayList<>();
+        lore.add("§a16 points");
+        lore.add("§d(Click to Add)");
+        lore.add(" ");
+
+        lore.add("§eType: §bMelee Weapon");
+
+        lore.add(" ");
+        lore.add("§5§oForged by the great Dwarven blacksmith");
+        lore.add("§5§oGoldfounder Pause, this Dwarven Runeblade");
+        lore.add("§5§ois made out of ancient clocks and dyed");
+        lore.add("§5§owith the blood of Ice Dragon Yrvader,");
+        lore.add("§5§oCrassle's late father.");
+        lore.add(" ");
+
+        lore.add("§0§kDwarven Runeblade");
+        meta.setLore(lore);
+
+        item.setItemMeta(meta);
+        dwarvenRuneblade = item;
     }
 
     private static void createShortbowEquipped() {

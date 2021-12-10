@@ -1,16 +1,30 @@
 package main.me.volt.dvz.gui;
 
+import main.me.volt.dvz.items.DwarfItems;
 import main.me.volt.dvz.items.DwarfLoadoutItems;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 public class KitGUI {
+    public static Inventory kitSelectorGUI = Bukkit.createInventory(null, 54, "Select a Kit - BETA");
     public static Inventory kitGUI = Bukkit.createInventory(null, 54, "Dwarf Loadout");
     public static Inventory kitMeleeGUI = Bukkit.createInventory(null, 54, "Dwarf Loadout | Melee");
 
     public KitGUI() {
 
+    }
+
+    public static boolean openKitSelectorGUI(Player player) {
+        kitSelectorGUI.setItem(0, DwarfItems.warriorKit);
+        kitSelectorGUI.setItem(1, DwarfItems.paladinKit);
+        kitSelectorGUI.setItem(2, DwarfItems.rangerKit);
+
+        kitSelectorGUI.setItem(45, DwarfLoadoutItems.pointsRemaining);
+        kitSelectorGUI.setItem(50, DwarfLoadoutItems.rightArrow);
+
+        player.openInventory(kitSelectorGUI);
+        return true;
     }
 
     public static boolean openGUI(Player player) {
@@ -45,7 +59,7 @@ public class KitGUI {
     }
 
     public static boolean openMeleeGUI(Player player) {
-        kitMeleeGUI.setItem(0, DwarfLoadoutItems.dwarvenArmorEquipped);
+        kitMeleeGUI.setItem(0, DwarfLoadoutItems.dwarvenRuneblade);
 
         player.openInventory(kitMeleeGUI);
         return true;

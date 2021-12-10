@@ -43,10 +43,9 @@ public class ShrineManager {
         this.plugin = plugin;
         this.spawnProtector = new SpawnProtector();
 
-        World world = Bukkit.getWorlds().get(0);
         String[] sp = config.getString("mob-spawn", "0,100,0,0").split(",");
 
-        this.startingMobSpawn = new Location(world, Double.parseDouble(sp[0]), Double.parseDouble(sp[1]), Double.parseDouble(sp[2]), Float.parseFloat(sp[3]), 0.0F);
+        this.startingMobSpawn = new Location(plugin.newWorld, Double.parseDouble(sp[0]), Double.parseDouble(sp[1]), Double.parseDouble(sp[2]), Float.parseFloat(sp[3]), 0.0F);
         this.startingMobSpawnInvuln = config.getInt("mob-spawn-invuln", 10);
         this.startingMobSpawnPulseRange = config.getInt("mob-spawn-pulse-range", 25);
 
@@ -328,11 +327,11 @@ public class ShrineManager {
             String s = config.getString("coords");
             String[] coords = s.split(",");
 
-            this.center = new Location(Bukkit.getWorlds().get(0), Double.parseDouble(coords[0]), Double.parseDouble(coords[1]), Double.parseDouble(coords[2]), Float.parseFloat(coords[3]), 0.0F);
+            this.center = new Location(plugin.newWorld, Double.parseDouble(coords[0]), Double.parseDouble(coords[1]), Double.parseDouble(coords[2]), Float.parseFloat(coords[3]), 0.0F);
 
             coords = config.getString("mob-spawn", s).split(",");
 
-            this.mobSpawn = new Location(Bukkit.getWorlds().get(0), Double.parseDouble(coords[0]), Double.parseDouble(coords[1]), Double.parseDouble(coords[2]), Float.parseFloat(coords[3]), 0.0F);
+            this.mobSpawn = new Location(plugin.newWorld, Double.parseDouble(coords[0]), Double.parseDouble(coords[1]), Double.parseDouble(coords[2]), Float.parseFloat(coords[3]), 0.0F);
             this.name = config.getString("name", "Shrine");
             this.captureRadius = config.getInt("capture-radius", 10);
             this.captureBoundingBox = new BoundingBox(this.center, this.captureRadius);

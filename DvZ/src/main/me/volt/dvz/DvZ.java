@@ -109,6 +109,7 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
     public Set<Player> monsters;
 
     public Set<Player> warriorKit;
+    public Set<Player> paladinKit;
     public Set<Player> rangerKit;
 
     ScoreboardManager manager;
@@ -138,6 +139,8 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
     BukkitTask endTask;
     BukkitTask monsterSpecialTask;
 
+    BukkitTask updateScoreboardTask;
+
     private Bleeder bleeder;
 
     public GameEvent gameEvent;
@@ -151,11 +154,8 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
     private PassiveManager passiveManager = new PassiveManager();
 
     public ArrayList<String> worldNames = new ArrayList<String>();
-    List<String> excludeFolders = Arrays.asList("plugins", "logs", "crash-reports", "cache");
-    public int randomWorld;
-
-    private World newWorld;
-    private World currentWorld;
+    List<String> excludeFolders = Arrays.asList("plugins", "logs", "crash-reports", "cache", "world");
+    public World newWorld;
 
     public Inventory srChestInventory;
 
@@ -193,11 +193,10 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         passiveManager.addListener("shrinedestroyed", ShrineDestroyedListener.class);
     }
 
-    //File mapsFolder = new File(Bukkit.getWorldContainer(), "maps");
     public void onEnable() {
-        if (gameRunning) {
-            if (!Bukkit.getOnlinePlayers().isEmpty()) {
-                this.initializeScoreboard();
+        for (File file : Bukkit.getWorldContainer().listFiles()) {
+            if (file.isDirectory() && !excludeFolders.contains(file.getName())) {
+                worldNames.add(file.getName());
             }
         }
 
@@ -205,134 +204,47 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         DwarfLoadoutItems.init();
         srChestInventory = this.getServer().createInventory(null, 54, ChatColor.DARK_BLUE + "Shared Resource Chest");
 
+        kitSelectorItems();
+        dwarfLoadoutItems();
+        loadoutMeleeItems();
+
         File configFile = new File(getDataFolder(), "config.yml");
 
-        for (File file : Bukkit.getWorldContainer().listFiles()) {
-            if (file.isDirectory() && !excludeFolders.contains(file.getName())) {
-                worldNames.add(file.getName());
-            }
-        }
-
-//        randomWorld = random.nextInt(worldNames.size());
-//        newWorld = this.getServer().createWorld(new WorldCreator(worldNames.get(randomWorld)));
-//        this.getServer().unloadWorld("world", false);
-//        this.getLogger().info("Loaded map: " + worldNames.get(randomWorld));
-//
-//        currentWorld = getServer().getWorld(worldNames.get(randomWorld));
-
-        if (!configFile.exists()) {
-            System.out.println("Config file not found! Creating default config file...");
-            saveDefaultConfig();
-        }
-        else {
-            System.out.println("Config file found!");
-        }
+//        if (!configFile.exists()) {
+//            System.out.println("Config file not found! Creating default config file...");
+//            saveDefaultConfig();
+//        }
+//        else {
+//            System.out.println("Config file found!");
+//        }
 
         YamlConfiguration config = new YamlConfiguration();
 
-        try {
-            config.load(configFile);
-        }
-        catch (Exception e) {
-            getLogger().severe("FAILED TO LOAD CONFIG FILE!");
-            e.printStackTrace();
-            setEnabled(false);
-            return;
-        }
+//        try {
+//            config.load(configFile);
+//        }
+//        catch (Exception e) {
+//            getLogger().severe("FAILED TO LOAD CONFIG FILE!");
+//            e.printStackTrace();
+//            setEnabled(false);
+//            return;
+//        }
 
-        Bukkit.getWorlds().get(0).setDifficulty(Difficulty.HARD);
+        Bukkit.getServer().unloadWorld(getServer().getWorlds().get(0), false);
 
-        Bukkit.getWorlds().get(0).setStorm(false);
-        Bukkit.getWorlds().get(0).setWeatherDuration(300000);
-
-        Bukkit.getWorlds().get(0).setGameRule(GameRule.DO_TILE_DROPS, false);
-        Bukkit.getWorlds().get(0).setGameRule(GameRule.SPAWN_RADIUS, 1);
-        Bukkit.getWorlds().get(0).setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
-        Bukkit.getWorlds().get(0).setGameRule(GameRule.KEEP_INVENTORY, false);
-        Bukkit.getWorlds().get(0).setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
-
-        this.mapName = config.getString("map-name", "map");
-        this.autoStartTime = config.getInt("auto-start-time", 0);
-
-        this.minPlayers = config.getInt("min-players", 0);
-        this.minPlayersForHeroes = config.getInt("min-players-for-heroes", 5);
-
-        this.monsterReleaseTime = config.getInt("monster-release-time", 0);
-        this.scoreInterval = config.getInt("score-interval", 30);
-        this.percentMonsters = config.getInt("percent-monsters", 30);
-
-        this.monsterSpecialInterval = config.getInt("monster-special-interval", 480);
-
-        this.becomeDwarfSpell = MagicSpells.getSpellByInternalName(config.getString("become-dwarf-spell", "dwarf_become_dwarf"));
-        this.becomeMonsterSpell = MagicSpells.getSpellByInternalName(config.getString("become-monster-spell", "monster_forcegroup"));
-        this.monsterSpecialSpell = MagicSpells.getSpellByInternalName(config.getString("monster-special-spell", "monster-special"));
-
-        this.killDwarvesOnJoin = config.getBoolean("kill-dwarves-on-join", false);
-        this.startEndTimerAtPercent = config.getInt("start-end-timer-at-percent", 20);
-        this.endTimerDuration = config.getInt("end-timer-duration", 300);
-
-        this.startCommands = config.getStringList("start-commands");
-        this.monsterReleaseCommands = config.getStringList("monster-release-commands");
-        this.specialDwarves = config.getStringList("special-dwarves");
+        loadRandomWorld();
         this.heroes = new HashMap<>();
 
-        String mapSpawnString = config.getString("map-spawn", "");
-        String mobSpawnString = config.getString("mob-spawn", "");
-        String dwarfSpawnString = config.getString("dwarf-spawn", "");
+        newWorld.setDifficulty(Difficulty.HARD);
 
-        String quarryLocString = config.getString("quarry-location", "");
-        String blacksmithTableLocString = config.getString("blacksmith-location", "");
-        String sawmillLocString = config.getString("sawmill-location", "");
+        newWorld.setStorm(false);
+        newWorld.setWeatherDuration(300000);
 
-        if (quarryLocString.isEmpty()) {
-            this.quarryLocation = Bukkit.getWorlds().get(0).getSpawnLocation();
-        }
-        else {
-            String[] split = quarryLocString.split(",");
-            this.quarryLocation = new Location(Bukkit.getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
-        }
-
-        if (blacksmithTableLocString.isEmpty()) {
-            this.blacksmithTablesLocation = Bukkit.getWorlds().get(0).getSpawnLocation();
-        }
-        else {
-            String[] split = blacksmithTableLocString.split(",");
-            this.blacksmithTablesLocation = new Location(Bukkit.getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
-        }
-
-        if (sawmillLocString.isEmpty()) {
-            this.sawmillLocation = Bukkit.getWorlds().get(0).getSpawnLocation();
-        }
-        else {
-            String[] split = sawmillLocString.split(",");
-            this.sawmillLocation = new Location(Bukkit.getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
-        }
-
-        if (mapSpawnString.isEmpty()) {
-            this.mapSpawn = Bukkit.getWorlds().get(0).getSpawnLocation();
-        }
-        else {
-            String[] split = mapSpawnString.split(",");
-            this.mapSpawn = new Location(Bukkit.getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
-        }
-
-        if (mobSpawnString.isEmpty()) {
-            this.mobSpawn = Bukkit.getWorlds().get(0).getSpawnLocation();
-        }
-        else {
-            String[] split = mobSpawnString.split(",");
-            this.mobSpawn = new Location(Bukkit.getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
-        }
-
-        if (dwarfSpawnString.isEmpty()) {
-            this.dwarfSpawn = Bukkit.getWorlds().get(0).getSpawnLocation();
-        }
-        else {
-            String[] split = dwarfSpawnString.split(",");
-            this.dwarfSpawn = new Location(Bukkit.getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
-        }
-
-        this.shrineManager = new ShrineManager(this, config);
+        newWorld.setGameRule(GameRule.DO_TILE_DROPS, false);
+        newWorld.setGameRule(GameRule.SPAWN_RADIUS, 1);
+        newWorld.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
+        newWorld.setGameRule(GameRule.KEEP_INVENTORY, false);
+        newWorld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
 
         this.tips = Collections.synchronizedSet(new HashSet<>());
 
@@ -340,6 +252,7 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         this.monsters = Collections.synchronizedSet(new HashSet<>());
 
         this.warriorKit = Collections.synchronizedSet(new HashSet<>());
+        this.paladinKit = Collections.synchronizedSet(new HashSet<>());
         this.rangerKit = Collections.synchronizedSet(new HashSet<>());
 
         if (this.becomeDwarfSpell == null) {
@@ -380,27 +293,138 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         endGame();
     }
 
-    private void loadRandomWorld(Player player) {
+    private void loadRandomWorld() {
+        if (gameEnded)
+            updateScoreboardTask.cancel();
+
         Random rand = new Random();
         int randomMap = rand.nextInt(worldNames.size());
 
+        Bukkit.unloadWorld(newWorld, false);
         newWorld = getServer().createWorld(new WorldCreator(worldNames.get(randomMap)));
-        getServer().unloadWorld(currentWorld, false);
 
-        player.teleport(newWorld.getSpawnLocation());
+        File worldConfigFile = new File(newWorld.getWorldFolder(), "config.yml");
+        YamlConfiguration worldConfig = new YamlConfiguration();
 
-        System.out.println("Changing map to: " + worldNames.get(randomMap));
+        try {
+            worldConfig.load(worldConfigFile);
+        }
+        catch (Exception e) {
+            getLogger().severe("FAILED TO LOAD CONFIG FILE! Does world have config?");
+            e.printStackTrace();
+            setEnabled(false);
+            return;
+        }
+
+        newWorld.setDifficulty(Difficulty.HARD);
+
+        newWorld.setStorm(false);
+        newWorld.setWeatherDuration(300000);
+
+        newWorld.setGameRule(GameRule.DO_TILE_DROPS, false);
+        newWorld.setGameRule(GameRule.SPAWN_RADIUS, 1);
+        newWorld.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
+        newWorld.setGameRule(GameRule.KEEP_INVENTORY, false);
+        newWorld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
+
+        this.mapName = worldConfig.getString("map-name", "map");
+        this.autoStartTime = worldConfig.getInt("auto-start-time", 0);
+
+        this.minPlayers = worldConfig.getInt("min-players", 0);
+        this.minPlayersForHeroes = worldConfig.getInt("min-players-for-heroes", 5);
+
+        this.monsterReleaseTime = worldConfig.getInt("monster-release-time", 0);
+        this.scoreInterval = worldConfig.getInt("score-interval", 30);
+        this.percentMonsters = worldConfig.getInt("percent-monsters", 30);
+
+        this.monsterSpecialInterval = worldConfig.getInt("monster-special-interval", 480);
+
+        this.becomeDwarfSpell = MagicSpells.getSpellByInternalName(worldConfig.getString("become-dwarf-spell", "dwarf_become_dwarf"));
+        this.becomeMonsterSpell = MagicSpells.getSpellByInternalName(worldConfig.getString("become-monster-spell", "monster_forcegroup"));
+        this.monsterSpecialSpell = MagicSpells.getSpellByInternalName(worldConfig.getString("monster-special-spell", "monster-special"));
+
+        this.killDwarvesOnJoin = worldConfig.getBoolean("kill-dwarves-on-join", false);
+        this.startEndTimerAtPercent = worldConfig.getInt("start-end-timer-at-percent", 20);
+        this.endTimerDuration = worldConfig.getInt("end-timer-duration", 300);
+
+        this.startCommands = worldConfig.getStringList("start-commands");
+        this.monsterReleaseCommands = worldConfig.getStringList("monster-release-commands");
+        this.specialDwarves = worldConfig.getStringList("special-dwarves");
+
+        String mapSpawnString = worldConfig.getString("map-spawn", "");
+        String mobSpawnString = worldConfig.getString("mob-spawn", "");
+        String dwarfSpawnString = worldConfig.getString("dwarf-spawn", "");
+
+        String quarryLocString = worldConfig.getString("quarry-location", "");
+        String blacksmithTableLocString = worldConfig.getString("blacksmith-location", "");
+        String sawmillLocString = worldConfig.getString("sawmill-location", "");
+
+        if (quarryLocString.isEmpty()) {
+            this.quarryLocation = newWorld.getSpawnLocation();
+        }
+        else {
+            String[] split = quarryLocString.split(",");
+            this.quarryLocation = new Location(newWorld, Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        }
+
+        if (blacksmithTableLocString.isEmpty()) {
+            this.blacksmithTablesLocation = newWorld.getSpawnLocation();
+        }
+        else {
+            String[] split = blacksmithTableLocString.split(",");
+            this.blacksmithTablesLocation = new Location(newWorld, Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        }
+
+        if (sawmillLocString.isEmpty()) {
+            this.sawmillLocation = newWorld.getSpawnLocation();
+        }
+        else {
+            String[] split = sawmillLocString.split(",");
+            this.sawmillLocation = new Location(newWorld, Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        }
+
+        if (mapSpawnString.isEmpty()) {
+            this.mapSpawn = newWorld.getSpawnLocation();
+        }
+        else {
+            String[] split = mapSpawnString.split(",");
+            this.mapSpawn = new Location(newWorld, Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        }
+
+        if (mobSpawnString.isEmpty()) {
+            this.mobSpawn = newWorld.getSpawnLocation();
+        }
+        else {
+            String[] split = mobSpawnString.split(",");
+            this.mobSpawn = new Location(newWorld, Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        }
+
+        if (dwarfSpawnString.isEmpty()) {
+            this.dwarfSpawn = newWorld.getSpawnLocation();
+        }
+        else {
+            String[] split = dwarfSpawnString.split(",");
+            this.dwarfSpawn = new Location(newWorld, Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        }
+
+        this.shrineManager = new ShrineManager(this, worldConfig);
+
+        barCountdown = new BarCountdown();
+        barCountdown.barWaitingForPlayers();
+
+        for (Player players : Bukkit.getOnlinePlayers()) {
+            dwarves.remove(players);
+            rangerKit.remove(players);
+            warriorKit.remove(players);
+            paladinKit.remove(players);
+
+            monsters.remove(players);
+
+            heroes.remove(players.getName());
+        }
+
+        System.out.println("Loaded World: " + worldNames.get(randomMap));
     }
-
-//    @EventHandler
-//    private void onJoin(PlayerJoinEvent event) {
-//        new BukkitRunnable() {
-//            public void run() {
-//                Player player = event.getPlayer();
-//                player.teleport(newWorld.getSpawnLocation());
-//            }
-//        }.runTaskLater(this, 20L);
-//    }
 
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (command.getName().equalsIgnoreCase("startgame")) {
@@ -626,7 +650,7 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                 Player player = (Player) sender;
 
                 if (!this.gameRunning && !this.gameEnded) {
-                    KitGUI.openGUI(player);
+                    player.openInventory(KitGUI.kitSelectorGUI);
                 }
             }
         }
@@ -656,6 +680,18 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                 else if (sender instanceof Player) {
                     this.shrineManager.respawnMob((Player) sender);
                 }
+            }
+        }
+        else if (!command.getName().equalsIgnoreCase("randommap")) {
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+
+                loadRandomWorld();
+
+                for (Player players : Bukkit.getOnlinePlayers()) {
+                    players.teleport(newWorld.getSpawnLocation());
+                }
+                player.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Map has been set to: " + ChatColor.AQUA + newWorld.toString());
             }
         }
         return true;
@@ -1076,11 +1112,11 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
             players.setScoreboard(scoreboard);
         }
 
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+        updateScoreboardTask = new BukkitRunnable() {
             public void run() {
                 updateScoreboards();
             }
-        }, 20L, 20L);
+        }.runTaskTimer(this, 20L, 20L);
     }
 
     private void doomEventTimer() {
@@ -1176,14 +1212,6 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
             this.timeScore = this.objective.getScore(ChatColor.LIGHT_PURPLE + "Time");
             this.timeScore.setScore(totalTime);
         }
-    }
-
-    public void updateScoreboard() {
-        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this.plugin, new Runnable() {
-            public void run() {
-                DvZ.this.updateScoreboards();
-            }
-        }, 0L, 100L);
     }
 
     public void recount() {
@@ -1306,6 +1334,18 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                     player.getInventory().setArmorContents(null);
                 }
             }
+
+            Bukkit.getScheduler().runTaskLater(this, new Runnable() {
+                public void run() {
+                    loadRandomWorld();
+                    gameEnded = false;
+
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        player.teleport(newWorld.getSpawnLocation());
+                        barCountdown.removeBarFromPlayer(player);
+                    }
+                }
+            }, 600L);
         }
     }
 
@@ -1331,5 +1371,46 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                 System.out.println("Invalid player.");
             }
         }
+    }
+
+    private void kitSelectorItems() {
+        KitGUI.kitSelectorGUI.setItem(0, DwarfItems.warriorKit);
+        KitGUI.kitSelectorGUI.setItem(1, DwarfItems.paladinKit);
+        KitGUI.kitSelectorGUI.setItem(2, DwarfItems.rangerKit);
+
+        KitGUI.kitSelectorGUI.setItem(45, DwarfLoadoutItems.pointsRemaining);
+        KitGUI.kitSelectorGUI.setItem(49, DwarfLoadoutItems.rightArrow);
+    }
+
+    private void dwarfLoadoutItems() {
+        // DEFAULT
+        KitGUI.kitGUI.setItem(0, DwarfLoadoutItems.dwarvenRunebladeEquipped);
+        KitGUI.kitGUI.setItem(1, DwarfLoadoutItems.dwarvenShortbowEquipped);
+        KitGUI.kitGUI.setItem(2, DwarfLoadoutItems.jimmyJuiceEquipped);
+        KitGUI.kitGUI.setItem(3, DwarfLoadoutItems.dwarvenArmorEquipped);
+        KitGUI.kitGUI.setItem(4, DwarfLoadoutItems.magicStone1Equipped);
+        KitGUI.kitGUI.setItem(5, DwarfLoadoutItems.enchantedLamps1Equipped);
+        KitGUI.kitGUI.setItem(6, DwarfLoadoutItems.wigglyWrenches1Equipped);
+        KitGUI.kitGUI.setItem(7, DwarfLoadoutItems.stoneMason1Equipped);
+        KitGUI.kitGUI.setItem(8, DwarfLoadoutItems.torchbearer1Equipped);
+
+
+        // DIVIDERS
+        KitGUI.kitGUI.setItem(9, DwarfLoadoutItems.divider);
+        KitGUI.kitGUI.setItem(10, DwarfLoadoutItems.divider);
+        KitGUI.kitGUI.setItem(11, DwarfLoadoutItems.divider);
+        KitGUI.kitGUI.setItem(12, DwarfLoadoutItems.divider);
+        KitGUI.kitGUI.setItem(13, DwarfLoadoutItems.divider);
+        KitGUI.kitGUI.setItem(14, DwarfLoadoutItems.divider);
+        KitGUI.kitGUI.setItem(15, DwarfLoadoutItems.divider);
+        KitGUI.kitGUI.setItem(16, DwarfLoadoutItems.divider);
+        KitGUI.kitGUI.setItem(17, DwarfLoadoutItems.divider);
+
+        KitGUI.kitGUI.setItem(48, DwarfLoadoutItems.leftArrow);
+        KitGUI.kitGUI.setItem(50, DwarfLoadoutItems.rightArrow);
+    }
+
+    private void loadoutMeleeItems() {
+        KitGUI.kitMeleeGUI.setItem(0, DwarfLoadoutItems.dwarvenRuneblade);
     }
 }

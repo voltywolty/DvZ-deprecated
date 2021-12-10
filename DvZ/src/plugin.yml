@@ -62,6 +62,9 @@ commands:
   loadout:
     description: Shows loadout to equip what player wants.
     permission: dvz.testing
+  randommap:
+    description: Loads a random playable map.
+    permission: dvz.admin
 
 permissions:
   dvz.admin:

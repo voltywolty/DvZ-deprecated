@@ -1,6 +1,7 @@
 package main.me.volt.dvz.items;
 
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -25,6 +26,7 @@ public class DwarfItems {
     public static ItemStack clearHat;
 
     public static ItemStack warriorKit;
+    public static ItemStack paladinKit;
     public static ItemStack rangerKit;
     public static ItemStack clearKit;
 
@@ -48,6 +50,7 @@ public class DwarfItems {
         createClearHat();
 
         createWarriorClass();
+        createPaladinClass();
         createRangerClass();
         createClearKit();
 
@@ -103,6 +106,7 @@ public class DwarfItems {
         List<String> lore = new ArrayList<>();
         lore.add("§5§oPick a hat you want to show off during them match.");
         meta.setLore(lore);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 
         item.setItemMeta(meta);
         hatSelector = item;
@@ -167,6 +171,7 @@ public class DwarfItems {
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName("§bDwarven Cap");
         meta.setUnbreakable(true);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 
         item.setItemMeta(meta);
         dwarvenCap = item;
@@ -195,11 +200,18 @@ public class DwarfItems {
     }
 
     private static void createWarriorClass() {
-        ItemStack item = new ItemStack(Material.BROWN_DYE, 1);
+        ItemStack item = new ItemStack(Material.BROWN_DYE, 64);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName("§bWarrior Kit");
 
         List<String> lore = new ArrayList<>();
+        lore.add("§a64 points");
+        lore.add("§d(Click to Select Class)");
+        lore.add(" ");
+
+        lore.add("§eType: §bClass");
+        lore.add(" ");
+
         lore.add("§5§oWarriors are the fighters of the front line.");
         lore.add("§5§oThey wield a powerful sword, this sword gives PROC for 3 seconds.");
         meta.setLore(lore);
@@ -208,12 +220,43 @@ public class DwarfItems {
         warriorKit = item;
     }
 
+    private static void createPaladinClass() {
+        ItemStack item = new ItemStack(Material.STONE_SWORD, 64);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName("§bPaladin Kit");
+
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+
+        List<String> lore = new ArrayList<>();
+        lore.add("§a64 points");
+        lore.add("§d(Click to Select Class)");
+        lore.add(" ");
+
+        lore.add("§eType: §bClass");
+        lore.add(" ");
+
+        lore.add("§5§oPaladins are the protecting the light.");
+        lore.add("§5§oThey wield a powerful mace to hold the line and tools");
+        lore.add("§5§oto call forth the light to battle.");
+        meta.setLore(lore);
+
+        item.setItemMeta(meta);
+        paladinKit = item;
+    }
+
     private static void createRangerClass() {
-        ItemStack item = new ItemStack(Material.BOW, 1);
+        ItemStack item = new ItemStack(Material.BOW, 64);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName("§bRanger Kit");
 
         List<String> lore = new ArrayList<>();
+        lore.add("§a64 points");
+        lore.add("§d(Click to Select Class)");
+        lore.add(" ");
+
+        lore.add("§eType: §bClass");
+        lore.add(" ");
+
         lore.add("§5§oRangers are the defenders of the keep.");
         lore.add("§5§oThey wield a powerful bow, heal allies, and repair");
         lore.add("§5§othe walls in desperate situations against the demons.");
