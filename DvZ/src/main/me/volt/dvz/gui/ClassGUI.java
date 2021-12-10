@@ -14,6 +14,7 @@ public class ClassGUI {
 
     public static boolean openGUI(Player player) {
         classGUI.setItem(0, DwarfItems.warriorKit);
+        classGUI.setItem(1, DwarfItems.paladinKit);
         classGUI.setItem(2, DwarfItems.rangerKit);
 
         player.openInventory(classGUI);
