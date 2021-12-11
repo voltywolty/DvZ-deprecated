@@ -12,12 +12,13 @@ import java.util.List;
 
 public class DwarfLoadoutItems {
     public static ItemStack divider;
-    public static ItemStack leftArrow;
-    public static ItemStack rightArrow;
+    public static ItemStack leftArrow, rightArrow;
 
     public static ItemStack pointsRemaining;
 
-    // ITEMS TO SHOW FOR EQUIPPED
+    // Note - for best optimization, match melees with
+    // the same line as dwarvenRuneblade and match others
+    // with the corresponding types
     public static ItemStack dwarvenRunebladeEquipped;
     public static ItemStack dwarvenShortbowEquipped;
     public static ItemStack jimmyJuiceEquipped;

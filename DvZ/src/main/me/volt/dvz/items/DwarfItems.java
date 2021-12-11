@@ -15,16 +15,6 @@ public class DwarfItems {
     public static ItemStack classSelectorBook;
     public static ItemStack hatSelector;
 
-    public static ItemStack wolfHunterHat;
-    public static ItemStack santaHat; // USE ON CHRISTMAS ONLY!
-    public static ItemStack pharaohHat;
-    public static ItemStack goggles;
-    public static ItemStack warriorCap;
-    public static ItemStack dragonsBreathHat;
-    public static ItemStack dwarvenCap;
-    public static ItemStack dwarvenBeard;
-    public static ItemStack clearHat;
-
     public static ItemStack warriorKit;
     public static ItemStack paladinKit;
     public static ItemStack rangerKit;
@@ -38,16 +28,6 @@ public class DwarfItems {
 
         createClassSelectorBook();
         createHatSelector();
-
-        createWolfHunterHat();
-        createSantaHat();
-        createPharaohHat();
-        createGoggles();
-        createWarriorCap();
-        createDragonsBreath();
-        createDwarvenCap();
-        createDwarvenBeard();
-        createClearHat();
 
         createWarriorClass();
         createPaladinClass();
@@ -88,10 +68,10 @@ public class DwarfItems {
     private static void createClassSelectorBook() {
         ItemStack item = new ItemStack(Material.BOOK, 1);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§bClass Selector");
+        meta.setDisplayName("§bOpen Kit Menu");
 
         List<String> lore = new ArrayList<>();
-        lore.add("§5§oPick a class you wanna be before the game starts.");
+        lore.add("§5§oClick to open the kit menu.");
         meta.setLore(lore);
 
         item.setItemMeta(meta);
@@ -101,102 +81,15 @@ public class DwarfItems {
     private static void createHatSelector() {
         ItemStack item = new ItemStack(Material.DIAMOND_HELMET, 1);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§bHat Selector");
+        meta.setDisplayName("§bOpen Hat Menu");
 
         List<String> lore = new ArrayList<>();
-        lore.add("§5§oPick a hat you want to show off during them match.");
+        lore.add("§5§oClick to open the hat menu.");
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 
         item.setItemMeta(meta);
         hatSelector = item;
-    }
-
-    private static void createWolfHunterHat() {
-        ItemStack item = new ItemStack(Material.PURPLE_WOOL, 1);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§bWolf Hunter");
-
-        item.setItemMeta(meta);
-        wolfHunterHat = item;
-    }
-
-    private static void createSantaHat() {
-        ItemStack item = new ItemStack(Material.WHITE_WOOL, 1);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§bDwarven §cSanta §aHat");
-
-        item.setItemMeta(meta);
-        santaHat = item;
-    }
-
-    private static void createPharaohHat() {
-        ItemStack item = new ItemStack(Material.BROWN_WOOL, 1);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§bPharaoh");
-
-        item.setItemMeta(meta);
-        pharaohHat = item;
-    }
-
-    private static void createGoggles() {
-        ItemStack item = new ItemStack(Material.GRAY_WOOL, 1);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§bGnomish Goggles");
-
-        item.setItemMeta(meta);
-        goggles = item;
-    }
-
-    private static void createWarriorCap() {
-        ItemStack item = new ItemStack(Material.LIGHT_GRAY_WOOL, 1);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§bWarrior");
-
-        item.setItemMeta(meta);
-        warriorCap = item;
-    }
-
-    private static void createDragonsBreath() {
-        ItemStack item = new ItemStack(Material.RED_WOOL, 1);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§bDragons Breath");
-
-        item.setItemMeta(meta);
-        dragonsBreathHat = item;
-    }
-
-    private static void createDwarvenCap() {
-        ItemStack item = new ItemStack(Material.DIAMOND_HELMET, 1);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§bDwarven Cap");
-        meta.setUnbreakable(true);
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-
-        item.setItemMeta(meta);
-        dwarvenCap = item;
-    }
-
-    private static void createDwarvenBeard() {
-        ItemStack item = new ItemStack(Material.YELLOW_STAINED_GLASS, 1);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§bDwarven Beard");
-
-        item.setItemMeta(meta);
-        dwarvenBeard = item;
-    }
-
-    private static void createClearHat() {
-        ItemStack item = new ItemStack(Material.BARRIER, 1);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§cRemove Hat");
-
-        List<String> lore = new ArrayList<>();
-        lore.add("§5§oClears any hat you have equipped.");
-        meta.setLore(lore);
-
-        item.setItemMeta(meta);
-        clearHat = item;
     }
 
     private static void createWarriorClass() {
