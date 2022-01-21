@@ -10,7 +10,6 @@ import main.me.volt.dvz.events.doom.DoomEvent;
 import main.me.volt.dvz.events.doom.GoblinSquadEvent;
 import main.me.volt.dvz.events.doom.GolemEvent;
 import main.me.volt.dvz.gui.HatGUI;
-import main.me.volt.dvz.gui.KitGUI;
 import main.me.volt.dvz.items.DwarfItems;
 import main.me.volt.dvz.items.DwarfLoadoutItems;
 import main.me.volt.dvz.items.cosmetic.HatItems;
@@ -82,11 +81,8 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
     public List<String> startCommands, monsterReleaseCommands, specialDwarves;
     public Map<Player, String> heroes;
 
-    // NOTE - eventually add more locations for the compass
-    // this will help out with more specific locations
-    // like: gold, oil, current shrine, etc.
     public Location mapSpawn, mobSpawn, dwarfSpawn;
-    public Location quarryLocation, blacksmithTablesLocation, sawmillLocation;
+    public Location quarryLocation, blacksmithLocation, sawmillLocation, oilLocation;
 
     public ShrineManager shrineManager;
     public ShrineBarManager shrineBarManager;
@@ -289,6 +285,7 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         String quarryLocString = config.getString("quarry-location", "");
         String blacksmithTableLocString = config.getString("blacksmith-location", "");
         String sawmillLocString = config.getString("sawmill-location", "");
+        String oilLocString = config.getString("oil-location", "");
 
         if (quarryLocString.isEmpty()) {
             this.quarryLocation = Bukkit.getServer().getWorlds().get(0).getSpawnLocation();
@@ -299,11 +296,11 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         }
 
         if (blacksmithTableLocString.isEmpty()) {
-            this.blacksmithTablesLocation = Bukkit.getServer().getWorlds().get(0).getSpawnLocation();
+            this.blacksmithLocation = Bukkit.getServer().getWorlds().get(0).getSpawnLocation();
         }
         else {
             String[] split = blacksmithTableLocString.split(",");
-            this.blacksmithTablesLocation = new Location(Bukkit.getServer().getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+            this.blacksmithLocation = new Location(Bukkit.getServer().getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
         }
 
         if (sawmillLocString.isEmpty()) {
@@ -312,6 +309,14 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
         else {
             String[] split = sawmillLocString.split(",");
             this.sawmillLocation = new Location(Bukkit.getServer().getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        }
+
+        if (oilLocString.isEmpty()) {
+            this.oilLocation = Bukkit.getServer().getWorlds().get(0).getSpawnLocation();
+        }
+        else {
+            String[] split = oilLocString.split(",");
+            this.oilLocation = new Location(Bukkit.getServer().getWorlds().get(0), Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
         }
 
         if (mapSpawnString.isEmpty()) {
@@ -558,15 +563,6 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                 }
             }
         }
-        else if (command.getName().equalsIgnoreCase("loadout")) {
-            if (sender instanceof Player) {
-                Player player = (Player) sender;
-
-                if (!this.gameRunning && !this.gameEnded) {
-                    player.openInventory(KitGUI.kitSelectorGUI);
-                }
-            }
-        }
         else if (command.getName().equalsIgnoreCase("setmonsterspawn")) {
             if (sender instanceof Player) {
                 Player player = (Player) sender;
@@ -581,18 +577,6 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
                 dwarfSpawn = player.getLocation();
 
                 player.sendMessage(ChatColor.GOLD + "[DvZ] " + ChatColor.WHITE + "Dwarf spawn has been set to: " + ChatColor.YELLOW + dwarfSpawn.getX() + ", " + dwarfSpawn.getY() + ", " + dwarfSpawn.getZ());
-            }
-        }
-        else if (!command.getName().equalsIgnoreCase("setshrine") || !(sender instanceof Player)) {
-            if (command.getName().equalsIgnoreCase("warpmonster")) {
-                if (args.length == 1) {
-                    Player player = Bukkit.getPlayerExact(args[0]);
-                    if (player != null)
-                        this.shrineManager.respawnMob(player);
-                }
-                else if (sender instanceof Player) {
-                    this.shrineManager.respawnMob((Player) sender);
-                }
             }
         }
         return true;
@@ -1247,7 +1231,7 @@ public class DvZ extends JavaPlugin implements GameMode, Listener {
             }
 
             Location landSpot = this.shrineManager.getFinalShrine().clone();
-            while(landSpot.getBlock().getType() != Material.AIR) {
+            while (landSpot.getBlock().getType() != Material.AIR) {
                 landSpot.add(0.0D, 1.0D, 0.0D);
             }
 

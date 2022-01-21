@@ -29,13 +29,11 @@ public class ShrineManager {
     SpawnProtector spawnProtector;
     Location startingMobSpawn;
 
-    int startingMobSpawnInvuln;
-    int startingMobSpawnPulseRange;
-
+    int startingMobSpawnInvuln, startingMobSpawnPulseRange;
     public List<Shrine> shrines = new ArrayList<>();
 
     public int currentShrine = 0;
-    int pulseCounter = 0;
+    private int pulseCounter = 0;
 
     List<String> shrineImmune = new ArrayList<>();
 

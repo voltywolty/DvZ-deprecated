@@ -10,13 +10,17 @@ import org.bukkit.potion.PotionType;
 import java.util.ArrayList;
 import java.util.List;
 
+// NOTE - an item loader class needs to be made
+// that takes in custom class data and returns
+// an item stack - however, I can store this data
+// in .yml files that can be loaded and parsed
 public class DwarfLoadoutItems {
     public static ItemStack divider;
     public static ItemStack leftArrow, rightArrow;
 
     public static ItemStack pointsRemaining;
 
-    // Note - for best optimization, match melees with
+    // NOTE - for best optimization, match melees with
     // the same line as dwarvenRuneblade and match others
     // with the corresponding types
     public static ItemStack dwarvenRunebladeEquipped;

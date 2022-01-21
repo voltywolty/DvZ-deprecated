@@ -56,12 +56,6 @@ commands:
     description: Sets the dwarf spawn if not already set.
     aliases: [dwarfspawn]
     permission: dvz.admin
-  setshrine:
-    description: Sets the shrine position.
-    permission: dvz.admin
-  loadout:
-    description: Shows loadout to equip what player wants.
-    permission: dvz.testing
 
 permissions:
   dvz.admin:

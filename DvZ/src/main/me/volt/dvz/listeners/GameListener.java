@@ -283,32 +283,62 @@ public class GameListener implements Listener {
     }
 
     int counter = 0;
+    String currentLocation;
     @EventHandler
     public void onCompassRightClick(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         Action action = event.getAction();
+
+        if (event.getItem() == null || event.getItem().getItemMeta() == null)
+            return;
 
         if (action == Action.RIGHT_CLICK_AIR && event.getItem().getType().equals(Material.COMPASS)) {
             if (counter == 0) {
                 player.setCompassTarget(plugin.quarryLocation);
                 player.sendMessage(ChatColor.YELLOW + "Your compass is now pointing at " + ChatColor.AQUA + "the gold mine and quarry" + ChatColor.YELLOW + ".");
                 counter++;
+
+                currentLocation = "the gold mine and quarry";
             }
             else if (counter == 1) {
-                player.setCompassTarget(plugin.blacksmithTablesLocation);
+                player.setCompassTarget(plugin.blacksmithLocation);
                 player.sendMessage(ChatColor.YELLOW + "Your compass is now pointing at " + ChatColor.AQUA + "the blacksmith" + ChatColor.YELLOW + ".");
                 counter++;
+
+                currentLocation = "the blacksmith";
             }
             else if (counter == 2) {
                 player.setCompassTarget(plugin.sawmillLocation);
-                player.sendMessage(ChatColor.YELLOW + "Your compass is now pointing at " + ChatColor.AQUA + "the lumber mill and oil" + ChatColor.YELLOW + ".");
+                player.sendMessage(ChatColor.YELLOW + "Your compass is now pointing at " + ChatColor.AQUA + "the lumber mill" + ChatColor.YELLOW + ".");
                 counter++;
+
+                currentLocation = "the lumber mill";
             }
             else if (counter == 3) {
-                player.setCompassTarget(plugin.mobSpawn);
-                player.sendMessage(ChatColor.YELLOW + "Your compass is now pointing at " + ChatColor.AQUA + "the monster spawn" + ChatColor.YELLOW + ".");
-                counter = 0;
+                player.setCompassTarget(plugin.oilLocation);
+                player.sendMessage(ChatColor.YELLOW + "Your compass is now pointing at " + ChatColor.AQUA + "the oil" + ChatColor.YELLOW + ".");
+                counter++;
+
+                currentLocation = "the oil";
             }
+            else if (counter == 4) {
+                player.setCompassTarget(plugin.shrineManager.getMobSpawn());
+                player.sendMessage(ChatColor.YELLOW + "Your compass is now pointing at " + ChatColor.AQUA + "the monster spawn" + ChatColor.YELLOW + ".");
+                counter++;
+
+                currentLocation = "the monster spawn";
+            }
+            else if (counter == 5) {
+                player.setCompassTarget(plugin.shrineManager.getCurrentShrine());
+                player.sendMessage(ChatColor.YELLOW + "Your compass is now pointing at " + ChatColor.AQUA + "the current shrine" + ChatColor.YELLOW + ".");
+                counter = 0;
+
+                currentLocation = "the current shrine";
+            }
+        }
+        else if (action == Action.LEFT_CLICK_AIR && event.getItem().getType().equals(Material.COMPASS)) {
+            if (currentLocation != null)
+                player.sendMessage(ChatColor.YELLOW + "Your compass is pointing at " + ChatColor.AQUA + currentLocation + ChatColor.YELLOW + ".");
         }
     }
 
