@@ -7,7 +7,7 @@ When the game beings, all players spawn as a dwarf and their task is to gather s
 As night falls, a small amount of dwarves will be randomly selected to die or partake in an event. The most common event being the plague. The goal of the monsters is to destroy all the dwarven shrines. It is very difficult for most monsters to fight a dwarf in single combat - monsters must rely on numbers to overwhelm and destroy the dwarves. As more dwarves are killed, the ranks of the monsters will grow and the dwarves will be forced to retreat. Eventually, the monsters will overwhelm the first shrine, which will move their spawn up to that point, forcing the dwarves to fall back to the next shrine. This process repeats until the last shrine is destroyed. The game ends when all the dwarves are dead or all the shrines have been destroyed.
 
 ### This version of DvZ
-This version of DvZ was recreated by me from scratch. All code and configs are soley made for MC Evolved and any redistribution is prohibited. This version is to maintain PlayMindcrack like aspect of DvZ, with slight modifications to the players likings.
+This version of DvZ was recreated by me from scratch. All code and configs are soley made for ShrineMC and any redistribution is prohibited. This version is to maintain PlayMindcrack like aspect of DvZ, with slight modifications to the players likings.
 > Java Version 1.17.1
 - **Discord**: https://discord.gg/gfa38enTTj
 - **Releases**: [![Github Releases](https://img.shields.io/github/downloads/voltywolty/DvZ/total.svg)](https://github.com/voltywolty/DvZ/releases)
