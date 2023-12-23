@@ -1,5 +1,7 @@
 # Dwarves vs. Zombies
 
+### Please note this is deprecated and no longer working.
+
 Dwarves vs. Zombies is a large scale role-playing game. ShrineMC games will start when there is at least 10 players, however, if it is not met, a staff member can start a game manually. 
 
 When the game beings, all players spawn as a dwarf and their task is to gather supplies, weapons, and fortify their keep for the coming invasion. The dwarves will have one Minecraft day to prepare for the invasion. The dwarves ultimate goal is to defend their shrines from the oncoming hordes of monsters - however, they will fall eventually. The hordes are endless, and the dwarves are few. Additionally, dwarves cannot respawn - once dead, they become a monster.
